@@ -1,4 +1,5 @@
 using DictionaryService.Contracts;
+using DictionaryService.Contracts.Department;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DictionaryService.Presenters;

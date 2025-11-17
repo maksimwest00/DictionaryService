@@ -7,14 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DictionaryService.Application\DictionaryService.Application.csproj" />
       <ProjectReference Include="..\DictionaryService.Contracts\DictionaryService.Contracts.csproj" />
       <ProjectReference Include="..\DictionaryService.Domain\DictionaryService.Domain.csproj" />
-      <ProjectReference Include="..\DictionaryService.Infrastructure\DictionaryService.Infrastructure.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
     </ItemGroup>
 
 </Project>

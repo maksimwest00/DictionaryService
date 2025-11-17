@@ -8,6 +8,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DictionaryService.Web", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DictionaryService.Presenters", "src\DictionaryService.Presenters\DictionaryService.Presenters.csproj", "{533DE532-D07D-41FF-BC58-356148EB6B24}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{57A49AE5-F69D-4A4A-8E20-1AD0B80A5583}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DictionaryService.Application", "src\DictionaryService.Application\DictionaryService.Application.csproj", "{3C4BDCF7-4D54-4236-A010-A0C631015301}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DictionaryService.Infrastructure", "src\DictionaryService.Infrastructure\DictionaryService.Infrastructure.csproj", "{C6EC1A68-95AA-4486-B27C-062AD57CDC56}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DictionaryService.Contracts", "src\DictionaryService.Contracts\DictionaryService.Contracts.csproj", "{19930609-C931-4A25-9879-37C224625C84}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,10 +38,25 @@ Global
 		{533DE532-D07D-41FF-BC58-356148EB6B24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{533DE532-D07D-41FF-BC58-356148EB6B24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{533DE532-D07D-41FF-BC58-356148EB6B24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C4BDCF7-4D54-4236-A010-A0C631015301}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C4BDCF7-4D54-4236-A010-A0C631015301}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C4BDCF7-4D54-4236-A010-A0C631015301}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C4BDCF7-4D54-4236-A010-A0C631015301}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6EC1A68-95AA-4486-B27C-062AD57CDC56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6EC1A68-95AA-4486-B27C-062AD57CDC56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6EC1A68-95AA-4486-B27C-062AD57CDC56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6EC1A68-95AA-4486-B27C-062AD57CDC56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19930609-C931-4A25-9879-37C224625C84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19930609-C931-4A25-9879-37C224625C84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19930609-C931-4A25-9879-37C224625C84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19930609-C931-4A25-9879-37C224625C84}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{D865DEB7-F097-4B12-9F0F-010E23A5C6FD} = {DB65F166-B16F-4558-9880-89C1599E5E2B}
 		{537069A7-49FC-4440-B2AC-16797396D002} = {DB65F166-B16F-4558-9880-89C1599E5E2B}
 		{533DE532-D07D-41FF-BC58-356148EB6B24} = {DB65F166-B16F-4558-9880-89C1599E5E2B}
+		{3C4BDCF7-4D54-4236-A010-A0C631015301} = {DB65F166-B16F-4558-9880-89C1599E5E2B}
+		{C6EC1A68-95AA-4486-B27C-062AD57CDC56} = {DB65F166-B16F-4558-9880-89C1599E5E2B}
+		{19930609-C931-4A25-9879-37C224625C84} = {DB65F166-B16F-4558-9880-89C1599E5E2B}
 	EndGlobalSection
 EndGlobal

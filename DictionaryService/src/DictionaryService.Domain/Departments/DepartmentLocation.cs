@@ -2,7 +2,9 @@
 
 public class DepartmentLocation
 {
-    public Guid DepartmentId { get; set; }
+    public Guid Id { get; private set; }
 
-    public Guid LocationId { get; set; }
+    public Guid DepartmentId { get; private set; }
+
+    public Guid LocationId { get; private set; }
 }

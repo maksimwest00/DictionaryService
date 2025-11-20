@@ -1,48 +1,27 @@
-﻿using System.Text.RegularExpressions;
-
-namespace DictionaryService.Domain.Departments;
+﻿namespace DictionaryService.Domain.Departments;
 
 public class Department
 {
     private readonly List<Department> _children;
-    private readonly List<Location> _locations;
-    private readonly List<Position> _positions;
+    private readonly List<DepartmentLocation> _departmentLocations;
+    private readonly List<DepartmentPosition> _departmentPositions;
 
     public Department(
-        string name,
-        string identifier,
+        Name name,
+        Identifier identifier,
         Guid? parentId,
-        string path,
+        Path path,
         short depth,
         bool isActive,
         DateTime createdAt,
         DateTime updatedAt,
         Department? parent,
         List<Department> children,
-        IEnumerable<Location> locations,
-        IEnumerable<Position> positions)
+        IEnumerable<DepartmentLocation> departmentLocations,
+        IEnumerable<DepartmentPosition> departmentPositions)
     {
         Id = Guid.NewGuid();
-
-        if (string.IsNullOrWhiteSpace(name) ||
-            (name.Length > 150 || name.Length < 3))
-        {
-            throw new ArgumentException("Name must be between 3 and 150 characters");
-        }
-
         Name = name;
-
-        if (string.IsNullOrWhiteSpace(identifier) ||
-            (identifier.Length > 150 || identifier.Length < 3))
-        {
-            throw new ArgumentException("Identifier must be between 3 and 150 characters");
-        }
-
-        if (!Regex.IsMatch(identifier, @"^[a-zA-Z]*$"))
-        {
-            throw new ArgumentException("Identifier must be in Latin characters");
-        }
-
         Identifier = identifier;
         ParentId = parentId;
         Path = path;
@@ -52,19 +31,19 @@ public class Department
         UpdatedAt = updatedAt;
         Parent = parent;
         _children = children;
-        _locations = locations.ToList();
-        _positions = positions.ToList();
+        _departmentLocations = departmentLocations.ToList();
+        _departmentPositions = departmentPositions.ToList();
     }
 
     public Guid Id { get; private set; }
 
-    public string Name { get; private set; }
+    public Name Name { get; private set; }
 
-    public string Identifier { get; private set; }
+    public Identifier Identifier { get; private set; }
 
     public Guid? ParentId { get; private set; }
 
-    public string Path { get; private set; }
+    public Path Path { get; private set; }
 
     public short Depth { get; private set; }
 
@@ -78,7 +57,7 @@ public class Department
 
     public IReadOnlyList<Department> Children => _children;
 
-    public IReadOnlyList<Location> Locations => _locations;
+    public IReadOnlyList<DepartmentLocation> Locations => _departmentLocations;
 
-    public IReadOnlyList<Position> Positions => _positions;
+    public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
 }

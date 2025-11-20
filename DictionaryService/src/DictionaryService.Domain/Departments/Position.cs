@@ -3,47 +3,33 @@ namespace DictionaryService.Domain.Departments;
 public class Position
 {
     public Position(
-        string name,
-        string? description,
+        Name name,
+        Description? description,
         bool isActive,
         DateTime createdAt,
         DateTime updatedAt,
-        List<Department> department)
+        List<DepartmentPosition> departmentPositions)
     {
         Id = Guid.NewGuid();
-
-        if (string.IsNullOrWhiteSpace(name) ||
-            (name.Length > 100 || name.Length < 3))
-        {
-            throw new ArgumentException("Name must be between 3 and 100 characters");
-        }
-
         Name = name;
-
-        if (description != null &&
-            (description.Length > 1000 || description.Length < 3))
-        {
-            throw new ArgumentException("Description must be between 3 and 1000 characters");
-        }
-
         Description = description;
         IsActive = isActive;
         CreatedAt = createdAt;
         UpdatedAt = updatedAt;
-        Department = department;
+        DpartmentPositions = departmentPositions;
     }
 
-    public Guid Id { get; set; }
+    public Guid Id { get; private set; }
 
-    public string Name { get; set; }
+    public Name Name { get; private set; }
 
-    public string? Description { get; set; }
+    public Description? Description { get; private set; }
 
-    public bool IsActive { get; set; }
+    public bool IsActive { get; private set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; private set; }
 
-    public DateTime UpdatedAt { get; set; }
+    public DateTime UpdatedAt { get; private set; }
 
-    public List<Department> Department { get; set; }
+    public List<DepartmentPosition> DpartmentPositions { get; private set; }
 }

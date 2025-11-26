@@ -2,6 +2,13 @@ namespace DictionaryService.Domain.Departments;
 
 public class Location
 {
+    private readonly List<DepartmentLocation> _departmentLocations = [];
+
+    // EF core
+    private Location()
+    {
+    }
+
     public Location(
         Name name,
         Address address,
@@ -9,7 +16,7 @@ public class Location
         bool isActive,
         DateTime createdAt,
         DateTime updatedAt,
-        List<DepartmentLocation> departments)
+        List<DepartmentLocation> departmentLocations)
     {
         Id = Guid.NewGuid();
         Name = name;
@@ -18,7 +25,7 @@ public class Location
         IsActive = isActive;
         CreatedAt = createdAt;
         UpdatedAt = updatedAt;
-        Departments = departments;
+        _departmentLocations = departmentLocations;
     }
 
     public Guid Id { get; private set; }
@@ -35,5 +42,5 @@ public class Location
 
     public DateTime UpdatedAt { get; private set; }
 
-    public List<DepartmentLocation> Departments { get; private set; }
+    public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations;
 }

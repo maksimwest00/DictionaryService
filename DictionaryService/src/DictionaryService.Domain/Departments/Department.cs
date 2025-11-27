@@ -6,6 +6,11 @@ public class Department
     private readonly List<DepartmentLocation> _departmentLocations;
     private readonly List<DepartmentPosition> _departmentPositions;
 
+    // EF Core
+    private Department()
+    {
+    }
+
     public Department(
         Name name,
         Identifier identifier,
@@ -57,7 +62,7 @@ public class Department
 
     public IReadOnlyList<Department> Children => _children;
 
-    public IReadOnlyList<DepartmentLocation> Locations => _departmentLocations;
+    public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations;
 
     public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
 }

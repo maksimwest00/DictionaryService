@@ -17,6 +17,8 @@ public class Location
         Id = Guid.NewGuid();
         Name = name;
         Address = address;
+        if (string.IsNullOrEmpty(timezone))
+            throw new ArgumentException("Invalid timezone"); 
         Timezone = timezone;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;

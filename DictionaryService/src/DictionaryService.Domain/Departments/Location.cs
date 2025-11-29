@@ -12,20 +12,14 @@ public class Location
     public Location(
         Name name,
         Address address,
-        string timezone,
-        bool isActive,
-        DateTime createdAt,
-        DateTime updatedAt,
-        List<DepartmentLocation> departmentLocations)
+        string timezone)
     {
         Id = Guid.NewGuid();
         Name = name;
         Address = address;
         Timezone = timezone;
-        IsActive = isActive;
-        CreatedAt = createdAt;
-        UpdatedAt = updatedAt;
-        _departmentLocations = departmentLocations;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public Guid Id { get; private set; }

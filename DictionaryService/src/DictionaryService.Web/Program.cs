@@ -1,12 +1,8 @@
-using DictionaryService.Infrastructure;
+using DictionaryService.Web;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
-
-builder.Services.AddScoped<DictionaryServiceDbContext>(sp => new DictionaryServiceDbContext(
-    builder.Configuration.GetConnectionString("DictionaryServiceDb")!));
+builder.Services.AddProgramDependincies(builder.Configuration);
 
 WebApplication app = builder.Build();
 

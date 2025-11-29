@@ -1,4 +1,4 @@
-﻿namespace DictionaryService.Contracts.Department;
+﻿namespace DictionaryService.Contracts.Departments;
 
 public record CreateDepartmentDto(
     string Name,

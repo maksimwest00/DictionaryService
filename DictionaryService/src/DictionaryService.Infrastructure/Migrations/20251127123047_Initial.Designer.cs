@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DictionaryService.Infrastructure.Migrations
 {
     [DbContext(typeof(DictionaryServiceDbContext))]
-    [Migration("20251126201807_Initial")]
+    [Migration("20251127123047_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -177,11 +177,29 @@ namespace DictionaryService.Infrastructure.Migrations
                         {
                             b1.IsRequired();
 
-                            b1.Property<string>("Value")
+                            b1.Property<string>("Building")
                                 .IsRequired()
                                 .HasMaxLength(500)
                                 .HasColumnType("character varying(500)")
-                                .HasColumnName("address");
+                                .HasColumnName("building");
+
+                            b1.Property<string>("City")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("city");
+
+                            b1.Property<string>("RoomNumber")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("roomNumber");
+
+                            b1.Property<string>("Street")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("street");
                         });
 
                     b.ComplexProperty<Dictionary<string, object>>("Name", "DictionaryService.Domain.Departments.Location.Name#Name", b1 =>

@@ -9,7 +9,7 @@ public record Description
         Value = value;
     }
 
-    public string? Value { get; private set; }
+    public string? Value { get; }
 
     public static Description Create(string value)
     {

@@ -51,7 +51,10 @@ namespace DictionaryService.Infrastructure.Migrations
                     is_active = table.Column<bool>(type: "boolean", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    address = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    building = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    city = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    roomNumber = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    street = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
                 },
                 constraints: table =>

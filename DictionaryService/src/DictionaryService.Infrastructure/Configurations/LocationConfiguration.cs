@@ -28,10 +28,25 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
 
         builder.ComplexProperty(l => l.Address, ab =>
         {
-            ab.Property(a => a.Value)
+            ab.Property(a => a.City)
                 .IsRequired()
                 .HasMaxLength(LengthConstants.Length500)
-                .HasColumnName("address");
+                .HasColumnName("city");
+
+            ab.Property(a => a.Street)
+                .IsRequired()
+                .HasMaxLength(LengthConstants.Length500)
+                .HasColumnName("street");
+
+            ab.Property(a => a.Building)
+                .IsRequired()
+                .HasMaxLength(LengthConstants.Length500)
+                .HasColumnName("building");
+
+            ab.Property(a => a.RoomNumber)
+                .IsRequired()
+                .HasMaxLength(LengthConstants.Length500)
+                .HasColumnName("roomNumber");
         });
 
         builder.Property(l => l.Timezone)

@@ -1,8 +1,7 @@
-using DictionaryService.Contracts;
-using DictionaryService.Contracts.Department;
+using DictionaryService.Contracts.Departments;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DictionaryService.Presenters;
+namespace DictionaryService.Presenters.Departments;
 
 [ApiController]
 [Route("[controller]")]

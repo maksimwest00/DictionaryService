@@ -2,13 +2,21 @@
 
 public record Address
 {
-    public string City { get; private set; }
-    public string Street { get; private set; }
-    public string Building { get; private set; }
-    public string RoomNumber { get; private set; }
+    public string City { get; }
+    public string Street { get; }
+    public string Building { get; }
+    public string RoomNumber { get; }
 
-    private Address()
+    private Address(
+        string city,
+        string street,
+        string building,
+        string roomNumber)
     {
+        City = city;
+        Street = street;
+        Building = building;
+        RoomNumber = roomNumber;
     }
 
     public static Address Create(
@@ -26,12 +34,6 @@ public record Address
         if (string.IsNullOrEmpty(roomNumber))
             throw new ArgumentException("Invalid room number");
 
-        return new Address
-        {
-            City = city,
-            Street = street,
-            Building = building,
-            RoomNumber = roomNumber,
-        };
+        return new Address(city, street, building, roomNumber);
     }
 }

@@ -7,7 +7,7 @@ public record Name
         Value = value;
     }
 
-    public string Value { get; private set; }
+    public string Value { get; }
 
     public static Name Create(string value)
     {

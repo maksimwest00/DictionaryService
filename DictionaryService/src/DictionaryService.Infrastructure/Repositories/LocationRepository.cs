@@ -1,5 +1,5 @@
 ﻿using DictionaryService.Application.Locations;
-using DictionaryService.Domain.Departments;
+using DictionaryService.Domain.Locations;
 
 namespace DictionaryService.Infrastructure.Repositories;
 
@@ -7,10 +7,7 @@ public class LocationRepository : ILocationRepository
 {
     private readonly DictionaryServiceDbContext _dbContext;
 
-    public LocationRepository(DictionaryServiceDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    public LocationRepository(DictionaryServiceDbContext dbContext) => _dbContext = dbContext;
 
     public async Task<Guid> AddAsync(
         Location location,

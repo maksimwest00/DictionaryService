@@ -1,4 +1,7 @@
-﻿namespace DictionaryService.Domain.Departments;
+﻿using DictionaryService.Domain.Departments;
+using DictionaryService.Domain.Locations;
+
+namespace DictionaryService.Domain.DepartmentLocations;
 
 public class DepartmentLocation
 {

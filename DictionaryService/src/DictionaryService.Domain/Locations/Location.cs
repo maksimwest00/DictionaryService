@@ -1,4 +1,6 @@
-namespace DictionaryService.Domain.Departments;
+using DictionaryService.Domain.DepartmentLocations;
+
+namespace DictionaryService.Domain.Locations;
 
 public class Location
 {
@@ -18,7 +20,10 @@ public class Location
         Name = name;
         Address = address;
         if (string.IsNullOrEmpty(timezone))
-            throw new ArgumentException("Invalid timezone"); 
+        {
+            throw new ArgumentException("Invalid timezone");
+        }
+
         Timezone = timezone;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;

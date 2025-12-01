@@ -1,4 +1,4 @@
-﻿namespace DictionaryService.Domain.Departments;
+﻿namespace DictionaryService.Domain.Positions;
 
 public record Description
 {
@@ -10,7 +10,7 @@ public record Description
     public static Description Create(string value)
     {
         if (string.IsNullOrWhiteSpace(value) ||
-            value.Length > 1000 || value.Length < 3)
+            value.Length > 1000)
         {
             throw new ArgumentException("Description must be between 3 and 1000 characters");
         }

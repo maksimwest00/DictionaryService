@@ -1,4 +1,4 @@
-﻿namespace DictionaryService.Domain.Departments;
+﻿namespace DictionaryService.Domain.Locations;
 
 public record Name
 {
@@ -9,9 +9,9 @@ public record Name
     public static Name Create(string value)
     {
         if (string.IsNullOrWhiteSpace(value) ||
-            value.Length > 150 || value.Length < 3)
+            value.Length > 120 || value.Length < 3)
         {
-            throw new ArgumentException("Name must be between 3 and 150 characters");
+            throw new ArgumentException("Name must be between 3 and 120 characters");
         }
 
         return new Name(value);

@@ -1,9 +1,9 @@
-namespace DictionaryService.Domain.Departments;
+using DictionaryService.Domain.DepartmentPositions;
+
+namespace DictionaryService.Domain.Positions;
 
 public class Position
 {
-    private readonly List<DepartmentPosition> _departmentPositions = [];
-
     // EF core
     private Position()
     {
@@ -23,7 +23,7 @@ public class Position
         IsActive = isActive;
         CreatedAt = createdAt;
         UpdatedAt = updatedAt;
-        _departmentPositions = departmentPositions;
+        DepartmentPositions = departmentPositions;
     }
 
     public Guid Id { get; private set; }
@@ -38,5 +38,5 @@ public class Position
 
     public DateTime UpdatedAt { get; private set; }
 
-    public List<DepartmentPosition> DepartmentPositions => _departmentPositions;
+    public List<DepartmentPosition> DepartmentPositions { get; } = [];
 }

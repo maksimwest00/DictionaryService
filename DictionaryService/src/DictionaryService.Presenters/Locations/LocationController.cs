@@ -10,17 +10,14 @@ public class LocationController : ControllerBase
 {
     private readonly ILocationSerivce _locationService;
 
-    public LocationController(ILocationSerivce locationSerivce)
-    {
-        _locationService = locationSerivce;
-    }
+    public LocationController(ILocationSerivce locationSerivce) => _locationService = locationSerivce;
 
     [HttpPost]
     public async Task<IActionResult> CreateAsync(
         [FromBody] CreateLocationDto request,
         CancellationToken cancellationToken)
     {
-        var locationId = await _locationService.CreateAsync(request, cancellationToken);
+        Guid locationId = await _locationService.CreateAsync(request, cancellationToken);
         return Ok(locationId);
     }
 }

@@ -1,4 +1,4 @@
-﻿using DictionaryService.Domain.Departments;
+﻿using DictionaryService.Domain.Locations;
 
 namespace DictionaryService.Application.Locations;
 

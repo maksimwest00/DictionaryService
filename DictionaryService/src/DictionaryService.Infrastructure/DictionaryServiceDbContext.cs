@@ -7,10 +7,7 @@ public class DictionaryServiceDbContext : DbContext
 {
     private readonly string _connectionString;
 
-    public DictionaryServiceDbContext(string connectionString)
-    {
-        _connectionString = connectionString;
-    }
+    public DictionaryServiceDbContext(string connectionString) => _connectionString = connectionString;
 
     public DbSet<Department> Departments => Set<Department>();
 
@@ -23,8 +20,6 @@ public class DictionaryServiceDbContext : DbContext
         optionsBuilder.LogTo(Console.WriteLine);
     }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
+    protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DictionaryServiceDbContext).Assembly);
-    }
 }

@@ -1,4 +1,7 @@
-﻿namespace DictionaryService.Domain.Locations;
+﻿using CSharpFunctionalExtensions;
+using DictionaryService.Domain.Shared;
+
+namespace DictionaryService.Domain.Locations;
 
 public record Address
 {
@@ -19,7 +22,7 @@ public record Address
     public string Building { get; }
     public string RoomNumber { get; }
 
-    public static Address Create(
+    public static Result<Address, Error> Create(
         string city,
         string street,
         string building,
@@ -27,22 +30,22 @@ public record Address
     {
         if (string.IsNullOrEmpty(city))
         {
-            throw new ArgumentException("Invalid city");
+            return GeneralErrors.ValueIsInvalid("City", "City must be not null");
         }
 
         if (string.IsNullOrEmpty(street))
         {
-            throw new ArgumentException("Invalid street");
+            return GeneralErrors.ValueIsInvalid("Street", "Street must be not null");
         }
 
         if (string.IsNullOrEmpty(building))
         {
-            throw new ArgumentException("Invalid building");
+            return GeneralErrors.ValueIsInvalid("Building", "Building must be not null");
         }
 
         if (string.IsNullOrEmpty(roomNumber))
         {
-            throw new ArgumentException("Invalid room number");
+            return GeneralErrors.ValueIsInvalid("RoomNumber", "RoomNumber must be not null");
         }
 
         return new Address(city, street, building, roomNumber);

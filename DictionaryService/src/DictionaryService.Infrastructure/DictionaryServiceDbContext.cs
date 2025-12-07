@@ -16,7 +16,6 @@ public class DictionaryServiceDbContext : DbContext
         base.OnConfiguring(optionsBuilder);
 
         optionsBuilder.UseNpgsql(_connectionString);
-
         optionsBuilder.LogTo(Console.WriteLine);
     }
 

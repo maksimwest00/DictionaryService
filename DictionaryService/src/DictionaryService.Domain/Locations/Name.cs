@@ -1,4 +1,7 @@
-﻿namespace DictionaryService.Domain.Locations;
+﻿using CSharpFunctionalExtensions;
+using DictionaryService.Domain.Shared;
+
+namespace DictionaryService.Domain.Locations;
 
 public record Name
 {
@@ -6,12 +9,12 @@ public record Name
 
     public string Value { get; }
 
-    public static Name Create(string value)
+    public static Result<Name, Error> Create(string value)
     {
         if (string.IsNullOrWhiteSpace(value) ||
             value.Length > 120 || value.Length < 3)
         {
-            throw new ArgumentException("Name must be between 3 and 120 characters");
+            return GeneralErrors.ValueIsInvalid("Name", "Name must be between 3 and 120 characters");
         }
 
         return new Name(value);

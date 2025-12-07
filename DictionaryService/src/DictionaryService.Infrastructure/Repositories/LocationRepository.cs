@@ -1,5 +1,5 @@
 ﻿using DictionaryService.Application.Locations;
-using DictionaryService.Domain.Departments;
+using DictionaryService.Domain.Locations;
 
 namespace DictionaryService.Infrastructure.Repositories;
 

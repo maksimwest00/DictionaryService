@@ -1,10 +1,13 @@
 using DictionaryService.Web;
+using DictionaryService.Web.Middlewares;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProgramDependincies(builder.Configuration);
 
 WebApplication app = builder.Build();
+
+app.UseExceptionMiddleware();
 
 if (app.Environment.IsDevelopment())
 {

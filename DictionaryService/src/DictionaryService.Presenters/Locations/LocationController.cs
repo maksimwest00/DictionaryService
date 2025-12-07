@@ -1,5 +1,6 @@
 ﻿using DictionaryService.Application.Locations;
 using DictionaryService.Contracts.Locations;
+using DictionaryService.Presenters.ResponseExtensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DictionaryService.Presenters.Locations;
@@ -20,7 +21,10 @@ public class LocationController : ControllerBase
         [FromBody] CreateLocationDto request,
         CancellationToken cancellationToken)
     {
-        var locationId = await _locationService.CreateAsync(request, cancellationToken);
-        return Ok(locationId);
+        throw new Exception("hi");
+        
+        var createResult = await _locationService.CreateAsync(request, cancellationToken);
+
+        return createResult.IsFailure ? createResult.Error.ToResponse() : Ok(Envelope.Ok(createResult.Value));
     }
 }

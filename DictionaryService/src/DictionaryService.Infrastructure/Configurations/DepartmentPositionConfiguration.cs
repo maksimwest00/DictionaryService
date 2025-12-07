@@ -1,4 +1,4 @@
-﻿using DictionaryService.Domain.Departments;
+﻿using DictionaryService.Domain.DepartmentPositions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

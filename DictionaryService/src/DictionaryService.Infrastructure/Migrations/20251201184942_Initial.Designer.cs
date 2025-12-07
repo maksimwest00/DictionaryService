@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DictionaryService.Infrastructure.Migrations
 {
     [DbContext(typeof(DictionaryServiceDbContext))]
-    [Migration("20251130153250_Initial")]
+    [Migration("20251201184942_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -25,6 +25,56 @@ namespace DictionaryService.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("DictionaryService.Domain.DepartmentLocations.DepartmentLocation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("DepartmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("departmentId");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("locationId");
+
+                    b.HasKey("Id")
+                        .HasName("pk_department_locations");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("LocationId");
+
+                    b.ToTable("department_locations", (string)null);
+                });
+
+            modelBuilder.Entity("DictionaryService.Domain.DepartmentPositions.DepartmentPosition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("DepartmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("department_id");
+
+                    b.Property<Guid>("PositionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("position_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_department_positions");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("PositionId");
+
+                    b.ToTable("department_positions", (string)null);
+                });
 
             modelBuilder.Entity("DictionaryService.Domain.Departments.Department", b =>
                 {
@@ -99,57 +149,7 @@ namespace DictionaryService.Infrastructure.Migrations
                     b.ToTable("departments", (string)null);
                 });
 
-            modelBuilder.Entity("DictionaryService.Domain.Departments.DepartmentLocation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("DepartmentId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("departmentId");
-
-                    b.Property<Guid>("LocationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("locationId");
-
-                    b.HasKey("Id")
-                        .HasName("pk_department_locations");
-
-                    b.HasIndex("DepartmentId");
-
-                    b.HasIndex("LocationId");
-
-                    b.ToTable("department_locations", (string)null);
-                });
-
-            modelBuilder.Entity("DictionaryService.Domain.Departments.DepartmentPosition", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("DepartmentId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("department_id");
-
-                    b.Property<Guid>("PositionId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("position_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_department_positions");
-
-                    b.HasIndex("DepartmentId");
-
-                    b.HasIndex("PositionId");
-
-                    b.ToTable("department_positions", (string)null);
-                });
-
-            modelBuilder.Entity("DictionaryService.Domain.Departments.Location", b =>
+            modelBuilder.Entity("DictionaryService.Domain.Locations.Location", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -173,7 +173,7 @@ namespace DictionaryService.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.ComplexProperty<Dictionary<string, object>>("Address", "DictionaryService.Domain.Departments.Location.Address#Address", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("Address", "DictionaryService.Domain.Locations.Location.Address#Address", b1 =>
                         {
                             b1.IsRequired();
 
@@ -202,7 +202,7 @@ namespace DictionaryService.Infrastructure.Migrations
                                 .HasColumnName("street");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("Name", "DictionaryService.Domain.Departments.Location.Name#Name", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("Name", "DictionaryService.Domain.Locations.Location.Name#Name", b1 =>
                         {
                             b1.IsRequired();
 
@@ -219,7 +219,7 @@ namespace DictionaryService.Infrastructure.Migrations
                     b.ToTable("locations", (string)null);
                 });
 
-            modelBuilder.Entity("DictionaryService.Domain.Departments.Position", b =>
+            modelBuilder.Entity("DictionaryService.Domain.Positions.Position", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -238,7 +238,7 @@ namespace DictionaryService.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.ComplexProperty<Dictionary<string, object>>("Description", "DictionaryService.Domain.Departments.Position.Description#Description", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("Description", "DictionaryService.Domain.Positions.Position.Description#Description", b1 =>
                         {
                             b1.IsRequired();
 
@@ -248,7 +248,7 @@ namespace DictionaryService.Infrastructure.Migrations
                                 .HasColumnName("description");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("Name", "DictionaryService.Domain.Departments.Position.Name#Name", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("Name", "DictionaryService.Domain.Positions.Position.Name#Name", b1 =>
                         {
                             b1.IsRequired();
 
@@ -265,6 +265,44 @@ namespace DictionaryService.Infrastructure.Migrations
                     b.ToTable("positions", (string)null);
                 });
 
+            modelBuilder.Entity("DictionaryService.Domain.DepartmentLocations.DepartmentLocation", b =>
+                {
+                    b.HasOne("DictionaryService.Domain.Departments.Department", "Department")
+                        .WithMany("DepartmentLocations")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DictionaryService.Domain.Locations.Location", "Location")
+                        .WithMany("DepartmentLocations")
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+
+                    b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("DictionaryService.Domain.DepartmentPositions.DepartmentPosition", b =>
+                {
+                    b.HasOne("DictionaryService.Domain.Departments.Department", "Department")
+                        .WithMany("DepartmentPositions")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DictionaryService.Domain.Positions.Position", "Position")
+                        .WithMany("DepartmentPositions")
+                        .HasForeignKey("PositionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+
+                    b.Navigation("Position");
+                });
+
             modelBuilder.Entity("DictionaryService.Domain.Departments.Department", b =>
                 {
                     b.HasOne("DictionaryService.Domain.Departments.Department", "Parent")
@@ -279,44 +317,6 @@ namespace DictionaryService.Infrastructure.Migrations
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("DictionaryService.Domain.Departments.DepartmentLocation", b =>
-                {
-                    b.HasOne("DictionaryService.Domain.Departments.Department", "Department")
-                        .WithMany("DepartmentLocations")
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DictionaryService.Domain.Departments.Location", "Location")
-                        .WithMany("DepartmentLocations")
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Department");
-
-                    b.Navigation("Location");
-                });
-
-            modelBuilder.Entity("DictionaryService.Domain.Departments.DepartmentPosition", b =>
-                {
-                    b.HasOne("DictionaryService.Domain.Departments.Department", "Department")
-                        .WithMany("DepartmentPositions")
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DictionaryService.Domain.Departments.Position", "Position")
-                        .WithMany("DepartmentPositions")
-                        .HasForeignKey("PositionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Department");
-
-                    b.Navigation("Position");
-                });
-
             modelBuilder.Entity("DictionaryService.Domain.Departments.Department", b =>
                 {
                     b.Navigation("Children");
@@ -326,12 +326,12 @@ namespace DictionaryService.Infrastructure.Migrations
                     b.Navigation("DepartmentPositions");
                 });
 
-            modelBuilder.Entity("DictionaryService.Domain.Departments.Location", b =>
+            modelBuilder.Entity("DictionaryService.Domain.Locations.Location", b =>
                 {
                     b.Navigation("DepartmentLocations");
                 });
 
-            modelBuilder.Entity("DictionaryService.Domain.Departments.Position", b =>
+            modelBuilder.Entity("DictionaryService.Domain.Positions.Position", b =>
                 {
                     b.Navigation("DepartmentPositions");
                 });

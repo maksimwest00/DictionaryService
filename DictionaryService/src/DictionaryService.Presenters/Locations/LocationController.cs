@@ -21,8 +21,6 @@ public class LocationController : ControllerBase
         [FromBody] CreateLocationDto request,
         CancellationToken cancellationToken)
     {
-        throw new Exception("hi");
-        
         var createResult = await _locationService.CreateAsync(request, cancellationToken);
 
         return createResult.IsFailure ? createResult.Error.ToResponse() : Ok(Envelope.Ok(createResult.Value));

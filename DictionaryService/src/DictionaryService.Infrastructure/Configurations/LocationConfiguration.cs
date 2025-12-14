@@ -64,5 +64,9 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
         builder.Property(l => l.UpdatedAt)
             .IsRequired()
             .HasColumnName("updated_at");
+
+        builder.HasMany(p => p.DepartmentLocations)
+            .WithOne()
+            .HasForeignKey(dl => dl.LocationId);
     }
 }

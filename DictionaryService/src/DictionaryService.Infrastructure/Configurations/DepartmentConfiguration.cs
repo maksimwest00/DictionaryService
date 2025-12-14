@@ -21,30 +21,33 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
         builder.ComplexProperty(d => d.Name, nb =>
         {
             nb.Property(t => t.Value)
-                .IsRequired()
-                .HasMaxLength(LengthConstants.Length500)
-                .HasColumnName("name");
+                .HasMaxLength(Name.NAME_MAX_LENGTH)
+                .HasColumnName("name")
+                .IsRequired();
         });
 
         builder.ComplexProperty(d => d.Identifier, ib =>
         {
             ib.Property(t => t.Value)
-                .IsRequired()
-                .HasMaxLength(LengthConstants.Length500)
-                .HasColumnName("identifier");
+                .HasMaxLength(Identifier.IDENTIFIER_MAX_LENGTH)
+                .HasColumnName("identifier")
+                .IsRequired();
         });
 
         builder.ComplexProperty(d => d.Path, pb =>
         {
             pb.Property(t => t.Value)
-                .IsRequired()
-                .HasMaxLength(LengthConstants.Length500)
-                .HasColumnName("path");
+                .HasColumnName("path")
+                .IsRequired();
         });
 
         builder.Property(d => d.Depth)
             .IsRequired()
             .HasColumnName("depth");
+
+        builder.Property(x => x.ChildrenCount)
+            .IsRequired()
+            .HasColumnName("children_count");
 
         builder.Property(d => d.IsActive)
             .IsRequired()
@@ -58,19 +61,22 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
             .IsRequired()
             .HasColumnName("updated_at");
 
-        builder.HasOne(d => d.Parent)
-            .WithMany(d => d.Children)
-            .HasForeignKey(d => d.ParentId)
-            .IsRequired(false)
-            .OnDelete(DeleteBehavior.Cascade);
-
         builder.Property(d => d.ParentId)
             .IsRequired(false)
             .HasColumnName("parent_id");
 
         builder.HasMany(d => d.Children)
+            .WithOne(x => x.Parent)
+            .IsRequired(false)
+            .HasForeignKey(x => x.ParentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(d => d.DepartmentLocations)
             .WithOne()
-            .HasForeignKey("departments_id")
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey(d => d.DepartmentId);
+
+        builder.HasMany(d => d.DepartmentPositions)
+            .WithOne()
+            .HasForeignKey(d => d.DepartmentId);
     }
 }

@@ -30,22 +30,22 @@ public record Address
     {
         if (string.IsNullOrEmpty(city))
         {
-            return GeneralErrors.ValueIsInvalid("City", "City must be not null");
+            return GeneralErrors.ValueIsRequired("Address City");
         }
 
         if (string.IsNullOrEmpty(street))
         {
-            return GeneralErrors.ValueIsInvalid("Street", "Street must be not null");
+            return GeneralErrors.ValueIsRequired("Address Street");
         }
 
         if (string.IsNullOrEmpty(building))
         {
-            return GeneralErrors.ValueIsInvalid("Building", "Building must be not null");
+            return GeneralErrors.ValueIsRequired("Address Building");
         }
 
         if (string.IsNullOrEmpty(roomNumber))
         {
-            return GeneralErrors.ValueIsInvalid("RoomNumber", "RoomNumber must be not null");
+            return GeneralErrors.ValueIsRequired("Address RoomNumber");
         }
 
         return new Address(city, street, building, roomNumber);

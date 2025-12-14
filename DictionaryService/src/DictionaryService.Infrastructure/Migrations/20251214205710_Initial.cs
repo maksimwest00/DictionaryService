@@ -17,29 +17,24 @@ namespace DictionaryService.Infrastructure.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     parent_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    depth = table.Column<short>(type: "smallint", nullable: false),
+                    depth = table.Column<int>(type: "integer", nullable: false),
+                    children_count = table.Column<int>(type: "integer", nullable: false),
                     isActive = table.Column<bool>(type: "boolean", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    departments_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    identifier = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    path = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
+                    identifier = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    path = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_departments", x => x.id);
                     table.ForeignKey(
-                        name: "FK_departments_departments_departments_id",
-                        column: x => x.departments_id,
-                        principalTable: "departments",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_departments_departments_parent_id",
                         column: x => x.parent_id,
                         principalTable: "departments",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -70,8 +65,8 @@ namespace DictionaryService.Infrastructure.Migrations
                     is_active = table.Column<bool>(type: "boolean", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
+                    description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -83,21 +78,21 @@ namespace DictionaryService.Infrastructure.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    departmentId = table.Column<Guid>(type: "uuid", nullable: false),
-                    locationId = table.Column<Guid>(type: "uuid", nullable: false)
+                    department_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    location_id = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_department_locations", x => x.id);
                     table.ForeignKey(
-                        name: "FK_department_locations_departments_departmentId",
-                        column: x => x.departmentId,
+                        name: "FK_department_locations_departments_department_id",
+                        column: x => x.department_id,
                         principalTable: "departments",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_department_locations_locations_locationId",
-                        column: x => x.locationId,
+                        name: "FK_department_locations_locations_location_id",
+                        column: x => x.location_id,
                         principalTable: "locations",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -129,14 +124,14 @@ namespace DictionaryService.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_department_locations_departmentId",
+                name: "IX_department_locations_department_id",
                 table: "department_locations",
-                column: "departmentId");
+                column: "department_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_department_locations_locationId",
+                name: "IX_department_locations_location_id",
                 table: "department_locations",
-                column: "locationId");
+                column: "location_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_department_positions_department_id",
@@ -147,11 +142,6 @@ namespace DictionaryService.Infrastructure.Migrations
                 name: "IX_department_positions_position_id",
                 table: "department_positions",
                 column: "position_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_departments_departments_id",
-                table: "departments",
-                column: "departments_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_departments_parent_id",

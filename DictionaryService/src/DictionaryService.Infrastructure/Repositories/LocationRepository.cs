@@ -1,5 +1,6 @@
 ﻿using DictionaryService.Application.Locations;
 using DictionaryService.Domain.Locations;
+using Microsoft.EntityFrameworkCore;
 
 namespace DictionaryService.Infrastructure.Repositories;
 

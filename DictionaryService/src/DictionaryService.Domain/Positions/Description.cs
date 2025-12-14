@@ -1,18 +1,33 @@
-﻿namespace DictionaryService.Domain.Positions;
+﻿using CSharpFunctionalExtensions;
+using DictionaryService.Domain.Shared;
+
+namespace DictionaryService.Domain.Positions;
 
 public record Description
 {
-    private Description(string? value) => Value = value;
+    public const int MAX_DESCRIPTION_LENGTH = 1000;
+
+    private Description(string? value)
+    {
+        Value = value;
+    }
+
     public static Description EmptyDescription => new((string?)null);
 
     public string? Value { get; }
 
-    public static Description Create(string value)
+    public static Result<Description, Error> Create(string value)
     {
-        if (string.IsNullOrWhiteSpace(value) ||
-            value.Length > 1000)
+        if (string.IsNullOrWhiteSpace(value))
         {
-            throw new ArgumentException("Description must be between 3 and 1000 characters");
+            return GeneralErrors.ValueIsRequired("Position description");
+        }
+
+        if (value.Length > MAX_DESCRIPTION_LENGTH)
+        {
+            return GeneralErrors.ValueIsInvalid(
+                "Position description",
+                "Description must be between 3 and 1000 characters");
         }
 
         return new Description(value);

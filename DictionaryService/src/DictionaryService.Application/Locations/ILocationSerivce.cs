@@ -6,7 +6,7 @@ namespace DictionaryService.Application.Locations;
 
 public interface ILocationSerivce
 {
-    Task<Result<Guid,Error>> CreateAsync(
+    Task<Result<Guid, Error>> CreateAsync(
         CreateLocationDto request,
         CancellationToken cancellationToken);
 }

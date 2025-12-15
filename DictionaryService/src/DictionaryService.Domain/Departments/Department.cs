@@ -1,9 +1,11 @@
-﻿using DictionaryService.Domain.DepartmentLocations;
+﻿using CSharpFunctionalExtensions;
+using DictionaryService.Domain.DepartmentLocations;
 using DictionaryService.Domain.DepartmentPositions;
+using DictionaryService.Domain.Shared;
 
 namespace DictionaryService.Domain.Departments;
 
-public class Department
+public sealed class Department
 {
     private readonly List<Department> _children;
     private readonly List<DepartmentLocation> _departmentLocations;
@@ -15,28 +17,27 @@ public class Department
     }
 
     public Department(
+        Guid id,
         Name name,
         Identifier identifier,
         Guid? parentId,
         Path path,
-        short depth,
-        bool isActive,
-        DateTime createdAt,
-        DateTime updatedAt,
+        int depth,
         Department? parent,
         List<Department> children,
         IEnumerable<DepartmentLocation> departmentLocations,
         IEnumerable<DepartmentPosition> departmentPositions)
     {
-        Id = Guid.NewGuid();
+        Id = id;
         Name = name;
         Identifier = identifier;
         ParentId = parentId;
         Path = path;
         Depth = depth;
-        IsActive = isActive;
-        CreatedAt = createdAt;
-        UpdatedAt = updatedAt;
+        ChildrenCount = Children.Count;
+        IsActive = true;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
         Parent = parent;
         _children = children;
         _departmentLocations = departmentLocations.ToList();
@@ -53,7 +54,9 @@ public class Department
 
     public Path Path { get; private set; }
 
-    public short Depth { get; private set; }
+    public int Depth { get; private set; }
+
+    public int ChildrenCount { get; private set; }
 
     public bool IsActive { get; private set; }
 
@@ -68,4 +71,60 @@ public class Department
     public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations;
 
     public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
+
+    public static Result<Department, Error> CreateParent(
+        Name name,
+        Identifier identifier,
+        IEnumerable<DepartmentLocation> departmentLocations,
+        Guid? departmentId = null)
+    {
+        var departmentLocationsList = departmentLocations.ToList();
+
+        if (departmentLocationsList.Count == 0)
+        {
+            return Error.Validation("department.location", "Department locations must contain at least one location");
+        }
+
+        var path = Path.CreateParent(identifier);
+        return new Department(
+            departmentId ?? Guid.NewGuid(),
+            name,
+            identifier,
+            null,
+            path,
+            0,
+            null,
+            [],
+            departmentLocationsList,
+            []);
+    }
+
+    public static Result<Department, Error> CreateChild(
+        Name name,
+        Identifier identifier,
+        Department parent,
+        IEnumerable<DepartmentLocation> departmentLocations,
+        Guid? departmentId = null)
+    {
+        var departmentLocationsList = departmentLocations.ToList();
+
+        if (departmentLocationsList.Count == 0)
+        {
+            return Error.Validation("department.location", "Department locations must contain at least one location");
+        }
+
+        var path = parent.Path.CreateChild(identifier);
+
+        return new Department(
+            departmentId ?? Guid.NewGuid(),
+            name,
+            identifier,
+            parent.Id,
+            path,
+            parent.Depth + 1,
+            parent,
+            [],
+            departmentLocationsList,
+            []);
+    }
 }

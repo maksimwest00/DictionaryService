@@ -2,16 +2,22 @@
 
 public record Path
 {
-    private Path(string value) => Value = value;
+    private const char SEPARATOR = '/';
+
+    private Path(string value)
+    {
+        Value = value;
+    }
+
     public string Value { get; }
 
-    public static Path Create(string value)
+    public static Path CreateParent(Identifier identifier)
     {
-        if (string.IsNullOrEmpty(value))
-        {
-            throw new ArgumentException("Invalid path");
-        }
+        return new Path(identifier.Value);
+    }
 
-        return new Path(value);
+    public Path CreateChild(Identifier childIdentifier)
+    {
+        return new Path(Value + SEPARATOR + childIdentifier.Value);
     }
 }

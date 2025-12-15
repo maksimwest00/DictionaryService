@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DictionaryService.Infrastructure.Migrations
 {
     [DbContext(typeof(DictionaryServiceDbContext))]
-    [Migration("20251201184942_Initial")]
+    [Migration("20251214205710_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -35,11 +35,11 @@ namespace DictionaryService.Infrastructure.Migrations
 
                     b.Property<Guid>("DepartmentId")
                         .HasColumnType("uuid")
-                        .HasColumnName("departmentId");
+                        .HasColumnName("department_id");
 
                     b.Property<Guid>("LocationId")
                         .HasColumnType("uuid")
-                        .HasColumnName("locationId");
+                        .HasColumnName("location_id");
 
                     b.HasKey("Id")
                         .HasName("pk_department_locations");
@@ -83,12 +83,16 @@ namespace DictionaryService.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<int>("ChildrenCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("children_count");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<short>("Depth")
-                        .HasColumnType("smallint")
+                    b.Property<int>("Depth")
+                        .HasColumnType("integer")
                         .HasColumnName("depth");
 
                     b.Property<bool>("IsActive")
@@ -103,17 +107,14 @@ namespace DictionaryService.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<Guid?>("departments_id")
-                        .HasColumnType("uuid");
-
                     b.ComplexProperty<Dictionary<string, object>>("Identifier", "DictionaryService.Domain.Departments.Department.Identifier#Identifier", b1 =>
                         {
                             b1.IsRequired();
 
                             b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasMaxLength(500)
-                                .HasColumnType("character varying(500)")
+                                .HasMaxLength(150)
+                                .HasColumnType("character varying(150)")
                                 .HasColumnName("identifier");
                         });
 
@@ -123,8 +124,8 @@ namespace DictionaryService.Infrastructure.Migrations
 
                             b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasMaxLength(500)
-                                .HasColumnType("character varying(500)")
+                                .HasMaxLength(150)
+                                .HasColumnType("character varying(150)")
                                 .HasColumnName("name");
                         });
 
@@ -134,8 +135,7 @@ namespace DictionaryService.Infrastructure.Migrations
 
                             b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasMaxLength(500)
-                                .HasColumnType("character varying(500)")
+                                .HasColumnType("text")
                                 .HasColumnName("path");
                         });
 
@@ -143,8 +143,6 @@ namespace DictionaryService.Infrastructure.Migrations
                         .HasName("pk_departments");
 
                     b.HasIndex("ParentId");
-
-                    b.HasIndex("departments_id");
 
                     b.ToTable("departments", (string)null);
                 });
@@ -243,8 +241,8 @@ namespace DictionaryService.Infrastructure.Migrations
                             b1.IsRequired();
 
                             b1.Property<string>("Value")
-                                .HasMaxLength(500)
-                                .HasColumnType("character varying(500)")
+                                .HasMaxLength(1000)
+                                .HasColumnType("character varying(1000)")
                                 .HasColumnName("description");
                         });
 
@@ -254,8 +252,8 @@ namespace DictionaryService.Infrastructure.Migrations
 
                             b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasMaxLength(500)
-                                .HasColumnType("character varying(500)")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("name");
                         });
 
@@ -267,52 +265,40 @@ namespace DictionaryService.Infrastructure.Migrations
 
             modelBuilder.Entity("DictionaryService.Domain.DepartmentLocations.DepartmentLocation", b =>
                 {
-                    b.HasOne("DictionaryService.Domain.Departments.Department", "Department")
+                    b.HasOne("DictionaryService.Domain.Departments.Department", null)
                         .WithMany("DepartmentLocations")
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DictionaryService.Domain.Locations.Location", "Location")
+                    b.HasOne("DictionaryService.Domain.Locations.Location", null)
                         .WithMany("DepartmentLocations")
                         .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Department");
-
-                    b.Navigation("Location");
                 });
 
             modelBuilder.Entity("DictionaryService.Domain.DepartmentPositions.DepartmentPosition", b =>
                 {
-                    b.HasOne("DictionaryService.Domain.Departments.Department", "Department")
+                    b.HasOne("DictionaryService.Domain.Departments.Department", null)
                         .WithMany("DepartmentPositions")
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DictionaryService.Domain.Positions.Position", "Position")
+                    b.HasOne("DictionaryService.Domain.Positions.Position", null)
                         .WithMany("DepartmentPositions")
                         .HasForeignKey("PositionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Department");
-
-                    b.Navigation("Position");
                 });
 
             modelBuilder.Entity("DictionaryService.Domain.Departments.Department", b =>
                 {
                     b.HasOne("DictionaryService.Domain.Departments.Department", "Parent")
-                        .WithMany()
-                        .HasForeignKey("ParentId");
-
-                    b.HasOne("DictionaryService.Domain.Departments.Department", null)
                         .WithMany("Children")
-                        .HasForeignKey("departments_id")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Parent");
                 });

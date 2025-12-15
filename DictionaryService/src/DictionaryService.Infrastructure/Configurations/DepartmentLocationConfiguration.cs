@@ -19,22 +19,10 @@ public class DepartmentLocationConfiguration : IEntityTypeConfiguration<Departme
 
         builder.Property(dl => dl.DepartmentId)
             .IsRequired()
-            .HasColumnName("departmentId");
+            .HasColumnName("department_id");
 
         builder.Property(dl => dl.LocationId)
             .IsRequired()
-            .HasColumnName("locationId");
-
-        builder.HasOne(dl => dl.Department)
-            .WithMany(dl => dl.DepartmentLocations)
-            .HasForeignKey(dl => dl.DepartmentId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(dl => dl.Location)
-            .WithMany(dl => dl.DepartmentLocations)
-            .HasForeignKey(dl => dl.LocationId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasColumnName("location_id");
     }
 }

@@ -1,11 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\DictionaryService.Application\DictionaryService.Application.csproj"/>
     <ProjectReference Include="..\DictionaryService.Contracts\DictionaryService.Contracts.csproj"/>
@@ -14,7 +8,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0"/>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core"/>
   </ItemGroup>
 
 </Project>

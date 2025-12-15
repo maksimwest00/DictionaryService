@@ -1,23 +1,31 @@
+using System.Globalization;
 using DictionaryService.Web;
-using DictionaryService.Web.Middlewares;
+using Serilog;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
+    .CreateBootstrapLogger();
 
-builder.Services.AddProgramDependincies(builder.Configuration);
-
-WebApplication app = builder.Build();
-
-app.UseExceptionMiddleware();
-
-if (app.Environment.IsDevelopment())
+try
 {
-    app.MapOpenApi();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/openapi/v1.json", "DictionaryService");
-    });
+    Log.Information("Starting web application");
+
+    WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+    builder.Services.AddProgramDependencies(builder.Configuration);
+
+    WebApplication app = builder.Build();
+
+    app.Configure();
+
+    app.Run();
 }
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

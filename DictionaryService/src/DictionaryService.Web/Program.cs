@@ -1,15 +1,27 @@
+using System.Globalization;
 using DictionaryService.Web;
-using DictionaryService.Web.Middlewares;
+using Serilog;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
+    .CreateBootstrapLogger();
 
-builder.Services.AddProgramDependincies(builder.Configuration);
+try
+{
+    Log.Information("Starting web application");
 
-WebApplication app = builder.Build();
+    WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-app.UseExceptionMiddleware();
+    builder.Services.AddProgramDependencies(builder.Configuration);
 
-if (app.Environment.IsDevelopment())
+    WebApplication app = builder.Build();
+
+    app.Configure();
+
+    app.Run();
+}
+catch (Exception ex)
 {
 <<<<<<< Updated upstream
     app.MapOpenApi();
@@ -46,7 +58,3 @@ finally
     Log.CloseAndFlush();
 >>>>>>> Stashed changes
 }
-
-app.MapControllers();
-
-app.Run();

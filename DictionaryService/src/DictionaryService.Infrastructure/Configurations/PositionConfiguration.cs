@@ -22,7 +22,7 @@ public class PositionConfiguration : IEntityTypeConfiguration<Position>
         {
             nb.Property(t => t.Value)
                 .IsRequired()
-                .HasMaxLength(LengthConstants.Length500)
+                .HasMaxLength(Name.MAX_NAME_LENGTH)
                 .HasColumnName("name");
         });
 
@@ -30,7 +30,7 @@ public class PositionConfiguration : IEntityTypeConfiguration<Position>
         {
             db.Property(t => t.Value)
                 .IsRequired(false)
-                .HasMaxLength(LengthConstants.Length500)
+                .HasMaxLength(Description.MAX_DESCRIPTION_LENGTH)
                 .HasColumnName("description");
         });
 
@@ -47,8 +47,7 @@ public class PositionConfiguration : IEntityTypeConfiguration<Position>
             .HasColumnName("updated_at");
 
         builder.HasMany(p => p.DepartmentPositions)
-            .WithOne(dp => dp.Position)
-            .HasForeignKey(dp => dp.PositionId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .WithOne()
+            .HasForeignKey(dp => dp.PositionId);
     }
 }

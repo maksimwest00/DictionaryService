@@ -32,7 +32,10 @@ public class ExceptionMiddleware
         HttpContext context,
         Exception exception)
     {
-        _logger.LogError(exception, exception.Message);
+        _logger.LogError(
+            exception,
+            "exception: {exception}",
+            exception.Message);
 
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
@@ -40,13 +43,5 @@ public class ExceptionMiddleware
         var error = Error.Failure(null, "Something went wrong");
 
         await context.Response.WriteAsJsonAsync(Envelope.Error(error));
-    }
-}
-
-public static class ExceptionMiddlewareExtension
-{
-    public static IApplicationBuilder UseExceptionMiddleware(this WebApplication app)
-    {
-        return app.UseMiddleware<ExceptionMiddleware>();
     }
 }

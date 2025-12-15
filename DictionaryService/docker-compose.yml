@@ -1,4 +1,16 @@
 services:
+  dictionary-service:
+    container_name: dictionary-service
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "9001:9001"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:9001
+    restart: always
+  
   postgres:
     container_name: postgres
     image: postgres
@@ -8,7 +20,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - 5434:5432
+      - "5434:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data1
 

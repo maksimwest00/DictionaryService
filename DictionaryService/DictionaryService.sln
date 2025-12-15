@@ -12,6 +12,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
 		.editorconfig = .editorconfig
+<<<<<<< Updated upstream
+=======
+		Directory.Packages.props = Directory.Packages.props
+		Dockerfile = Dockerfile
+		docker-compose-dev.yml = docker-compose-dev.yml
+>>>>>>> Stashed changes
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DictionaryService.Application", "src\DictionaryService.Application\DictionaryService.Application.csproj", "{3C4BDCF7-4D54-4236-A010-A0C631015301}"

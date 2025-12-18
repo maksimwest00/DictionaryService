@@ -34,7 +34,7 @@ public class ExceptionMiddleware
     {
         _logger.LogError(
             exception,
-            "exception: {exception}",
+            "exception: {ExceptionMessage}",
             exception.Message);
 
         context.Response.ContentType = "application/json";

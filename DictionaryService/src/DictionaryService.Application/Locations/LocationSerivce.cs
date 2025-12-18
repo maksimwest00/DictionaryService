@@ -16,19 +16,19 @@ public class LocationSerivce : ILocationSerivce
     }
 
     public async Task<Result<Guid, Error>> CreateAsync(
-        CreateLocationDto request,
+        CreateLocationCommand command,
         CancellationToken cancellationToken)
     {
-        var nameLocationResult = Name.Create(request.Name);
+        var nameLocationResult = Name.Create(command.Request.Name);
 
         if (nameLocationResult.IsFailure)
             return nameLocationResult.Error;
 
         var addressLocationResult = Address.Create(
-            request.Address.City,
-            request.Address.Street,
-            request.Address.Building,
-            request.Address.RoomNumber);
+            command.Request.Address.City,
+            command.Request.Address.Street,
+            command.Request.Address.Building,
+            command.Request.Address.RoomNumber);
 
         if (addressLocationResult.IsFailure)
             return addressLocationResult.Error;
@@ -36,7 +36,7 @@ public class LocationSerivce : ILocationSerivce
         Location location = new(
             nameLocationResult.Value,
             addressLocationResult.Value,
-            request.Timezone);
+            command.Request.Timezone);
 
         return await _locationRepository.AddAsync(location, cancellationToken);
     }

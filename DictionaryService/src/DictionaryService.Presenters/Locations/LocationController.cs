@@ -19,11 +19,13 @@ public class LocationController : ControllerBase
 
     [HttpPost]
     public async Task<IActionResult> CreateAsync(
-        [FromBody] CreateLocationDto request,
+        [FromBody] CreateLocationRequest request,
         [FromServices] ILogger<LocationController> logger,
         CancellationToken cancellationToken)
     {
-        var createResult = await _locationService.CreateAsync(request, cancellationToken);
+        var command = new CreateLocationCommand(request);
+
+        var createResult = await _locationService.CreateAsync(command, cancellationToken);
 
         if (createResult.IsSuccess)
         {
@@ -31,7 +33,7 @@ public class LocationController : ControllerBase
         }
         else
         {
-            logger.LogInformation("Ошибка создания локации: {error}", createResult.Error.Message);
+            logger.LogInformation("Ошибка создания локации: {ErrorMessage}", createResult.Error.Message);
         }
 
         return createResult.IsFailure ? createResult.Error.ToResponse() : Ok(Envelope.Ok(createResult.Value));

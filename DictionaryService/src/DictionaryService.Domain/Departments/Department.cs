@@ -82,7 +82,7 @@ public sealed class Department
 
         if (departmentLocationsList.Count == 0)
         {
-            return Error.Validation("department.location", "Department locations must contain at least one location");
+            return Error.Validation("department.location", ["Department locations must contain at least one location"]);
         }
 
         var path = Path.CreateParent(identifier);
@@ -110,7 +110,7 @@ public sealed class Department
 
         if (departmentLocationsList.Count == 0)
         {
-            return Error.Validation("department.location", "Department locations must contain at least one location");
+            return Error.Validation("department.location", ["Department locations must contain at least one location"]);
         }
 
         var path = parent.Path.CreateChild(identifier);

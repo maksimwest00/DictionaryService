@@ -34,13 +34,13 @@ public class ExceptionMiddleware
     {
         _logger.LogError(
             exception,
-            "exception: {exception}",
+            "exception: {ExceptionMessage}",
             exception.Message);
 
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-        var error = Error.Failure(null, "Something went wrong");
+        var error = Error.Failure(null, ["Something went wrong"]);
 
         await context.Response.WriteAsJsonAsync(Envelope.Error(error));
     }

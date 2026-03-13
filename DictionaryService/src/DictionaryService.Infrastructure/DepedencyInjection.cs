@@ -11,7 +11,7 @@ public static class DepedencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddScoped<DictionaryServiceDbContext>(sp => new DictionaryServiceDbContext(
+        services.AddScoped<DictionaryServiceDbContext>(_ => new DictionaryServiceDbContext(
             configuration.GetConnectionString("DictionaryServiceDb")!));
         services.AddScoped<ILocationRepository, LocationRepository>();
         return services;

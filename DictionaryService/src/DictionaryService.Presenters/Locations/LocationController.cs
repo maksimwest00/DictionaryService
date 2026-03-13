@@ -1,4 +1,6 @@
-﻿using DictionaryService.Application.Locations;
+﻿using DictionaryService.Application.Abstractions;
+using DictionaryService.Application.Locations;
+using DictionaryService.Application.Locations.CreateLocation;
 using DictionaryService.Contracts.Locations;
 using DictionaryService.Presenters.ResponseExtensions;
 using Microsoft.AspNetCore.Mvc;
@@ -10,20 +12,16 @@ namespace DictionaryService.Presenters.Locations;
 [Route("/api/[controller]")]
 public class LocationController : ControllerBase
 {
-    private readonly ILocationSerivce _locationService;
-
-    public LocationController(ILocationSerivce locationSerivce)
-    {
-        _locationService = locationSerivce;
-    }
-
     [HttpPost]
     public async Task<IActionResult> CreateAsync(
-        [FromBody] CreateLocationDto request,
+        [FromBody] CreateLocationRequest request,
         [FromServices] ILogger<LocationController> logger,
+        [FromServices] ICommandHandler<Guid, CreateLocationCommand> handler,
         CancellationToken cancellationToken)
     {
-        var createResult = await _locationService.CreateAsync(request, cancellationToken);
+        var command = new CreateLocationCommand(request);
+
+        var createResult = await handler.HandleAsync(command, cancellationToken);
 
         if (createResult.IsSuccess)
         {
@@ -31,7 +29,7 @@ public class LocationController : ControllerBase
         }
         else
         {
-            logger.LogInformation("Ошибка создания локации: {error}", createResult.Error.Message);
+            logger.LogInformation("Ошибка создания локации: {ErrorMessage}", string.Join(',', createResult.Error.Messages));
         }
 
         return createResult.IsFailure ? createResult.Error.ToResponse() : Ok(Envelope.Ok(createResult.Value));

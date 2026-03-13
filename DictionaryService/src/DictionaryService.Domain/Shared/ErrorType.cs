@@ -1,5 +1,8 @@
-﻿namespace DictionaryService.Domain.Shared;
+﻿using System.Text.Json.Serialization;
 
+namespace DictionaryService.Domain.Shared;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ErrorType
 {
     VALIDATION,

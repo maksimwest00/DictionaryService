@@ -17,7 +17,6 @@ public sealed class Department
     }
 
     public Department(
-        Guid id,
         Name name,
         Identifier identifier,
         Guid? parentId,
@@ -25,22 +24,22 @@ public sealed class Department
         int depth,
         Department? parent,
         List<Department> children,
-        IEnumerable<DepartmentLocation> departmentLocations,
+        IEnumerable<Guid> locationIds,
         IEnumerable<DepartmentPosition> departmentPositions)
     {
-        Id = id;
+        Id = Guid.NewGuid();
         Name = name;
         Identifier = identifier;
         ParentId = parentId;
         Path = path;
         Depth = depth;
-        ChildrenCount = Children.Count;
+        ChildrenCount = children.Count;
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
         Parent = parent;
         _children = children;
-        _departmentLocations = departmentLocations.ToList();
+        _departmentLocations = locationIds.Select(locationId => new DepartmentLocation(this.Id, locationId)).ToList();
         _departmentPositions = departmentPositions.ToList();
     }
 
@@ -75,10 +74,9 @@ public sealed class Department
     public static Result<Department, Error> CreateParent(
         Name name,
         Identifier identifier,
-        IEnumerable<DepartmentLocation> departmentLocations,
-        Guid? departmentId = null)
+        IEnumerable<Guid> locationIds)
     {
-        var departmentLocationsList = departmentLocations.ToList();
+        var departmentLocationsList = locationIds.ToList();
 
         if (departmentLocationsList.Count == 0)
         {
@@ -86,8 +84,8 @@ public sealed class Department
         }
 
         var path = Path.CreateParent(identifier);
+
         return new Department(
-            departmentId ?? Guid.NewGuid(),
             name,
             identifier,
             null,
@@ -103,10 +101,9 @@ public sealed class Department
         Name name,
         Identifier identifier,
         Department parent,
-        IEnumerable<DepartmentLocation> departmentLocations,
-        Guid? departmentId = null)
+        IEnumerable<Guid> locationIds)
     {
-        var departmentLocationsList = departmentLocations.ToList();
+        var departmentLocationsList = locationIds.ToList();
 
         if (departmentLocationsList.Count == 0)
         {
@@ -116,7 +113,6 @@ public sealed class Department
         var path = parent.Path.CreateChild(identifier);
 
         return new Department(
-            departmentId ?? Guid.NewGuid(),
             name,
             identifier,
             parent.Id,

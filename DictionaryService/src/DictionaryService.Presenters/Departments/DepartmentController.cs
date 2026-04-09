@@ -1,40 +1,40 @@
+using CSharpFunctionalExtensions;
+using DictionaryService.Application.Abstractions;
+using DictionaryService.Application.Departments.CreateDepartment;
 using DictionaryService.Contracts.Departments;
+using DictionaryService.Domain.Shared;
+using DictionaryService.Presenters.ResponseExtensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace DictionaryService.Presenters.Departments;
 
 [ApiController]
-[Route("[controller]")]
+[Route("/api/[controller]")]
 public class DepartmentController : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> Create(
-        [FromBody] CreateDepartmentDto request,
-        CancellationToken cancellationToken) =>
-        await Task.FromResult(Ok("Department created"));
+    public async Task<IActionResult> CreateAsync(
+        [FromBody] CreateDepartmentRequest request,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] ICommandHandler<Guid, CreateDepartmentCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        CreateDepartmentCommand command = new(request);
 
-    [HttpGet]
-    public async Task<IActionResult> Get(
-        [FromQuery] GetDepartmentDto dto,
-        CancellationToken cancellationToken) =>
-        await Task.FromResult(Ok("Department get"));
+        Result<Guid, Error> createResult = await handler.HandleAsync(command, cancellationToken);
 
-    [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetById(
-        [FromRoute] Guid id,
-        CancellationToken cancellationToken) =>
-        await Task.FromResult(Ok("Department get by id"));
+        if (createResult.IsSuccess)
+        {
+            logger.LogInformation("Подразделение успешно создано с id: {CreateResultValue}", createResult.Value);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка создания подразделения: {ErrorMessage}",
+                string.Join(',', createResult.Error.Messages));
+        }
 
-    [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(
-        [FromRoute] Guid id,
-        [FromBody] UpdateDepartmentDto request,
-        CancellationToken cancellationToken) =>
-        await Task.FromResult(Ok("Department updated"));
-
-    [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> Delete(
-        [FromRoute] Guid id,
-        CancellationToken cancellationToken) =>
-        await Task.FromResult(Ok("Department deleted"));
+        return createResult.IsFailure ? createResult.Error.ToResponse() : Ok(Envelope.Ok(createResult.Value));
+    }
 }

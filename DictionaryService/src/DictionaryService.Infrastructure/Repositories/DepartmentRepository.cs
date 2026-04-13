@@ -66,4 +66,12 @@ public class DepartmentRepository : IDepartmentRepository
             d => d.Id == departmentId,
             cancellationToken);
     }
+
+    public async Task<bool> ExistsAsync(
+        Guid[] departmentIds,
+        CancellationToken cancellationToken)
+    {
+        return await _dbContext.Departments
+            .AnyAsync(l => departmentIds.Contains(l.Id), cancellationToken);
+    }
 }

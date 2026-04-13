@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace DictionaryService.Presenters.Departments;
 
 [ApiController]
-[Route("/api/[controller]")]
+[Route("/api/departments")]
 public class DepartmentController : ControllerBase
 {
     [HttpPost]

@@ -1,5 +1,6 @@
 ﻿using DictionaryService.Application.Departments;
 using DictionaryService.Application.Locations;
+using DictionaryService.Application.Positions;
 using DictionaryService.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +17,7 @@ public static class DepedencyInjection
             configuration.GetConnectionString("DictionaryServiceDb")!));
         services.AddScoped<ILocationRepository, LocationRepository>();
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+        services.AddScoped<IPositionRepository, PositionRepository>();
         return services;
     }
 }

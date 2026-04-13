@@ -49,21 +49,7 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
             return Result.Failure<Guid, Error>(Error.Failure(null, ["Locations not found"]));
         }
 
-        if (!command.Request.ParentId.HasValue)
-        {
-            Result<Department, Error> createDepartmentResult = Department.CreateParent(
-                nameDepartmentResult.Value,
-                identifierDepartmentResult.Value,
-                command.Request.LocationIds);
-
-            if (createDepartmentResult.IsFailure)
-            {
-                return createDepartmentResult.Error;
-            }
-
-            return await _departmentRepository.AddAsync(createDepartmentResult.Value, cancellationToken);
-        }
-        else
+        if (command.Request.ParentId.HasValue)
         {
             Guid parentId = command.Request.ParentId.Value;
 
@@ -82,6 +68,20 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
                 nameDepartmentResult.Value,
                 identifierDepartmentResult.Value,
                 departmentParent,
+                command.Request.LocationIds);
+
+            if (createDepartmentResult.IsFailure)
+            {
+                return createDepartmentResult.Error;
+            }
+
+            return await _departmentRepository.AddAsync(createDepartmentResult.Value, cancellationToken);
+        }
+        else
+        {
+            Result<Department, Error> createDepartmentResult = Department.CreateParent(
+                nameDepartmentResult.Value,
+                identifierDepartmentResult.Value,
                 command.Request.LocationIds);
 
             if (createDepartmentResult.IsFailure)

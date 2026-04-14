@@ -37,4 +37,14 @@ public class DepartmentController : ControllerBase
 
         return createResult.IsFailure ? createResult.Error.ToResponse() : Ok(Envelope.Ok(createResult.Value));
     }
+
+    [HttpPut]
+    [Route("/api/departments/{departmentId}/locations")]
+    public async Task<IActionResult> UpdateLocationAsync(
+        [FromRoute] Guid departmentId,
+        [FromServices] ILogger<DepartmentController> logger,
+        CancellationToken cancellationToken)
+    {
+        return await Task.FromResult(Ok());
+    }
 }

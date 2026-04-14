@@ -21,4 +21,12 @@ public class LocationRepository : ILocationRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
         return location.Id;
     }
+
+    public async Task<bool> ExistsAsync(
+        Guid[] locationIds,
+        CancellationToken cancellationToken)
+    {
+        return await _dbContext.Locations
+            .AnyAsync(l => locationIds.Contains(l.Id), cancellationToken);
+    }
 }

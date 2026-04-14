@@ -15,6 +15,7 @@ public interface ICommandHandler<TResponse, in TCommand>
 
 public interface ICommandHandler<in TCommand>
 {
-    Task<UnitResult<Error>> HandleAsync(TCommand command,
+    Task<UnitResult<Error>> HandleAsync(
+        TCommand command,
         CancellationToken cancellationToken);
 }

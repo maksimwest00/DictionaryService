@@ -16,18 +16,18 @@ public record Description
 
     public string? Value { get; }
 
-    public static Result<Description, Error> Create(string value)
+    public static Result<Description, Error> Create(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
-            return GeneralErrors.ValueIsRequired("Position description");
+            return EmptyDescription;
         }
 
         if (value.Length > MAX_DESCRIPTION_LENGTH)
         {
             return GeneralErrors.ValueIsInvalid(
                 "Position description",
-                "Description must be between 3 and 1000 characters");
+                "Description must be less 1000 characters");
         }
 
         return new Description(value);

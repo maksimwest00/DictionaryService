@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace DictionaryService.Presenters.Locations;
 
 [ApiController]
-[Route("/api/[controller]")]
+[Route("/api/locations")]
 public class LocationController : ControllerBase
 {
     [HttpPost]

@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DictionaryService.Infrastructure.Migrations
 {
     [DbContext(typeof(DictionaryServiceDbContext))]
-    [Migration("20251214205710_Initial")]
+    [Migration("20260409170134_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -106,17 +106,6 @@ namespace DictionaryService.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
-
-                    b.ComplexProperty<Dictionary<string, object>>("Identifier", "DictionaryService.Domain.Departments.Department.Identifier#Identifier", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(150)
-                                .HasColumnType("character varying(150)")
-                                .HasColumnName("identifier");
-                        });
 
                     b.ComplexProperty<Dictionary<string, object>>("Name", "DictionaryService.Domain.Departments.Department.Name#Name", b1 =>
                         {
@@ -299,6 +288,32 @@ namespace DictionaryService.Infrastructure.Migrations
                         .WithMany("Children")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.OwnsOne("DictionaryService.Domain.Departments.Identifier", "Identifier", b1 =>
+                        {
+                            b1.Property<Guid>("DepartmentId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(150)
+                                .HasColumnType("character varying(150)")
+                                .HasColumnName("identifier");
+
+                            b1.HasKey("DepartmentId");
+
+                            b1.HasIndex("Value")
+                                .IsUnique()
+                                .HasDatabaseName("ix_departments_identifier");
+
+                            b1.ToTable("departments");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DepartmentId");
+                        });
+
+                    b.Navigation("Identifier")
+                        .IsRequired();
 
                     b.Navigation("Parent");
                 });

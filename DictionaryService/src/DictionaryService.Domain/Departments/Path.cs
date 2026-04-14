@@ -2,7 +2,7 @@
 
 public record Path
 {
-    private const char SEPARATOR = '/';
+    private const char SEPARATOR = '.';
 
     private Path(string value)
     {

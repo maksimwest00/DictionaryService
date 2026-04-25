@@ -29,4 +29,12 @@ public class LocationRepository : ILocationRepository
         return await _dbContext.Locations
             .AnyAsync(l => locationIds.Contains(l.Id), cancellationToken);
     }
+
+    public async Task<bool> ExistsAndActiveAsync(
+        Guid[] locationIds,
+        CancellationToken cancellationToken)
+    {
+        return await _dbContext.Locations
+            .AnyAsync(l => locationIds.Contains(l.Id) && l.IsActive, cancellationToken);
+    }
 }

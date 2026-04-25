@@ -1,4 +1,5 @@
-﻿using DictionaryService.Domain.Departments;
+﻿using DictionaryService.Domain.DepartmentLocations;
+using DictionaryService.Domain.Departments;
 using DictionaryService.Domain.Locations;
 using DictionaryService.Domain.Positions;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,8 @@ public class DictionaryServiceDbContext : DbContext
     }
 
     public DbSet<Department> Departments => Set<Department>();
+
+    public DbSet<DepartmentLocation> DepartmentLocations => Set<DepartmentLocation>();
 
     public DbSet<Location> Locations => Set<Location>();
 

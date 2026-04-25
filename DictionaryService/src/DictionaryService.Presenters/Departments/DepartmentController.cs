@@ -1,6 +1,7 @@
 using CSharpFunctionalExtensions;
 using DictionaryService.Application.Abstractions;
 using DictionaryService.Application.Departments.CreateDepartment;
+using DictionaryService.Application.Departments.UpdateDepartmentLocations;
 using DictionaryService.Contracts.Departments;
 using DictionaryService.Domain.Shared;
 using DictionaryService.Presenters.ResponseExtensions;
@@ -40,11 +41,28 @@ public class DepartmentController : ControllerBase
 
     [HttpPut]
     [Route("/api/departments/{departmentId}/locations")]
-    public async Task<IActionResult> UpdateLocationAsync(
+    public async Task<IActionResult> UpdateLocationsAsync(
         [FromRoute] Guid departmentId,
+        [FromBody] UpdateDepartmentLocationsRequest request,
         [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] ICommandHandler<Guid, UpdateDepartmentLocationsCommand> handler,
         CancellationToken cancellationToken)
     {
-        return await Task.FromResult(Ok());
+        UpdateDepartmentLocationsCommand command = new(departmentId, request);
+
+        Result<Guid, Error> updateResult = await handler.HandleAsync(command, cancellationToken);
+
+        if (updateResult.IsSuccess)
+        {
+            logger.LogInformation("Подразделение успешно обновлено {UpdateResultValue}", updateResult.Value);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка обновления подразделения: {ErrorMessage}",
+                string.Join(',', updateResult.Error.Messages));
+        }
+
+        return updateResult.IsFailure ? updateResult.Error.ToResponse() : Ok(Envelope.Ok(updateResult.Value));
     }
 }

@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using DictionaryService.Application.Departments;
+using DictionaryService.Domain.DepartmentLocations;
 using DictionaryService.Domain.Departments;
 using DictionaryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -73,5 +74,56 @@ public class DepartmentRepository : IDepartmentRepository
     {
         return await _dbContext.Departments
             .AnyAsync(l => departmentIds.Contains(l.Id), cancellationToken);
+    }
+
+    public async Task<bool> ExistsAndActiveAsync(
+        Guid departmentId,
+        CancellationToken cancellationToken)
+    {
+        return await _dbContext.Departments
+            .AnyAsync(l => l.Id == departmentId && l.IsActive, cancellationToken);
+    }
+
+    public async Task<UnitResult<Error>> DeleteLocationsAsync(
+        Guid departmentId,
+        CancellationToken cancellationToken)
+    {
+        await _dbContext.DepartmentLocations
+            .Where(d => d.DepartmentId == departmentId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        return UnitResult.Success<Error>();
+    }
+
+    public async Task<UnitResult<Error>> AddLocationsAsync(
+        IEnumerable<DepartmentLocation> departmentLocations,
+        CancellationToken cancellationToken)
+    {
+        await _dbContext.DepartmentLocations
+            .AddRangeAsync(departmentLocations, cancellationToken);
+
+        return UnitResult.Success<Error>();
+    }
+
+    public async Task<UnitResult<Error>> SaveUpdateLocationsAsync(
+        Guid departmentId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return UnitResult.Success<Error>();
+        }
+        catch (DbUpdateException ex)
+        {
+            _logger.LogError(
+                ex,
+                "Ошибка при обновлении локаций отдела в БД (DepartmentId={DepartmentId})",
+                departmentId);
+
+            return Result.Failure<Guid, Error>(Error.Conflict(
+                null,
+                ["An error occurred while updating locations department to the database"]));
+        }
     }
 }

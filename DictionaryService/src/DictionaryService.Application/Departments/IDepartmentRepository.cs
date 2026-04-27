@@ -26,4 +26,14 @@ public interface IDepartmentRepository
     Task<UnitResult<Error>> AddLocationsAsync(
         IEnumerable<DepartmentLocation> departmentLocations,
         CancellationToken cancellationToken);
+
+    Task<UnitResult<Error>> IsDepartmentContains(
+        Department department,
+        Department newParent,
+        CancellationToken cancellationToken);
+
+    Task<UnitResult<Error>> TransferAsync(
+        Department department,
+        Department? newParent,
+        CancellationToken cancellationToken);
 }

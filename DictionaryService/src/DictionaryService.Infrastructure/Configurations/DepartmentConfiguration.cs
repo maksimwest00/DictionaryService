@@ -42,8 +42,10 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
         {
             pb.Property(t => t.Value)
                 .HasColumnName("path")
+                .HasColumnType("ltree")
                 .IsRequired();
         });
+
 
         builder.Property(d => d.Depth)
             .IsRequired()

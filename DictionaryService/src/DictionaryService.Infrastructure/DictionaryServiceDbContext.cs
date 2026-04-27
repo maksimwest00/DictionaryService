@@ -30,6 +30,9 @@ public class DictionaryServiceDbContext : DbContext
         optionsBuilder.LogTo(Console.WriteLine);
     }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder) =>
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.HasPostgresExtension("ltree");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DictionaryServiceDbContext).Assembly);
+    }
 }

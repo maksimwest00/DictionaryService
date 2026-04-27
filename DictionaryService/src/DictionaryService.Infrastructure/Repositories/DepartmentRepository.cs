@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using Dapper;
 using DictionaryService.Application.Departments;
 using DictionaryService.Domain.DepartmentLocations;
 using DictionaryService.Domain.Departments;
@@ -6,6 +7,7 @@ using DictionaryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using Path = DictionaryService.Domain.Departments.Path;
 
 namespace DictionaryService.Infrastructure.Repositories;
 
@@ -64,7 +66,7 @@ public class DepartmentRepository : IDepartmentRepository
         CancellationToken cancellationToken)
     {
         return await _dbContext.Departments.FirstOrDefaultAsync(
-            d => d.Id == departmentId,
+            d => d.Id == departmentId && d.IsActive,
             cancellationToken);
     }
 
@@ -125,5 +127,77 @@ public class DepartmentRepository : IDepartmentRepository
                 null,
                 ["An error occurred while updating locations department to the database"]));
         }
+    }
+
+    public async Task<UnitResult<Error>> IsDepartmentContains(
+        Department department,
+        Department newParent,
+        CancellationToken cancellationToken)
+    {
+        Path path = department.Path;
+
+        string query = """
+                       SELECT COUNT(*)
+                       FROM departments
+                       WHERE path @> @path::ltree
+                           AND path != @path::ltree
+                           AND id = @newParentId
+                       """;
+
+        var connection = _dbContext.Database.GetDbConnection();
+
+        int count = await connection.ExecuteScalarAsync<int>(
+            query,
+            new
+            {
+                path = path.Value,
+                newParentId = newParent.Id,
+            });
+
+        if (count == 0)
+        {
+            return UnitResult.Success<Error>();
+        }
+        else
+        {
+            return UnitResult.Failure<Error>(Error.NotFound(
+                null,
+                ["New parent department include in department"],
+                department.Id));
+        }
+    }
+
+    public async Task<UnitResult<Error>> TransferAsync(
+        Department department,
+        Department? newParent,
+        CancellationToken cancellationToken)
+    {
+        var connection = _dbContext.Database.GetDbConnection();
+
+        string query = """
+                       UPDATE departments
+                       SET path = @newPath::ltree || subpath(path, depth),
+                           parent_id = @newParentId,
+                           depth = nlevel(@newPath::ltree)
+                       WHERE path = @oldPath::ltree;
+                       
+                       UPDATE departments
+                       SET path = @newPath::ltree || subpath(path, depth - 1),
+                           depth = nlevel(@newPath::ltree) + (nlevel(@oldPath::ltree) - 1)
+                       WHERE path <@ @oldPath::ltree
+                         AND path != @oldPath::ltree;
+                       """;
+
+        await connection.ExecuteAsync(
+            query,
+            param: new
+            {
+                id = department.Id,
+                oldPath = department.Path.Value,
+                newPath = newParent?.Path.Value,
+                newParentId = newParent?.Id,
+            });
+
+        return UnitResult.Success<Error>();
     }
 }

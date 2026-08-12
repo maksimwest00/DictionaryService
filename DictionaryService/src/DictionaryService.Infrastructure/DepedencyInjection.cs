@@ -1,6 +1,8 @@
-﻿using DictionaryService.Application.Departments;
+﻿using DictionaryService.Application.Database;
+using DictionaryService.Application.Departments;
 using DictionaryService.Application.Locations;
 using DictionaryService.Application.Positions;
+using DictionaryService.Infrastructure.Database;
 using DictionaryService.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +20,7 @@ public static class DepedencyInjection
         services.AddScoped<ILocationRepository, LocationRepository>();
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         services.AddScoped<IPositionRepository, PositionRepository>();
+        services.AddScoped<ITransactionManager, TransactionManager>();
         return services;
     }
 }

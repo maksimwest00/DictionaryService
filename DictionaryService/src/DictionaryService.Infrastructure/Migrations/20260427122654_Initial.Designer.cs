@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DictionaryService.Infrastructure.Migrations
 {
     [DbContext(typeof(DictionaryServiceDbContext))]
-    [Migration("20260409170134_Initial")]
+    [Migration("20260427122654_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -24,6 +24,7 @@ namespace DictionaryService.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "9.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "ltree");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("DictionaryService.Domain.DepartmentLocations.DepartmentLocation", b =>
@@ -124,7 +125,7 @@ namespace DictionaryService.Infrastructure.Migrations
 
                             b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasColumnType("text")
+                                .HasColumnType("ltree")
                                 .HasColumnName("path");
                         });
 

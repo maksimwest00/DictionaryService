@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using DictionaryService.Application.Abstractions;
+using DictionaryService.Application.Database;
 using DictionaryService.Application.Locations;
 using DictionaryService.Application.Validation.ValidationExtensions;
 using DictionaryService.Domain.DepartmentLocations;
@@ -14,15 +15,18 @@ public class UpdateDepartmentLocationsHandler : ICommandHandler<Guid, UpdateDepa
     private readonly IDepartmentRepository _departmentRepository;
     private readonly ILocationRepository _locationRepository;
     private readonly IValidator<UpdateDepartmentLocationsCommand> _validator;
+    private readonly ITransactionManager _transactionManager;
 
     public UpdateDepartmentLocationsHandler(
         IDepartmentRepository departmentRepository,
         ILocationRepository locationRepository,
-        IValidator<UpdateDepartmentLocationsCommand> validator)
+        IValidator<UpdateDepartmentLocationsCommand> validator,
+        ITransactionManager transactionManager)
     {
         _departmentRepository = departmentRepository;
         _locationRepository = locationRepository;
         _validator = validator;
+        _transactionManager = transactionManager;
     }
 
     public async Task<Result<Guid, Error>> HandleAsync(
@@ -67,10 +71,7 @@ public class UpdateDepartmentLocationsHandler : ICommandHandler<Guid, UpdateDepa
             departmentLocations,
             cancellationToken);
 
-        var saveResult =
-            await _departmentRepository.SaveUpdateLocationsAsync(
-                command.DepartmentId,
-                cancellationToken);
+        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
 
         if (saveResult.IsFailure)
         {

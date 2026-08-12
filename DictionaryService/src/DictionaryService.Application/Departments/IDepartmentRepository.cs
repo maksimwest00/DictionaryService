@@ -15,15 +15,21 @@ public interface IDepartmentRepository
 
     Task<bool> ExistsAndActiveAsync(Guid departmentId, CancellationToken cancellationToken);
 
-    Task<UnitResult<Error>> SaveUpdateLocationsAsync(
-        Guid departmentId,
-        CancellationToken cancellationToken);
-
     Task<UnitResult<Error>> DeleteLocationsAsync(
         Guid departmentId,
         CancellationToken cancellationToken);
 
     Task<UnitResult<Error>> AddLocationsAsync(
         IEnumerable<DepartmentLocation> departmentLocations,
+        CancellationToken cancellationToken);
+
+    Task<UnitResult<Error>> IsDepartmentContains(
+        Department department,
+        Department newParent,
+        CancellationToken cancellationToken);
+
+    Task<UnitResult<Error>> TransferAsync(
+        Department department,
+        Department? newParent,
         CancellationToken cancellationToken);
 }

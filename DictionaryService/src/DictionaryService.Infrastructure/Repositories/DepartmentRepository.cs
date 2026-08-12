@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using Dapper;
 using DictionaryService.Application.Departments;
 using DictionaryService.Domain.DepartmentLocations;
 using DictionaryService.Domain.Departments;
@@ -6,6 +7,7 @@ using DictionaryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using Path = DictionaryService.Domain.Departments.Path;
 
 namespace DictionaryService.Infrastructure.Repositories;
 
@@ -63,8 +65,10 @@ public class DepartmentRepository : IDepartmentRepository
         Guid departmentId,
         CancellationToken cancellationToken)
     {
+        var connnection = _dbContext.Database.GetDbConnection();
+        connnection.Execute("SELECT * from departments");
         return await _dbContext.Departments.FirstOrDefaultAsync(
-            d => d.Id == departmentId,
+            d => d.Id == departmentId && d.IsActive,
             cancellationToken);
     }
 
@@ -105,25 +109,75 @@ public class DepartmentRepository : IDepartmentRepository
         return UnitResult.Success<Error>();
     }
 
-    public async Task<UnitResult<Error>> SaveUpdateLocationsAsync(
-        Guid departmentId,
+    public async Task<UnitResult<Error>> IsDepartmentContains(
+        Department department,
+        Department newParent,
         CancellationToken cancellationToken)
     {
-        try
+        Path path = department.Path;
+
+        const string query = """
+                             SELECT COUNT(*)
+                             FROM departments
+                             WHERE path @> @path::ltree
+                                 AND path != @path::ltree
+                                 AND id = @newParentId
+                             """;
+
+        var connection = _dbContext.Database.GetDbConnection();
+
+        int count = await connection.ExecuteScalarAsync<int>(
+            query,
+            new
+            {
+                path = path.Value,
+                newParentId = newParent.Id,
+            });
+
+        if (count == 0)
         {
-            await _dbContext.SaveChangesAsync(cancellationToken);
             return UnitResult.Success<Error>();
         }
-        catch (DbUpdateException ex)
+        else
         {
-            _logger.LogError(
-                ex,
-                "Ошибка при обновлении локаций отдела в БД (DepartmentId={DepartmentId})",
-                departmentId);
-
-            return Result.Failure<Guid, Error>(Error.Conflict(
+            return UnitResult.Failure<Error>(Error.NotFound(
                 null,
-                ["An error occurred while updating locations department to the database"]));
+                ["New parent department include in department"],
+                department.Id));
         }
+    }
+
+    public async Task<UnitResult<Error>> TransferAsync(
+        Department department,
+        Department? newParent,
+        CancellationToken cancellationToken)
+    {
+        var connection = _dbContext.Database.GetDbConnection();
+
+        const string query = """
+                             UPDATE departments
+                             SET path = @newPath::ltree || subpath(path, depth),
+                                 parent_id = @newParentId,
+                                 depth = nlevel(@newPath::ltree)
+                             WHERE path = @oldPath::ltree;
+
+                             UPDATE departments
+                             SET path = @newPath::ltree || subpath(path, depth - 1),
+                                 depth = nlevel(@newPath::ltree) + (nlevel(@oldPath::ltree) - 1)
+                             WHERE path <@ @oldPath::ltree
+                               AND path != @oldPath::ltree;
+                             """;
+
+        await connection.ExecuteAsync(
+            query,
+            param: new
+            {
+                id = department.Id,
+                oldPath = department.Path.Value,
+                newPath = newParent?.Path.Value,
+                newParentId = newParent?.Id,
+            });
+
+        return UnitResult.Success<Error>();
     }
 }

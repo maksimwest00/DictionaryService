@@ -11,6 +11,9 @@ namespace DictionaryService.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:PostgresExtension:ltree", ",,");
+
             migrationBuilder.CreateTable(
                 name: "departments",
                 columns: table => new
@@ -24,7 +27,7 @@ namespace DictionaryService.Infrastructure.Migrations
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
-                    path = table.Column<string>(type: "text", nullable: false)
+                    path = table.Column<string>(type: "ltree", nullable: false)
                 },
                 constraints: table =>
                 {

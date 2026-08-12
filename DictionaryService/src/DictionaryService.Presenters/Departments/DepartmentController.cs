@@ -1,6 +1,7 @@
 using CSharpFunctionalExtensions;
 using DictionaryService.Application.Abstractions;
 using DictionaryService.Application.Departments.CreateDepartment;
+using DictionaryService.Application.Departments.TransferDepartment;
 using DictionaryService.Application.Departments.UpdateDepartmentLocations;
 using DictionaryService.Contracts.Departments;
 using DictionaryService.Domain.Shared;
@@ -64,5 +65,32 @@ public class DepartmentController : ControllerBase
         }
 
         return updateResult.IsFailure ? updateResult.Error.ToResponse() : Ok(Envelope.Ok(updateResult.Value));
+    }
+
+    [HttpPut]
+    [Route("/api/departments/{departmentId}/parent")]
+    public async Task<IActionResult> TransferDepartmentAsync(
+        [FromRoute] Guid departmentId,
+        [FromBody] TransferDepartmentRequest request,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] ICommandHandler<Guid, TransferDepartmentCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        TransferDepartmentCommand command = new TransferDepartmentCommand(departmentId, request);
+
+        var transferResult = await handler.HandleAsync(command, cancellationToken);
+
+        if (transferResult.IsSuccess)
+        {
+            logger.LogInformation("Подразделение успешно перемещено {UpdateResultValue}", transferResult.Value);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка перемещения подразделения: {ErrorMessage}",
+                string.Join(',', transferResult.Error.Messages));
+        }
+
+        return transferResult.IsFailure ? transferResult.Error.ToResponse() : Ok(Envelope.Ok(transferResult.Value));
     }
 }

@@ -1,4 +1,5 @@
-﻿using DictionaryService.Application.Locations;
+﻿using Dapper;
+using DictionaryService.Application.Locations;
 using DictionaryService.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
 

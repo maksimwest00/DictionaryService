@@ -15,10 +15,6 @@ public interface IDepartmentRepository
 
     Task<bool> ExistsAndActiveAsync(Guid departmentId, CancellationToken cancellationToken);
 
-    Task<UnitResult<Error>> SaveUpdateLocationsAsync(
-        Guid departmentId,
-        CancellationToken cancellationToken);
-
     Task<UnitResult<Error>> DeleteLocationsAsync(
         Guid departmentId,
         CancellationToken cancellationToken);

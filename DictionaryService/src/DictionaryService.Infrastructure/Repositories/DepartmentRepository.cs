@@ -65,6 +65,8 @@ public class DepartmentRepository : IDepartmentRepository
         Guid departmentId,
         CancellationToken cancellationToken)
     {
+        var connnection = _dbContext.Database.GetDbConnection();
+        connnection.Execute("SELECT * from departments");
         return await _dbContext.Departments.FirstOrDefaultAsync(
             d => d.Id == departmentId && d.IsActive,
             cancellationToken);
@@ -107,28 +109,6 @@ public class DepartmentRepository : IDepartmentRepository
         return UnitResult.Success<Error>();
     }
 
-    public async Task<UnitResult<Error>> SaveUpdateLocationsAsync(
-        Guid departmentId,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            return UnitResult.Success<Error>();
-        }
-        catch (DbUpdateException ex)
-        {
-            _logger.LogError(
-                ex,
-                "Ошибка при обновлении локаций отдела в БД (DepartmentId={DepartmentId})",
-                departmentId);
-
-            return Result.Failure<Guid, Error>(Error.Conflict(
-                null,
-                ["An error occurred while updating locations department to the database"]));
-        }
-    }
-
     public async Task<UnitResult<Error>> IsDepartmentContains(
         Department department,
         Department newParent,
@@ -136,13 +116,13 @@ public class DepartmentRepository : IDepartmentRepository
     {
         Path path = department.Path;
 
-        string query = """
-                       SELECT COUNT(*)
-                       FROM departments
-                       WHERE path @> @path::ltree
-                           AND path != @path::ltree
-                           AND id = @newParentId
-                       """;
+        const string query = """
+                             SELECT COUNT(*)
+                             FROM departments
+                             WHERE path @> @path::ltree
+                                 AND path != @path::ltree
+                                 AND id = @newParentId
+                             """;
 
         var connection = _dbContext.Database.GetDbConnection();
 
@@ -174,19 +154,19 @@ public class DepartmentRepository : IDepartmentRepository
     {
         var connection = _dbContext.Database.GetDbConnection();
 
-        string query = """
-                       UPDATE departments
-                       SET path = @newPath::ltree || subpath(path, depth),
-                           parent_id = @newParentId,
-                           depth = nlevel(@newPath::ltree)
-                       WHERE path = @oldPath::ltree;
-                       
-                       UPDATE departments
-                       SET path = @newPath::ltree || subpath(path, depth - 1),
-                           depth = nlevel(@newPath::ltree) + (nlevel(@oldPath::ltree) - 1)
-                       WHERE path <@ @oldPath::ltree
-                         AND path != @oldPath::ltree;
-                       """;
+        const string query = """
+                             UPDATE departments
+                             SET path = @newPath::ltree || subpath(path, depth),
+                                 parent_id = @newParentId,
+                                 depth = nlevel(@newPath::ltree)
+                             WHERE path = @oldPath::ltree;
+
+                             UPDATE departments
+                             SET path = @newPath::ltree || subpath(path, depth - 1),
+                                 depth = nlevel(@newPath::ltree) + (nlevel(@oldPath::ltree) - 1)
+                             WHERE path <@ @oldPath::ltree
+                               AND path != @oldPath::ltree;
+                             """;
 
         await connection.ExecuteAsync(
             query,

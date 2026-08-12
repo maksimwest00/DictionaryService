@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using DictionaryService.Application.Abstractions;
+using DictionaryService.Application.Database;
 using DictionaryService.Application.Validation.ValidationExtensions;
 using DictionaryService.Domain.Locations;
 using DictionaryService.Domain.Shared;
@@ -11,13 +12,16 @@ public class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand
 {
     private readonly ILocationRepository _locationRepository;
     private readonly IValidator<CreateLocationCommand> _validator;
+    private readonly ITransactionManager _transactionManager;
 
     public CreateLocationHandler(
         ILocationRepository locationRepository,
-        IValidator<CreateLocationCommand> validator)
+        IValidator<CreateLocationCommand> validator,
+        ITransactionManager transactionManager)
     {
         _locationRepository = locationRepository;
         _validator = validator;
+        _transactionManager = transactionManager;
     }
 
     public async Task<Result<Guid, Error>> HandleAsync(
@@ -44,6 +48,25 @@ public class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand
             addressLocationResult.Value,
             command.Request.Timezone);
 
-        return await _locationRepository.AddAsync(location, cancellationToken);
+        var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+
+        if (transactionScopeResult.IsFailure)
+        {
+            return transactionScopeResult.Error;
+        }
+
+        using var transactionScope = transactionScopeResult.Value;
+
+        var locationId = await _locationRepository.AddAsync(location, cancellationToken);
+
+        var commitedResult = transactionScope.Commit();
+
+        if (commitedResult.IsFailure)
+        {
+            transactionScope.Rollback();
+            return commitedResult.Error;
+        }
+
+        return locationId;
     }
 }

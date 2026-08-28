@@ -44,6 +44,19 @@ public class PositionRepository : IPositionRepository
         }
     }
 
+    public async Task<Result<Position, Error>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        Position? position = await _dbContext.Positions
+            .FirstOrDefaultAsync(x => x.Id == id && x.IsActive, cancellationToken);
+
+        if (position is null)
+        {
+            return Result.Failure<Position, Error>(Error.NotFound(null, ["Position not found"], id));
+        }
+
+        return position;
+    }
+
     public async Task<bool> IsExistPositionNameAsync(
         string positionName,
         CancellationToken cancellationToken)

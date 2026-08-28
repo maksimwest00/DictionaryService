@@ -48,4 +48,9 @@ public class Position
     {
         return new Position(name, description, departmentIds);
     }
+
+    public void UpdateName(Name name)
+    {
+        Name = name;
+    }
 }

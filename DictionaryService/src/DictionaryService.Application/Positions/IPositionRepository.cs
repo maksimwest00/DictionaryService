@@ -13,4 +13,8 @@ public interface IPositionRepository
     Task<bool> IsExistPositionNameAsync(
         string positionName,
         CancellationToken cancellationToken);
+
+    Task<Result<Position, Error>> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken);
 }

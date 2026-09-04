@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using DictionaryService.Domain.DepartmentLocations;
+using DictionaryService.Domain.DepartmentPositions;
 using DictionaryService.Domain.Departments;
 using DictionaryService.Domain.Shared;
 
@@ -33,5 +34,13 @@ public interface IDepartmentRepository
     Task<UnitResult<Error>> TransferAsync(
         Department department,
         Department? newParent,
+        CancellationToken cancellationToken);
+
+    Task<UnitResult<Error>> AddPositionAsync(
+        DepartmentPosition departmentPosition,
+        CancellationToken cancellationToken);
+
+    Task<UnitResult<Error>> DeletePositionAsync(
+        DepartmentPosition departmentPosition,
         CancellationToken cancellationToken);
 }

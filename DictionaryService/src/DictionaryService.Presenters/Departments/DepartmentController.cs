@@ -1,7 +1,9 @@
 using CSharpFunctionalExtensions;
 using DictionaryService.Application.Abstractions;
+using DictionaryService.Application.Departments.AddPosition;
 using DictionaryService.Application.Departments.CreateDepartment;
 using DictionaryService.Application.Departments.DeleteDepartment;
+using DictionaryService.Application.Departments.DeletePosition;
 using DictionaryService.Application.Departments.TransferDepartment;
 using DictionaryService.Application.Departments.UpdateDepartmentLocations;
 using DictionaryService.Contracts.Departments;
@@ -118,5 +120,57 @@ public class DepartmentController : ControllerBase
         }
 
         return deleteResult.IsFailure ? deleteResult.Error.ToResponse() : Ok(Envelope.Ok());
+    }
+
+    [HttpPost("{deptId:Guid}/positions/{posId:Guid}")]
+    public async Task<IActionResult> AddPositionAsync(
+        [FromRoute] Guid deptId,
+        [FromRoute] Guid posId,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] ICommandHandler<Guid, AddPositionCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new AddPositionCommand(deptId, posId);
+
+        var addPositionResult = await handler.HandleAsync(command, cancellationToken);
+
+        if (addPositionResult.IsSuccess)
+        {
+            logger.LogInformation("Должность успешно привязана id: {id}", command.PosId);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка привязки должности: {ErrorMessage}",
+                string.Join(',', addPositionResult.Error.Messages));
+        }
+
+        return addPositionResult.IsFailure ? addPositionResult.Error.ToResponse() : Ok(Envelope.Ok(addPositionResult.Value));
+    }
+
+    [HttpDelete("{deptId:Guid}/positions/{posId:Guid}")]
+    public async Task<IActionResult> DeletePositionAsync(
+        [FromRoute] Guid deptId,
+        [FromRoute] Guid posId,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] ICommandHandler<Guid, DeletePositionCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new DeletePositionCommand(deptId, posId);
+
+        var deletePositionResult = await handler.HandleAsync(command, cancellationToken);
+
+        if (deletePositionResult.IsSuccess)
+        {
+            logger.LogInformation("Должность успешно отвязана id: {id}", command.PosId);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка отвязки должности: {ErrorMessage}",
+                string.Join(',', deletePositionResult.Error.Messages));
+        }
+
+        return deletePositionResult.IsFailure ? deletePositionResult.Error.ToResponse() : Ok(Envelope.Ok(deletePositionResult.Value));
     }
 }

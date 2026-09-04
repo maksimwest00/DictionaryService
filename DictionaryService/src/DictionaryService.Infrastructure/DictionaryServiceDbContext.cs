@@ -1,4 +1,5 @@
 ﻿using DictionaryService.Domain.DepartmentLocations;
+using DictionaryService.Domain.DepartmentPositions;
 using DictionaryService.Domain.Departments;
 using DictionaryService.Domain.Locations;
 using DictionaryService.Domain.Positions;
@@ -18,6 +19,8 @@ public class DictionaryServiceDbContext : DbContext
     public DbSet<Department> Departments => Set<Department>();
 
     public DbSet<DepartmentLocation> DepartmentLocations => Set<DepartmentLocation>();
+
+    public DbSet<DepartmentPosition> DepartmentPositions => Set<DepartmentPosition>();
 
     public DbSet<Location> Locations => Set<Location>();
 

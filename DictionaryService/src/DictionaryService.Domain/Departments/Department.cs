@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions;
 using DictionaryService.Domain.DepartmentLocations;
 using DictionaryService.Domain.DepartmentPositions;
 using DictionaryService.Domain.Shared;
@@ -122,5 +122,10 @@ public sealed class Department
             [],
             departmentLocationsList,
             []);
+    }
+
+    public void Deactivate()
+    {
+        IsActive = false;
     }
 }

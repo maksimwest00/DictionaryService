@@ -14,6 +14,7 @@ public interface ICommandHandler<TResponse, in TCommand>
 }
 
 public interface ICommandHandler<in TCommand>
+    where TCommand : ICommand
 {
     Task<UnitResult<Error>> HandleAsync(
         TCommand command,

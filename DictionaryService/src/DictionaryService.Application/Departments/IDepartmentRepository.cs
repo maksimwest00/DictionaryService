@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using DictionaryService.Domain.DepartmentLocations;
+using DictionaryService.Domain.DepartmentPositions;
 using DictionaryService.Domain.Departments;
 using DictionaryService.Domain.Shared;
 
@@ -9,7 +10,9 @@ public interface IDepartmentRepository
 {
     Task<Result<Guid, Error>> AddAsync(Department department, CancellationToken cancellationToken);
 
-    Task<Department?> GetByIdAsync(Guid departmentId, CancellationToken cancellationToken);
+    Task<Result<Department, Error>> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken);
 
     Task<bool> ExistsAsync(Guid[] departmentIds, CancellationToken cancellationToken);
 
@@ -31,5 +34,13 @@ public interface IDepartmentRepository
     Task<UnitResult<Error>> TransferAsync(
         Department department,
         Department? newParent,
+        CancellationToken cancellationToken);
+
+    Task<UnitResult<Error>> AddPositionAsync(
+        DepartmentPosition departmentPosition,
+        CancellationToken cancellationToken);
+
+    Task<UnitResult<Error>> DeletePositionAsync(
+        DepartmentPosition departmentPosition,
         CancellationToken cancellationToken);
 }

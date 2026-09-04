@@ -1,7 +1,8 @@
-﻿using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions;
 using Dapper;
 using DictionaryService.Application.Departments;
 using DictionaryService.Domain.DepartmentLocations;
+using DictionaryService.Domain.DepartmentPositions;
 using DictionaryService.Domain.Departments;
 using DictionaryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -61,15 +62,19 @@ public class DepartmentRepository : IDepartmentRepository
         }
     }
 
-    public async Task<Department?> GetByIdAsync(
-        Guid departmentId,
+    public async Task<Result<Department, Error>> GetByIdAsync(
+        Guid id,
         CancellationToken cancellationToken)
     {
-        var connnection = _dbContext.Database.GetDbConnection();
-        connnection.Execute("SELECT * from departments");
-        return await _dbContext.Departments.FirstOrDefaultAsync(
-            d => d.Id == departmentId && d.IsActive,
-            cancellationToken);
+        Department? position = await _dbContext.Departments
+            .FirstOrDefaultAsync(x => x.Id == id && x.IsActive, cancellationToken);
+
+        if (position is null)
+        {
+            return Error.NotFound(null, ["Department not found"], id);
+        }
+
+        return position;
     }
 
     public async Task<bool> ExistsAsync(
@@ -177,6 +182,39 @@ public class DepartmentRepository : IDepartmentRepository
                 newPath = newParent?.Path.Value,
                 newParentId = newParent?.Id,
             });
+
+        return UnitResult.Success<Error>();
+    }
+
+    public async Task<UnitResult<Error>> AddPositionAsync(
+        DepartmentPosition departmentPosition,
+        CancellationToken cancellationToken)
+    {
+        if (_dbContext.DepartmentPositions.Any(x =>
+                x.DepartmentId == departmentPosition.DepartmentId &&
+                x.PositionId == departmentPosition.PositionId))
+        {
+            return Error.Conflict(null, ["This record is exist"]);
+        }
+
+        await _dbContext.DepartmentPositions
+            .AddAsync(departmentPosition, cancellationToken);
+
+        return UnitResult.Success<Error>();
+    }
+
+    public async Task<UnitResult<Error>> DeletePositionAsync(
+        DepartmentPosition departmentPosition,
+        CancellationToken cancellationToken)
+    {
+        if (!_dbContext.DepartmentPositions.Any(x =>
+                x.DepartmentId == departmentPosition.DepartmentId &&
+                x.PositionId == departmentPosition.PositionId))
+        {
+            return Error.Conflict(null, ["This record is not exist"]);
+        }
+
+        _dbContext.DepartmentPositions.Remove(departmentPosition);
 
         return UnitResult.Success<Error>();
     }

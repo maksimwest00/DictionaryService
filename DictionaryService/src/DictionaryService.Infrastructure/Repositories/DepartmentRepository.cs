@@ -190,11 +190,12 @@ public class DepartmentRepository : IDepartmentRepository
         DepartmentPosition departmentPosition,
         CancellationToken cancellationToken)
     {
-        if (_dbContext.DepartmentPositions.Any(x =>
-                x.DepartmentId == departmentPosition.DepartmentId &&
-                x.PositionId == departmentPosition.PositionId))
+        if (await _dbContext.DepartmentPositions.AnyAsync(
+                x =>
+                    x.DepartmentId == departmentPosition.DepartmentId &&
+                    x.PositionId == departmentPosition.PositionId, cancellationToken))
         {
-            return Error.Conflict(null, ["This record is exist"]);
+            return Error.NotFound(null, ["This record is not exist"], null);
         }
 
         await _dbContext.DepartmentPositions
@@ -207,11 +208,12 @@ public class DepartmentRepository : IDepartmentRepository
         DepartmentPosition departmentPosition,
         CancellationToken cancellationToken)
     {
-        if (!_dbContext.DepartmentPositions.Any(x =>
+        if (!await _dbContext.DepartmentPositions.AnyAsync(
+            x =>
                 x.DepartmentId == departmentPosition.DepartmentId &&
-                x.PositionId == departmentPosition.PositionId))
+                x.PositionId == departmentPosition.PositionId, cancellationToken))
         {
-            return Error.Conflict(null, ["This record is not exist"]);
+            return Error.NotFound(null, ["This record is not exist"], null);
         }
 
         _dbContext.DepartmentPositions.Remove(departmentPosition);

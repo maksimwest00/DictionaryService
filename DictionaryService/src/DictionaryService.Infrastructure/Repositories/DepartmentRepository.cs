@@ -61,15 +61,19 @@ public class DepartmentRepository : IDepartmentRepository
         }
     }
 
-    public async Task<Department?> GetByIdAsync(
-        Guid departmentId,
+    public async Task<Result<Department, Error>> GetByIdAsync(
+        Guid id,
         CancellationToken cancellationToken)
     {
-        var connnection = _dbContext.Database.GetDbConnection();
-        connnection.Execute("SELECT * from departments");
-        return await _dbContext.Departments.FirstOrDefaultAsync(
-            d => d.Id == departmentId && d.IsActive,
-            cancellationToken);
+        Department? position = await _dbContext.Departments
+            .FirstOrDefaultAsync(x => x.Id == id && x.IsActive, cancellationToken);
+
+        if (position is null)
+        {
+            return Error.NotFound(null, ["Department not found"], id);
+        }
+
+        return position;
     }
 
     public async Task<bool> ExistsAsync(

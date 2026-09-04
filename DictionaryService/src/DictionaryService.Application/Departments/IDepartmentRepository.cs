@@ -9,7 +9,9 @@ public interface IDepartmentRepository
 {
     Task<Result<Guid, Error>> AddAsync(Department department, CancellationToken cancellationToken);
 
-    Task<Department?> GetByIdAsync(Guid departmentId, CancellationToken cancellationToken);
+    Task<Result<Department, Error>> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken);
 
     Task<bool> ExistsAsync(Guid[] departmentIds, CancellationToken cancellationToken);
 

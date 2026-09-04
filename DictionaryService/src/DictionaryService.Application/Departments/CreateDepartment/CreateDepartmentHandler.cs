@@ -67,21 +67,18 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
         {
             Guid parentId = command.Request.ParentId.Value;
 
-            Department? departmentParent =
+            var departmentParentResult =
                 await _departmentRepository.GetByIdAsync(parentId, cancellationToken);
 
-            if (departmentParent is null)
+            if (departmentParentResult.IsFailure)
             {
-                return Result.Failure<Guid, Error>(Error.NotFound(
-                    null,
-                    ["Department parent not found"],
-                    parentId));
+                return departmentParentResult.Error;
             }
 
             Result<Department, Error> createDepartmentResult = Department.CreateChild(
                 nameDepartmentResult.Value,
                 identifierDepartmentResult.Value,
-                departmentParent,
+                departmentParentResult.Value,
                 command.Request.LocationIds);
 
             if (createDepartmentResult.IsFailure)

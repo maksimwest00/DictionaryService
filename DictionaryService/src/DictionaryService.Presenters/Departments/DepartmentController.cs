@@ -1,6 +1,7 @@
 using CSharpFunctionalExtensions;
 using DictionaryService.Application.Abstractions;
 using DictionaryService.Application.Departments.CreateDepartment;
+using DictionaryService.Application.Departments.DeleteDepartment;
 using DictionaryService.Application.Departments.TransferDepartment;
 using DictionaryService.Application.Departments.UpdateDepartmentLocations;
 using DictionaryService.Contracts.Departments;
@@ -92,5 +93,30 @@ public class DepartmentController : ControllerBase
         }
 
         return transferResult.IsFailure ? transferResult.Error.ToResponse() : Ok(Envelope.Ok(transferResult.Value));
+    }
+
+    [HttpDelete("{id:Guid}")]
+    public async Task<IActionResult> DeleteAsync(
+        [FromRoute] Guid id,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] ICommandHandler<DeleteDepartmentCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        DeleteDepartmentCommand command = new(id);
+
+        var deleteResult = await handler.HandleAsync(command, cancellationToken);
+
+        if (deleteResult.IsSuccess)
+        {
+            logger.LogInformation("Подразделение успешно удалено id: {id}", command.Id);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка удаления подразделения: {ErrorMessage}",
+                string.Join(',', deleteResult.Error.Messages));
+        }
+
+        return deleteResult.IsFailure ? deleteResult.Error.ToResponse() : Ok(Envelope.Ok());
     }
 }

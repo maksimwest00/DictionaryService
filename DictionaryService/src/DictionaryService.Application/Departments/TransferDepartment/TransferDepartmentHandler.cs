@@ -19,16 +19,13 @@ public class TransferDepartmentHandler : ICommandHandler<Guid, TransferDepartmen
         CancellationToken cancellationToken)
     {
         // Проверить, что существует ли подразделение с таким departmentId и оно активно
-        var department = await _departmentRepository.GetByIdAsync(
+        var departmentResult = await _departmentRepository.GetByIdAsync(
             command.DepartmentId,
             cancellationToken);
 
-        if (department == null)
+        if (departmentResult.IsFailure)
         {
-            return Result.Failure<Guid, Error>(Error.NotFound(
-                null,
-                ["Department not found"],
-                command.DepartmentId));
+            return departmentResult.Error;
         }
 
         if (command.Request.ParentId.HasValue)
@@ -36,39 +33,40 @@ public class TransferDepartmentHandler : ICommandHandler<Guid, TransferDepartmen
             // Проверить, что новый parentId (если не null) существует, активен и не совпадает с departmentId
             if (command.Request.ParentId != command.DepartmentId)
             {
-                var newParentDepartment = await _departmentRepository.GetByIdAsync(
+                var newParentDepartmentResult = await _departmentRepository.GetByIdAsync(
                     command.Request.ParentId.Value,
                     cancellationToken);
 
-                if (newParentDepartment != null)
+                if (newParentDepartmentResult.IsFailure)
                 {
-                    // Нельзя выбрать родителем своё "дочернее" подразделение (чтобы не было зацикливания структуры)
-                    var isDepartmentContainsResult = await _departmentRepository.IsDepartmentContains(
-                        department,
-                        newParentDepartment,
-                        cancellationToken);
-
-                    if (isDepartmentContainsResult.IsFailure)
-                    {
-                        return Result.Failure<Guid, Error>(Error.NotFound(
-                            null,
-                            ["New parent is children of department"],
-                            command.DepartmentId));
-                    }
-
-                    await _departmentRepository.TransferAsync(
-                        department,
-                        newParentDepartment,
-                        cancellationToken);
-
-                    return command.DepartmentId;
-
+                    return Error.NotFound(
+                        null,
+                        ["New parent is not exist or is not active"],
+                        command.DepartmentId);
                 }
 
-                return Result.Failure<Guid, Error>(Error.NotFound(
-                    null,
-                    ["New parent is not exist or is not active"],
-                    command.DepartmentId));
+                // Нельзя выбрать родителем своё "дочернее" подразделение (чтобы не было зацикливания структуры)
+                var isDepartmentContainsResult = await _departmentRepository.IsDepartmentContains(
+                    departmentResult.Value,
+                    newParentDepartmentResult.Value,
+                    cancellationToken);
+
+                if (isDepartmentContainsResult.IsFailure)
+                {
+                    return Result.Failure<Guid, Error>(Error.NotFound(
+                        null,
+                        ["New parent is children of department"],
+                        command.DepartmentId));
+                }
+
+                await _departmentRepository.TransferAsync(
+                    departmentResult.Value,
+                    newParentDepartmentResult.Value,
+                    cancellationToken);
+
+                return command.DepartmentId;
+
+
             }
 
             return Result.Failure<Guid, Error>(Error.NotFound(
@@ -78,7 +76,7 @@ public class TransferDepartmentHandler : ICommandHandler<Guid, TransferDepartmen
         }
 
         await _departmentRepository.TransferAsync(
-            department,
+            departmentResult.Value,
             null,
             cancellationToken);
 

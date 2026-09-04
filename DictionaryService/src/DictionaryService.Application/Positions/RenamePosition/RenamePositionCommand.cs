@@ -3,4 +3,4 @@ using DictionaryService.Contracts.Positions;
 
 namespace DictionaryService.Application.Positions.RenamePosition;
 
-public record RenamePositionCommand(RenamePositionRequest Request) : ICommand;
+public record RenamePositionCommand(Guid PositionId, RenamePositionRequest Request) : ICommand;

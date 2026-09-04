@@ -44,7 +44,7 @@ public class RenamePositionHandler : ICommandHandler<Guid, RenamePositionCommand
         }
 
         var positionResult =
-            await _positionRepository.GetByIdAsync(command.Request.PositionId, cancellationToken);
+            await _positionRepository.GetByIdAsync(command.PositionId, cancellationToken);
 
         if (positionResult.IsFailure)
         {

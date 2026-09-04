@@ -2,12 +2,4 @@
 
 namespace DictionaryService.Application.Positions.DeletePosition;
 
-public record DeletePositionCommand : ICommand
-{
-    public Guid Id { get; }
-
-    public DeletePositionCommand(Guid id)
-    {
-        Id = id;
-    }
-}
+public record DeletePositionCommand(Guid Id) : ICommand;

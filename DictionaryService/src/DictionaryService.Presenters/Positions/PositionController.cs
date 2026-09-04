@@ -36,14 +36,15 @@ public class PositionController : ControllerBase
         return createResult.IsFailure ? createResult.Error.ToResponse() : Ok(Envelope.Ok(createResult.Value));
     }
 
-    [HttpPatch]
+    [HttpPatch("{id:Guid}")]
     public async Task<IActionResult> RenameAsync(
+        [FromRoute] Guid id,
         [FromBody] RenamePositionRequest request,
         [FromServices] ILogger<PositionController> logger,
         [FromServices] ICommandHandler<Guid, RenamePositionCommand> handler,
         CancellationToken cancellationToken)
     {
-        var command = new RenamePositionCommand(request);
+        var command = new RenamePositionCommand(id, request);
 
         var renameResult = await handler.HandleAsync(command, cancellationToken);
 
@@ -61,7 +62,7 @@ public class PositionController : ControllerBase
         return renameResult.IsFailure ? renameResult.Error.ToResponse() : Ok(Envelope.Ok(renameResult.Value));
     }
 
-    [HttpDelete]
+    [HttpDelete("{id:Guid}")]
     public async Task<IActionResult> DeleteAsync(
         [FromRoute] Guid id,
         [FromServices] ILogger<PositionController> logger,

@@ -32,10 +32,7 @@ public class DeletePositionHandler : ICommandHandler<DeletePositionCommand>
 
         if (positionResult.IsFailure)
         {
-            return Error.NotFound(
-                null,
-                ["Position not found"],
-                positionId);
+            return positionResult.Error;
         }
 
         Position position = positionResult.Value;

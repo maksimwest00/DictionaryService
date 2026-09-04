@@ -1,5 +1,6 @@
 ﻿using DictionaryService.Application.Abstractions;
 using DictionaryService.Application.Positions.CreatePosition;
+using DictionaryService.Application.Positions.DeletePosition;
 using DictionaryService.Application.Positions.RenamePosition;
 using DictionaryService.Contracts.Positions;
 using DictionaryService.Presenters.ResponseExtensions;
@@ -58,5 +59,30 @@ public class PositionController : ControllerBase
         }
 
         return renameResult.IsFailure ? renameResult.Error.ToResponse() : Ok(Envelope.Ok(renameResult.Value));
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> DeleteAsync(
+        [FromRoute] Guid id,
+        [FromServices] ILogger<PositionController> logger,
+        [FromServices] ICommandHandler<Guid, DeletePositionCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        DeletePositionCommand command = new(id);
+
+        var deleteResult = await handler.HandleAsync(command, cancellationToken);
+
+        if (deleteResult.IsSuccess)
+        {
+            logger.LogInformation("Должность успешно удалена id: {id}", command.Id);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка удаления должности: {ErrorMessage}",
+                string.Join(',', deleteResult.Error.Messages));
+        }
+
+        return deleteResult.IsFailure ? deleteResult.Error.ToResponse() : Ok(Envelope.Ok(deleteResult.Value));
     }
 }

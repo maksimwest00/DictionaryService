@@ -53,4 +53,9 @@ public class Position
     {
         Name = name;
     }
+
+    public void Deactivate()
+    {
+        IsActive = false;
+    }
 }

@@ -4,7 +4,7 @@ using DictionaryService.Application.Database;
 using DictionaryService.Domain.Locations;
 using DictionaryService.Domain.Shared;
 
-namespace DictionaryService.Application.Locations.DeleteLocation;
+namespace DictionaryService.Application.Locations.Commands.DeleteLocation;
 
 public class DeleteLocationHandler : ICommandHandler<DeleteLocationCommand>
 {

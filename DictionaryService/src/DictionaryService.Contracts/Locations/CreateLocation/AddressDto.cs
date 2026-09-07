@@ -1,4 +1,4 @@
-﻿namespace DictionaryService.Contracts.Locations;
+﻿namespace DictionaryService.Contracts.Locations.CreateLocation;
 
 public record AddressDto(
     string City,

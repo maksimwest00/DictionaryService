@@ -3,7 +3,7 @@ using DictionaryService.Domain.Locations;
 using DictionaryService.Domain.Shared;
 using FluentValidation;
 
-namespace DictionaryService.Application.Locations.CreateLocation;
+namespace DictionaryService.Application.Locations.Commands.CreateLocation;
 
 public class CreateLocationCommandValidator : AbstractValidator<CreateLocationCommand>
 {

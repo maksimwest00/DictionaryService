@@ -22,7 +22,7 @@ public class PositionConfiguration : IEntityTypeConfiguration<Position>
         {
             nb.Property(t => t.Value)
                 .IsRequired()
-                .HasMaxLength(Name.MAX_NAME_LENGTH)
+                .HasMaxLength(Name.NAME_MAX_LENGTH)
                 .HasColumnName("name");
         });
 

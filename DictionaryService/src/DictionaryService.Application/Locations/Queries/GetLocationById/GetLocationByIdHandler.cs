@@ -43,6 +43,5 @@ public class GetLocationByIdHandler : IQueryHandler<GetLocationByIdResponse, Get
         }
 
         return location;
-
     }
 }

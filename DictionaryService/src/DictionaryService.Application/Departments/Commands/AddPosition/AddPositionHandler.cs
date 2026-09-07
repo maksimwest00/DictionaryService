@@ -1,20 +1,19 @@
 ﻿using CSharpFunctionalExtensions;
 using DictionaryService.Application.Abstractions;
 using DictionaryService.Application.Database;
-using DictionaryService.Application.Departments.DeletePosition;
 using DictionaryService.Application.Positions;
 using DictionaryService.Domain.DepartmentPositions;
 using DictionaryService.Domain.Shared;
 
-namespace DictionaryService.Application.Departments.DeletePosition;
+namespace DictionaryService.Application.Departments.Commands.AddPosition;
 
-public class DeletePositionHandler : ICommandHandler<Guid, DeletePositionCommand>
+public class AddPositionHandler : ICommandHandler<Guid, AddPositionCommand>
 {
     private readonly IDepartmentRepository _departmentRepository;
     private readonly IPositionRepository _positionRepository;
     private readonly ITransactionManager _transactionManager;
 
-    public DeletePositionHandler(
+    public AddPositionHandler(
         IDepartmentRepository departmentRepository,
         IPositionRepository positionRepository,
         ITransactionManager transactionManager)
@@ -25,7 +24,7 @@ public class DeletePositionHandler : ICommandHandler<Guid, DeletePositionCommand
     }
 
     public async Task<Result<Guid, Error>> HandleAsync(
-        DeletePositionCommand command,
+        AddPositionCommand command,
         CancellationToken cancellationToken)
     {
         var departmentId = command.DeptId;
@@ -48,6 +47,8 @@ public class DeletePositionHandler : ICommandHandler<Guid, DeletePositionCommand
             return positionResult.Error;
         }
 
+        var department = departmentResult.Value;
+
         var departmentPosition = new DepartmentPosition(departmentId, positionId);
 
         Result<ITransactionScope, Error> transactionScopeResult =
@@ -61,7 +62,7 @@ public class DeletePositionHandler : ICommandHandler<Guid, DeletePositionCommand
         using ITransactionScope transactionScope = transactionScopeResult.Value;
 
         var addPositionResult =
-            await _departmentRepository.DeletePositionAsync(departmentPosition, cancellationToken);
+            await _departmentRepository.AddPositionAsync(departmentPosition, cancellationToken);
 
         if (addPositionResult.IsFailure)
         {

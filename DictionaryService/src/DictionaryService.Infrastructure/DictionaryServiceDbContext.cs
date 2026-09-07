@@ -29,6 +29,8 @@ public class DictionaryServiceDbContext : DbContext, IReadDbContext
 
     public IQueryable<Location> LocationsRead => Set<Location>().AsNoTracking();
 
+    public IQueryable<Department> DepartmentsRead => Set<Department>().AsNoTracking();
+    
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);

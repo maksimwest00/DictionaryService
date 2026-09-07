@@ -2,7 +2,7 @@
 using DictionaryService.Application.Abstractions;
 using DictionaryService.Domain.Shared;
 
-namespace DictionaryService.Application.Departments.TransferDepartment;
+namespace DictionaryService.Application.Departments.Commands.TransferDepartment;
 
 public class TransferDepartmentHandler : ICommandHandler<Guid, TransferDepartmentCommand>
 {

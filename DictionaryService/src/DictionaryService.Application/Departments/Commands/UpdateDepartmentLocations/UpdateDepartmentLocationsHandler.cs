@@ -8,7 +8,7 @@ using DictionaryService.Domain.Shared;
 using FluentValidation;
 using FluentValidation.Results;
 
-namespace DictionaryService.Application.Departments.UpdateDepartmentLocations;
+namespace DictionaryService.Application.Departments.Commands.UpdateDepartmentLocations;
 
 public class UpdateDepartmentLocationsHandler : ICommandHandler<Guid, UpdateDepartmentLocationsCommand>
 {

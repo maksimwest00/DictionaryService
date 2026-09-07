@@ -1,12 +1,14 @@
 using CSharpFunctionalExtensions;
 using DictionaryService.Application.Abstractions;
-using DictionaryService.Application.Departments.AddPosition;
-using DictionaryService.Application.Departments.CreateDepartment;
-using DictionaryService.Application.Departments.DeleteDepartment;
-using DictionaryService.Application.Departments.DeletePosition;
-using DictionaryService.Application.Departments.TransferDepartment;
-using DictionaryService.Application.Departments.UpdateDepartmentLocations;
+using DictionaryService.Application.Departments.Commands.AddPosition;
+using DictionaryService.Application.Departments.Commands.CreateDepartment;
+using DictionaryService.Application.Departments.Commands.DeleteDepartment;
+using DictionaryService.Application.Departments.Commands.DeletePosition;
+using DictionaryService.Application.Departments.Commands.TransferDepartment;
+using DictionaryService.Application.Departments.Commands.UpdateDepartmentLocations;
+using DictionaryService.Application.Departments.Queries;
 using DictionaryService.Contracts.Departments;
+using DictionaryService.Contracts.Departments.GetDepartmentById;
 using DictionaryService.Domain.Shared;
 using DictionaryService.Presenters.ResponseExtensions;
 using Microsoft.AspNetCore.Mvc;
@@ -172,5 +174,30 @@ public class DepartmentController : ControllerBase
         }
 
         return deletePositionResult.IsFailure ? deletePositionResult.Error.ToResponse() : Ok(Envelope.Ok(deletePositionResult.Value));
+    }
+
+    [HttpGet("{id:Guid}")]
+    public async Task<IActionResult> GetByIdAsync(
+        [FromRoute] Guid id,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] IQueryHandler<GetDepartmentByIdResponse, GetDepartmentByIdQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetDepartmentByIdQuery(id);
+
+        var result = await handler.HandleAsync(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation("Подразделение успешно получено id: {id}", query.Id);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения подразделения: {ErrorMessage}",
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
     }
 }

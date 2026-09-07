@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace DictionaryService.Application.Departments.UpdateDepartmentLocations;
+namespace DictionaryService.Application.Departments.Commands.UpdateDepartmentLocations;
 
 public class UpdateDepartmentCommandValidator : AbstractValidator<UpdateDepartmentLocationsCommand>
 {

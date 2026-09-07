@@ -8,7 +8,7 @@ using DictionaryService.Domain.Shared;
 using FluentValidation;
 using FluentValidation.Results;
 
-namespace DictionaryService.Application.Departments.CreateDepartment;
+namespace DictionaryService.Application.Departments.Commands.CreateDepartment;
 
 public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCommand>
 {

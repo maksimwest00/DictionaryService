@@ -9,6 +9,6 @@ public interface IQueryHandler<TResponse, in TQuery>
     where TQuery : IQuery
 {
     Task<Result<TResponse, Error>> HandleAsync(
-        TQuery command,
+        TQuery query,
         CancellationToken cancellationToken);
 }

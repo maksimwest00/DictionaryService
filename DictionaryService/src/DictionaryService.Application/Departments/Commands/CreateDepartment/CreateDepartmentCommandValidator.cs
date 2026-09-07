@@ -2,7 +2,7 @@
 using DictionaryService.Domain.Departments;
 using FluentValidation;
 
-namespace DictionaryService.Application.Departments.CreateDepartment;
+namespace DictionaryService.Application.Departments.Commands.CreateDepartment;
 
 public class CreateDepartmentCommandValidator : AbstractValidator<CreateDepartmentCommand>
 {

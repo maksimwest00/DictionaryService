@@ -3,7 +3,7 @@ using DictionaryService.Application.Abstractions;
 using DictionaryService.Application.Database;
 using DictionaryService.Domain.Shared;
 
-namespace DictionaryService.Application.Departments.DeleteDepartment;
+namespace DictionaryService.Application.Departments.Commands.DeleteDepartment;
 
 public class DeleteDepartmentHandler : ICommandHandler<DeleteDepartmentCommand>
 {

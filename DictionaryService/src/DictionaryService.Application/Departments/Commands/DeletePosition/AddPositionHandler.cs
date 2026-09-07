@@ -5,15 +5,15 @@ using DictionaryService.Application.Positions;
 using DictionaryService.Domain.DepartmentPositions;
 using DictionaryService.Domain.Shared;
 
-namespace DictionaryService.Application.Departments.AddPosition;
+namespace DictionaryService.Application.Departments.Commands.DeletePosition;
 
-public class AddPositionHandler : ICommandHandler<Guid, AddPositionCommand>
+public class DeletePositionHandler : ICommandHandler<Guid, DeletePositionCommand>
 {
     private readonly IDepartmentRepository _departmentRepository;
     private readonly IPositionRepository _positionRepository;
     private readonly ITransactionManager _transactionManager;
 
-    public AddPositionHandler(
+    public DeletePositionHandler(
         IDepartmentRepository departmentRepository,
         IPositionRepository positionRepository,
         ITransactionManager transactionManager)
@@ -24,7 +24,7 @@ public class AddPositionHandler : ICommandHandler<Guid, AddPositionCommand>
     }
 
     public async Task<Result<Guid, Error>> HandleAsync(
-        AddPositionCommand command,
+        DeletePositionCommand command,
         CancellationToken cancellationToken)
     {
         var departmentId = command.DeptId;
@@ -47,8 +47,6 @@ public class AddPositionHandler : ICommandHandler<Guid, AddPositionCommand>
             return positionResult.Error;
         }
 
-        var department = departmentResult.Value;
-
         var departmentPosition = new DepartmentPosition(departmentId, positionId);
 
         Result<ITransactionScope, Error> transactionScopeResult =
@@ -62,7 +60,7 @@ public class AddPositionHandler : ICommandHandler<Guid, AddPositionCommand>
         using ITransactionScope transactionScope = transactionScopeResult.Value;
 
         var addPositionResult =
-            await _departmentRepository.AddPositionAsync(departmentPosition, cancellationToken);
+            await _departmentRepository.DeletePositionAsync(departmentPosition, cancellationToken);
 
         if (addPositionResult.IsFailure)
         {

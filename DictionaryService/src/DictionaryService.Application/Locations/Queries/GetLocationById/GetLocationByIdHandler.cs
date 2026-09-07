@@ -21,11 +21,7 @@ public class GetLocationByIdHandler : IQueryHandler<GetLocationByIdResponse, Get
         CancellationToken cancellationToken)
     {
         var location = await _readDbContext.LocationsRead
-            .FirstOrDefaultAsync(x => x.Id == query.Id && x.IsActive, cancellationToken);
-
-        if (location is not null)
-        {
-            return new GetLocationByIdResponse
+            .Select(location => new GetLocationByIdResponse
             {
                 Id = location.Id,
                 Name = location.Name.Value,
@@ -38,9 +34,15 @@ public class GetLocationByIdHandler : IQueryHandler<GetLocationByIdResponse, Get
                 IsActive = location.IsActive,
                 CreatedAt = location.CreatedAt,
                 UpdatedAt = location.UpdatedAt,
-            };
+            })
+            .FirstOrDefaultAsync(x => x.Id == query.Id && x.IsActive, cancellationToken);
+
+        if (location is null)
+        {
+            return Error.NotFound(null, ["Location not found"], query.Id);
         }
 
-        return Error.NotFound(null, ["Location not found"], query.Id);
+        return location;
+
     }
 }

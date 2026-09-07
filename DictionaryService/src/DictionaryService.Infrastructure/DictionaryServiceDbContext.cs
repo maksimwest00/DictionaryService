@@ -1,4 +1,5 @@
-﻿using DictionaryService.Domain.DepartmentLocations;
+﻿using DictionaryService.Application.Database;
+using DictionaryService.Domain.DepartmentLocations;
 using DictionaryService.Domain.DepartmentPositions;
 using DictionaryService.Domain.Departments;
 using DictionaryService.Domain.Locations;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DictionaryService.Infrastructure;
 
-public class DictionaryServiceDbContext : DbContext
+public class DictionaryServiceDbContext : DbContext, IReadDbContext
 {
     private readonly string _connectionString;
 
@@ -26,6 +27,10 @@ public class DictionaryServiceDbContext : DbContext
 
     public DbSet<Position> Positions => Set<Position>();
 
+    public IQueryable<Location> LocationsRead => Set<Location>().AsNoTracking();
+
+    public IQueryable<Department> DepartmentsRead => Set<Department>().AsNoTracking();
+    
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);

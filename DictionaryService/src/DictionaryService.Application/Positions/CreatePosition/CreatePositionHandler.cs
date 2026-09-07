@@ -2,7 +2,6 @@
 using DictionaryService.Application.Abstractions;
 using DictionaryService.Application.Database;
 using DictionaryService.Application.Departments;
-using DictionaryService.Application.Locations.CreateLocation;
 using DictionaryService.Application.Validation.ValidationExtensions;
 using DictionaryService.Domain.Positions;
 using DictionaryService.Domain.Shared;

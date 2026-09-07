@@ -1,8 +1,9 @@
 ﻿using DictionaryService.Application.Abstractions;
-using DictionaryService.Application.Locations;
-using DictionaryService.Application.Locations.CreateLocation;
-using DictionaryService.Application.Locations.DeleteLocation;
-using DictionaryService.Contracts.Locations;
+using DictionaryService.Application.Locations.Commands.CreateLocation;
+using DictionaryService.Application.Locations.Commands.DeleteLocation;
+using DictionaryService.Application.Locations.Queries.GetLocationById;
+using DictionaryService.Contracts.Locations.CreateLocation;
+using DictionaryService.Contracts.Locations.GetLocationById;
 using DictionaryService.Presenters.ResponseExtensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -36,7 +37,6 @@ public class LocationController : ControllerBase
         return createResult.IsFailure ? createResult.Error.ToResponse() : Ok(Envelope.Ok(createResult.Value));
     }
 
-    // DELETE /locations/{id} - удалить локацию
     [HttpDelete("{id:Guid}")]
     public async Task<IActionResult> DeleteAsync(
         [FromRoute] Guid id,
@@ -60,5 +60,30 @@ public class LocationController : ControllerBase
         }
 
         return deleteResult.IsFailure ? deleteResult.Error.ToResponse() : Ok(Envelope.Ok());
+    }
+
+    [HttpGet("{id:Guid}")]
+    public async Task<IActionResult> GetByIdAsync(
+        [FromRoute] Guid id,
+        [FromServices] ILogger<LocationController> logger,
+        [FromServices] IQueryHandler<GetLocationByIdResponse, GetLocationByIdQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetLocationByIdQuery(id);
+
+        var result = await handler.HandleAsync(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation("Локация успешно получена id: {id}", query.Id);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения локации: {ErrorMessage}",
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
     }
 }

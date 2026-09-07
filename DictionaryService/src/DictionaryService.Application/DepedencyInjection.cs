@@ -17,6 +17,12 @@ public static class DepedencyInjection
             .AsSelfWithInterfaces()
             .WithScopedLifetime());
 
+        services.Scan(scan => scan.FromAssemblies(assembly)
+            .AddClasses(classes => classes
+                .AssignableToAny(typeof(IQueryHandler<,>)))
+            .AsSelfWithInterfaces()
+            .WithScopedLifetime());
+
         services.AddValidatorsFromAssembly(typeof(DepedencyInjection).Assembly);
 
         return services;

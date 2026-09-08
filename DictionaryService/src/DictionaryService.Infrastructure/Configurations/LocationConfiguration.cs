@@ -1,4 +1,4 @@
-﻿using DictionaryService.Domain;
+using DictionaryService.Domain;
 using DictionaryService.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -46,7 +46,7 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
             ab.Property(a => a.RoomNumber)
                 .IsRequired()
                 .HasMaxLength(LengthConstants.Length500)
-                .HasColumnName("roomNumber");
+                .HasColumnName("room_number");
         });
 
         builder.Property(l => l.Timezone)

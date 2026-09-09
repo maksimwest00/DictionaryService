@@ -6,6 +6,7 @@ using DictionaryService.Infrastructure.Database;
 using DictionaryService.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace DictionaryService.Infrastructure;
 
@@ -20,6 +21,11 @@ public static class DepedencyInjection
 
         services.AddScoped<IReadDbContext, DictionaryServiceDbContext>(_ => new DictionaryServiceDbContext(
             configuration.GetConnectionString("DictionaryServiceDb")!));
+
+        services.AddSingleton(NpgsqlDataSource.Create(configuration.GetConnectionString("DictionaryServiceDb")!));
+
+        services.AddSingleton<IReadDbConnectionFactory, NpgsqlReadDbConnectionFactory>();
+        Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
         services.AddScoped<ILocationRepository, LocationRepository>();
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();

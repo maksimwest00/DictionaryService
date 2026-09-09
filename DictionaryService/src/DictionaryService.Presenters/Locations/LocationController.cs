@@ -2,8 +2,10 @@
 using DictionaryService.Application.Locations.Commands.CreateLocation;
 using DictionaryService.Application.Locations.Commands.DeleteLocation;
 using DictionaryService.Application.Locations.Queries.GetLocationById;
+using DictionaryService.Application.Locations.Queries.GetTop;
 using DictionaryService.Contracts.Locations.CreateLocation;
 using DictionaryService.Contracts.Locations.GetLocationById;
+using DictionaryService.Contracts.Locations.GetTop;
 using DictionaryService.Presenters.ResponseExtensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -81,6 +83,28 @@ public class LocationController : ControllerBase
         {
             logger.LogInformation(
                 "Ошибка получения локации: {ErrorMessage}",
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
+    }
+
+    [HttpGet("/top")]
+    public async Task<IActionResult> GetTop(
+        [FromServices] ILogger<LocationController> logger,
+        [FromServices] IQueryHandler<GetTopResponse> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation("Топ локаций успешно получен");
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения топа локаций: {ErrorMessage}",
                 string.Join(',', result.Error.Messages));
         }
 

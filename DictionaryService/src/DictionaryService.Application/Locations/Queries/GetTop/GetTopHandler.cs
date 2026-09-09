@@ -19,8 +19,8 @@ public class GetTopHandler : IQueryHandler<GetTopResponse>
     }
 
     public async Task<Result<GetTopResponse, Error>> HandleAsync(CancellationToken cancellationToken)
-    {
-        IDbConnection connection = await _connectionFactory.OpenConnectionAsync(cancellationToken);
+    { 
+        using IDbConnection connection = await _connectionFactory.OpenConnectionAsync(cancellationToken);
 
         var dto = await connection.QueryAsync<LocationDto, AddressDto, LocationDto>(
             """

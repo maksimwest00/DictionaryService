@@ -22,5 +22,3 @@ public record AddressDto(
     string Street,
     string Building,
     string RoomNumber);
-
-public record DepartmentLocationDto;

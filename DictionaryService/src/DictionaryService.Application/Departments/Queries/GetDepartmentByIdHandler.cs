@@ -21,6 +21,7 @@ public class GetDepartmentByIdHandler : IQueryHandler<GetDepartmentByIdResponse,
         CancellationToken cancellationToken)
     {
         var location = await _readDbContext.DepartmentsRead
+            .Where(x => x.Id == query.Id && x.IsActive)
             .Select(x => new GetDepartmentByIdResponse
             {
                 Id = x.Id,
@@ -34,7 +35,7 @@ public class GetDepartmentByIdHandler : IQueryHandler<GetDepartmentByIdResponse,
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
             })
-            .FirstOrDefaultAsync(x => x.Id == query.Id && x.IsActive, cancellationToken);
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (location is null)
         {

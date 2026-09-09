@@ -26,11 +26,11 @@ public class GetTopHandler : IQueryHandler<GetTopResponse>
             """
                 SELECT  L.id
                      ,L.name
+                     ,COUNT(D.id) AS DepartmentCount
                      ,L.city
                      ,L.street
                      ,L.building
                      ,L.room_number
-                     ,COUNT(D.id) AS DepartmentCount
                 FROM locations AS L
                          INNER JOIN department_locations AS DL ON L.id = DL.location_id
                          INNER JOIN departments AS D ON DL.department_id = D.id

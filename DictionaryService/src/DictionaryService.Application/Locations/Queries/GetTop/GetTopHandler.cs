@@ -35,15 +35,14 @@ public class GetTopHandler : IQueryHandler<GetTopResponse>
                     INNER JOIN department_locations AS DL ON L.id = DL.location_id
                     INNER JOIN departments AS D ON DL.department_id = D.id
                     GROUP BY L.id, L.name, L.city, L.street, L.building, L.room_number
-                    ORDER BY department_count DESC;
+                    ORDER BY department_count DESC
+                    LIMIT 5;
                 """,
             splitOn: "city",
             map: (locationDto, addressDto) => locationDto with
             {
                 Address = addressDto
             });
-
-        var a = dto.ToList();
 
         var response = new GetTopResponse() { Locations = dto.ToList() };
 

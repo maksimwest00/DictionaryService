@@ -24,19 +24,20 @@ public class GetTopHandler : IQueryHandler<GetTopResponse>
 
         var dto = await connection.QueryAsync<LocationDto, AddressDto, LocationDto>(
             """
-                    SELECT L.id,
-                           L.name,
-                           COUNT(D.id) AS department_count,
-                           L.city,
-                           L.street,
-                           L.building,
-                           L.room_number
-                    FROM locations AS L
-                    INNER JOIN department_locations AS DL ON L.id = DL.location_id
-                    INNER JOIN departments AS D ON DL.department_id = D.id
-                    GROUP BY L.id, L.name, L.city, L.street, L.building, L.room_number
-                    ORDER BY department_count DESC
-                    LIMIT 5;
+                SELECT  L.id
+                     ,L.name
+                     ,L.city
+                     ,L.street
+                     ,L.building
+                     ,L.room_number
+                     ,COUNT(D.id) AS DepartmentCount
+                FROM locations AS L
+                         INNER JOIN department_locations AS DL ON L.id = DL.location_id
+                         INNER JOIN departments AS D ON DL.department_id = D.id
+                WHERE L.is_active = true AND D."isActive" = true
+                GROUP BY L.id, L.name, L.city, L.street, L.building, L.room_number
+                ORDER BY DepartmentCount DESC, L.id
+                LIMIT 5;
                 """,
             splitOn: "city",
             map: (locationDto, addressDto) => locationDto with

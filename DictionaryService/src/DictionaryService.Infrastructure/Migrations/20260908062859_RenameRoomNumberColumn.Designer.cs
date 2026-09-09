@@ -181,7 +181,7 @@ namespace DictionaryService.Infrastructure.Migrations
                                 .IsRequired()
                                 .HasMaxLength(500)
                                 .HasColumnType("character varying(500)")
-                                .HasColumnName("room_number112313");
+                                .HasColumnName("room_number");
 
                             b1.Property<string>("Street")
                                 .IsRequired()

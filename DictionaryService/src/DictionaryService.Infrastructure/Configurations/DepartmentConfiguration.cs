@@ -57,7 +57,7 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
 
         builder.Property(d => d.IsActive)
             .IsRequired()
-            .HasColumnName("isActive");
+            .HasColumnName("is_active");
 
         builder.Property(d => d.CreatedAt)
             .IsRequired()

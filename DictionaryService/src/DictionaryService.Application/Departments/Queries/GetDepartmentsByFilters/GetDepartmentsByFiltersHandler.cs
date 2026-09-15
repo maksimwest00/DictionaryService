@@ -15,6 +15,20 @@ namespace DictionaryService.Application.Departments.Queries.GetDepartmentsByFilt
 
 public class GetDepartmentsByFiltersHandler : IQueryHandler<PagedResult<DepartmentListItemResponse>, GetDepartmentsByFiltersQuery>
 {
+    private static readonly IReadOnlyDictionary<string, string> SortColumns =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["name"] = "name",
+            ["created_at"] = "created_at",
+        };
+
+    private static readonly IReadOnlyDictionary<string, string> SortDirections =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["asc"] = "ASC",
+            ["desc"] = "DESC",
+        };
+
     private readonly IValidator<GetDepartmentsByFiltersQuery> _validator;
     private readonly IReadDbConnectionFactory _readDbConnectionFactory;
 
@@ -69,31 +83,33 @@ public class GetDepartmentsByFiltersHandler : IQueryHandler<PagedResult<Departme
             ? "WHERE " + string.Join(" AND ", conditions)
             : string.Empty;
 
-        string orderByClause = !string.IsNullOrWhiteSpace(query.SortBy)
-            ? $"ORDER BY {query.SortBy} {(!string.IsNullOrWhiteSpace(query.SortDir)
-                                            ? query.SortDir : string.Empty)}"
-            : string.Empty;
+        string sortColumn = SortColumns.TryGetValue(query.SortBy ?? string.Empty, out string? col)
+            ? col
+            : "created_at"; // дефолт
+
+        string sortDir = SortDirections.TryGetValue(query.SortDir ?? string.Empty, out string? dir)
+            ? dir
+            : "DESC";
+
+        string orderByClause = $"ORDER BY {sortColumn} {sortDir}";
 
         var departments =
             await connection.QueryAsync<DepartmentListItemResponse, long, DepartmentListItemResponse>(
                 $"""
-                        SELECT id
-                               ,name
-                               ,path
-                               ,created_at
-                               ,COUNT(*) OVER() AS total_count
-                        FROM departments
-                        {whereClause}
-                        {orderByClause}
-                        LIMIT @pageSize OFFSET @offset
-                    """,
+                     SELECT id
+                            ,name
+                            ,path
+                            ,created_at
+                            ,(SELECT COUNT(*) FROM departments {whereClause}) AS total_count
+                     FROM departments
+                     {whereClause}
+                     {orderByClause}
+                     LIMIT @pageSize OFFSET @offset
+                 """,
                 splitOn: "total_count",
                 map: (department, count) =>
                 {
-                    if (totalCount is null)
-                    {
-                        totalCount = count;
-                    }
+                    totalCount ??= count;
                     return department;
                 },
                 param: parameters);

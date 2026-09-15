@@ -7,8 +7,12 @@ using DictionaryService.Application.Departments.Commands.DeletePosition;
 using DictionaryService.Application.Departments.Commands.TransferDepartment;
 using DictionaryService.Application.Departments.Commands.UpdateDepartmentLocations;
 using DictionaryService.Application.Departments.Queries;
+using DictionaryService.Application.Departments.Queries.GetDepartmentById;
+using DictionaryService.Application.Departments.Queries.GetDepartmentsByFilters;
 using DictionaryService.Contracts.Departments;
 using DictionaryService.Contracts.Departments.GetDepartmentById;
+using DictionaryService.Contracts.Departments.GetDepartmentsByFilters;
+using DictionaryService.Contracts.Shared;
 using DictionaryService.Domain.Shared;
 using DictionaryService.Presenters.ResponseExtensions;
 using Microsoft.AspNetCore.Mvc;
@@ -195,6 +199,29 @@ public class DepartmentController : ControllerBase
         {
             logger.LogInformation(
                 "Ошибка получения подразделения: {ErrorMessage}",
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetDepartmentsByFiltersAsync(
+        [FromQuery] GetDepartmentsByFiltersQuery query,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] IQueryHandler<PagedResult<DepartmentListItemResponse>, GetDepartmentsByFiltersQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation("Подразделения успешно получены");
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения подразделений: {ErrorMessage}",
                 string.Join(',', result.Error.Messages));
         }
 

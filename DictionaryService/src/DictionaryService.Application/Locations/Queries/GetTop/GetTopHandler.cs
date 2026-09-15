@@ -34,7 +34,7 @@ public class GetTopHandler : IQueryHandler<GetTopResponse>
                 FROM locations AS L
                          INNER JOIN department_locations AS DL ON L.id = DL.location_id
                          INNER JOIN departments AS D ON DL.department_id = D.id
-                WHERE L.is_active = true AND D."isActive" = true
+                WHERE L.is_active = true AND D.is_active = true
                 GROUP BY L.id, L.name, L.city, L.street, L.building, L.room_number
                 ORDER BY DepartmentCount DESC, L.id
                 LIMIT 5;

@@ -5,7 +5,7 @@ using DictionaryService.Contracts.Departments.GetDepartmentById;
 using DictionaryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
 
-namespace DictionaryService.Application.Departments.Queries;
+namespace DictionaryService.Application.Departments.Queries.GetDepartmentById;
 
 public class GetDepartmentByIdHandler : IQueryHandler<GetDepartmentByIdResponse, GetDepartmentByIdQuery>
 {

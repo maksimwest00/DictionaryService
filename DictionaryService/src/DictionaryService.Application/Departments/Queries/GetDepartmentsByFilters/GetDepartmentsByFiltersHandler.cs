@@ -64,16 +64,6 @@ public class GetDepartmentsByFiltersHandler : IQueryHandler<PagedResult<Departme
             parameters.Add("@search", $"%{query.Search}%");
         }
 
-        if (!string.IsNullOrWhiteSpace(query.SortBy))
-        {
-            parameters.Add("@sortBy", query.SortBy);
-        }
-
-        if (!string.IsNullOrWhiteSpace(query.SortDir))
-        {
-            parameters.Add("@sortDir", query.SortDir);
-        }
-
         parameters.Add("@pageSize", query.PageSize);
         parameters.Add("@offset", (query.Page - 1) * query.PageSize);
 

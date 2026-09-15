@@ -19,6 +19,6 @@ public class GetDepartmentsByFiltersValidator : AbstractValidator<GetDepartments
             .Must(x => x >= 1);
 
         RuleFor(x => x.PageSize)
-            .Must(x => x <= 100);
+            .Must(x => x >= 1 && x <= 100);
     }
 }

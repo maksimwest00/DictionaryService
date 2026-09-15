@@ -77,8 +77,6 @@ public class GetDepartmentsByFiltersHandler : IQueryHandler<PagedResult<Departme
         parameters.Add("@pageSize", query.PageSize);
         parameters.Add("@offset", (query.Page - 1) * query.PageSize);
 
-        long? totalCount = null;
-
         string whereClause = conditions.Count > 0
             ? "WHERE " + string.Join(" AND ", conditions)
             : string.Empty;
@@ -93,25 +91,27 @@ public class GetDepartmentsByFiltersHandler : IQueryHandler<PagedResult<Departme
 
         string orderByClause = $"ORDER BY {sortColumn} {sortDir}";
 
+        string countSql = $"""
+                           SELECT COUNT(*)
+                           FROM departments
+                           {whereClause}
+                           """;
+
+        long totalCount = await connection.ExecuteScalarAsync<long>(
+            countSql, parameters);
+
         var departments =
-            await connection.QueryAsync<DepartmentListItemResponse, long, DepartmentListItemResponse>(
+            await connection.QueryAsync<DepartmentListItemResponse>(
                 $"""
                      SELECT id
                             ,name
                             ,path
                             ,created_at
-                            ,(SELECT COUNT(*) FROM departments {whereClause}) AS total_count
                      FROM departments
                      {whereClause}
                      {orderByClause}
                      LIMIT @pageSize OFFSET @offset
                  """,
-                splitOn: "total_count",
-                map: (department, count) =>
-                {
-                    totalCount ??= count;
-                    return department;
-                },
                 param: parameters);
 
 
@@ -120,7 +120,7 @@ public class GetDepartmentsByFiltersHandler : IQueryHandler<PagedResult<Departme
             Data = departments.ToList(),
             PageNumber = query.Page,
             PageSize = query.PageSize,
-            TotalCount = totalCount ?? 0,
+            TotalCount = totalCount,
         };
 
         return pagedResult;

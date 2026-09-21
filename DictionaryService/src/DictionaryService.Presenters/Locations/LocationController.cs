@@ -1,11 +1,17 @@
 ﻿using DictionaryService.Application.Abstractions;
+using DictionaryService.Application.Departments.Queries.GetDepartmentsByFilters;
 using DictionaryService.Application.Locations.Commands.CreateLocation;
 using DictionaryService.Application.Locations.Commands.DeleteLocation;
 using DictionaryService.Application.Locations.Queries.GetLocationById;
+using DictionaryService.Application.Locations.Queries.GetLocationsByFilters;
 using DictionaryService.Application.Locations.Queries.GetTop;
+using DictionaryService.Contracts.Departments.GetDepartmentsByFilters;
 using DictionaryService.Contracts.Locations.CreateLocation;
 using DictionaryService.Contracts.Locations.GetLocationById;
+using DictionaryService.Contracts.Locations.GetLocationsByFilters;
 using DictionaryService.Contracts.Locations.GetTop;
+using DictionaryService.Contracts.Shared;
+using DictionaryService.Presenters.Departments;
 using DictionaryService.Presenters.ResponseExtensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -105,6 +111,29 @@ public class LocationController : ControllerBase
         {
             logger.LogInformation(
                 "Ошибка получения топа локаций: {ErrorMessage}",
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetLocationsByFiltersAsync(
+        [FromQuery] GetLocationsByFiltersQuery query,
+        [FromServices] ILogger<LocationController> logger,
+        [FromServices] IQueryHandler<PagedResult<LocationListItemResponse>, GetLocationsByFiltersQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation("Локации успешно получены");
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения локаций: {ErrorMessage}",
                 string.Join(',', result.Error.Messages));
         }
 

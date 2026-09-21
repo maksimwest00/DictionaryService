@@ -91,24 +91,28 @@ public class GetLocationsByFiltersHandler : IQueryHandler<PagedResult<LocationLi
 
         string orderByClause = $"ORDER BY {sortColumn} {sortDir}";
 
+        string cte = $"""
+                             WITH filtered AS (
+                                 SELECT L.id,
+                                        L.name,
+                                        L.created_at,
+                                        COUNT(D.id) AS department_count,
+                                        L.city,
+                                        L.street,
+                                        L.building,
+                                        L.room_number
+                                 FROM locations AS L
+                                          LEFT JOIN department_locations AS DL ON L.id = DL.location_id
+                                          LEFT JOIN departments AS D ON DL.department_id = D.id
+                                 {whereClause}
+                                 GROUP BY L.id
+                                 {whereClause2}
+                             )
+                            """;
+
         long totalCount = await connection.ExecuteScalarAsync<long>(
             $"""
-                WITH filtered AS (
-                    SELECT L.id,
-                           L.name,
-                           L.created_at,
-                           COUNT(D.id) AS department_count,
-                           L.city,
-                           L.street,
-                           L.building,
-                           L.room_number
-                    FROM locations AS L
-                             LEFT JOIN department_locations AS DL ON L.id = DL.location_id
-                             INNER JOIN departments AS D ON DL.department_id = D.id
-                    {whereClause}
-                    GROUP BY L.id
-                    {whereClause2}
-                )
+                {cte}
                 
                 SELECT COUNT(*) AS total_count
                 FROM filtered;
@@ -117,22 +121,7 @@ public class GetLocationsByFiltersHandler : IQueryHandler<PagedResult<LocationLi
         var locations =
             await connection.QueryAsync<LocationListItemResponse, AddressDto, LocationListItemResponse>(
                 $"""
-                        WITH filtered AS (
-                            SELECT L.id,
-                                   L.name,
-                                   L.created_at,
-                                   COUNT(D.id) AS department_count,
-                                   L.city,
-                                   L.street,
-                                   L.building,
-                                   L.room_number
-                            FROM locations AS L
-                                     LEFT JOIN department_locations AS DL ON L.id = DL.location_id
-                                     INNER JOIN departments AS D ON DL.department_id = D.id
-                            {whereClause}
-                            GROUP BY L.id
-                            {whereClause2}
-                        )
+                        {cte}
                         
                         SELECT  id,
                                 name,

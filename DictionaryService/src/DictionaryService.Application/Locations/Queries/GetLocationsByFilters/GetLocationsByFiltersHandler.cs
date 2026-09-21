@@ -19,7 +19,7 @@ public class GetLocationsByFiltersHandler : IQueryHandler<PagedResult<LocationLi
         {
             ["name"] = "name",
             ["created_at"] = "created_at",
-            ["departmentCount"] = "departmentCount",
+            ["departmentCount"] = "department_count",
         };
 
     private static readonly Dictionary<string, string> _sortDirections =
@@ -64,15 +64,15 @@ public class GetLocationsByFiltersHandler : IQueryHandler<PagedResult<LocationLi
             parameters.Add("@search", $"%{query.Search}%");
         }
 
-        string whereClause2 = query.MinDepartmentCount.HasValue
-                              && query.MinDepartmentCount > 0
-            ? "HAVING COUNT(temp.id) >= @minDepartmentCount" : string.Empty;
-
         if (query.MinDepartmentCount.HasValue
             && query.MinDepartmentCount > 0)
         {
             parameters.Add("@minDepartmentCount", query.MinDepartmentCount.Value);
         }
+
+        string whereClause2 = query.MinDepartmentCount.HasValue
+                              && query.MinDepartmentCount > 0
+            ? "HAVING COUNT(D.id) >= @minDepartmentCount" : string.Empty;
 
         parameters.Add("@pageSize", query.PageSize);
         parameters.Add("@offset", (query.Page - 1) * query.PageSize);
@@ -91,10 +91,31 @@ public class GetLocationsByFiltersHandler : IQueryHandler<PagedResult<LocationLi
 
         string orderByClause = $"ORDER BY {sortColumn} {sortDir}";
 
-        long totalCount = 0;
+        long totalCount = await connection.ExecuteScalarAsync<long>(
+            $"""
+                WITH filtered AS (
+                    SELECT L.id,
+                           L.name,
+                           L.created_at,
+                           COUNT(D.id) AS department_count,
+                           L.city,
+                           L.street,
+                           L.building,
+                           L.room_number
+                    FROM locations AS L
+                             LEFT JOIN department_locations AS DL ON L.id = DL.location_id
+                             INNER JOIN departments AS D ON DL.department_id = D.id
+                    {whereClause}
+                    GROUP BY L.id
+                    {whereClause2}
+                )
+                
+                SELECT COUNT(*) AS total_count
+                FROM filtered;
+             """, parameters);
 
         var locations =
-            await connection.QueryAsync<LocationListItemResponse, AddressDto, long, LocationListItemResponse>(
+            await connection.QueryAsync<LocationListItemResponse, AddressDto, LocationListItemResponse>(
                 $"""
                         WITH filtered AS (
                             SELECT L.id,
@@ -106,12 +127,12 @@ public class GetLocationsByFiltersHandler : IQueryHandler<PagedResult<LocationLi
                                    L.building,
                                    L.room_number
                             FROM locations AS L
-                                     INNER JOIN department_locations AS DL ON L.id = DL.location_id
+                                     LEFT JOIN department_locations AS DL ON L.id = DL.location_id
                                      INNER JOIN departments AS D ON DL.department_id = D.id
                             {whereClause}
                             GROUP BY L.id
+                            {whereClause2}
                         )
-                        
                         
                         SELECT  id,
                                 name,
@@ -120,17 +141,15 @@ public class GetLocationsByFiltersHandler : IQueryHandler<PagedResult<LocationLi
                                 city,
                                 street,
                                 building,
-                                room_number,
-                                COUNT(*) OVER () AS total_count
+                                room_number
                         FROM filtered
                         {orderByClause}
                         LIMIT @pageSize
                         OFFSET @offset;
                     """,
-                splitOn: "city, total_count",
-                map: (locationDto, addressDto, count) =>
+                splitOn: "city",
+                map: (locationDto, addressDto) =>
                 {
-                    totalCount = count;
                     return locationDto with { Address = addressDto };
                 },
                 param: parameters);

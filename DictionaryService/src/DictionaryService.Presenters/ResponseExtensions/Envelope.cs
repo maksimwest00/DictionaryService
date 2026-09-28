@@ -1,10 +1,17 @@
-﻿using DictionaryService.Domain.Shared;
+﻿using System.Text.Json.Serialization;
+using DictionaryService.Domain.Shared;
 
 namespace DictionaryService.Presenters.ResponseExtensions;
 
 public record Envelope
 {
     public DateTime TimeGenerated { get; }
+
+    [JsonConstructor]
+    private Envelope()
+    {
+
+    }
 
     private Envelope(
         object? result,

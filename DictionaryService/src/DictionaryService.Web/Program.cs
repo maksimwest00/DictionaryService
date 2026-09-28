@@ -29,3 +29,8 @@ finally
 {
     Log.CloseAndFlush();
 }
+
+namespace DictionaryService.Web
+{
+    public partial class Program;
+}

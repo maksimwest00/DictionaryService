@@ -10,11 +10,8 @@ public static class ValidationExtensions
     {
         List<ValidationFailure> validationErrors = validationResult.Errors;
 
-        var errors = from validationError in validationErrors
-            let errorMessage = validationError.ErrorMessage
-            let error = JsonSerializer.Deserialize<Error>(errorMessage)
-            select error.Messages;
+        var errors = validationErrors.Select(validationError => validationError.ErrorMessage);
 
-        return Error.Validation(null, errors.SelectMany(x => x).ToArray());
+        return Error.Validation(null, errors.ToArray());
     }
 }

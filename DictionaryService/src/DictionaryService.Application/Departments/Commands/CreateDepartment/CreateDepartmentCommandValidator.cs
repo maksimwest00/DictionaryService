@@ -23,7 +23,7 @@ public class CreateDepartmentCommandValidator : AbstractValidator<CreateDepartme
     {
         if (locationIds.Length == 0)
         {
-            return false;
+            return true;
         }
 
         return locationIds.Length == locationIds.Distinct().Count();

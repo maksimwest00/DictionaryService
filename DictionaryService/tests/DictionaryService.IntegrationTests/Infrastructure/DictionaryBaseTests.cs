@@ -53,5 +53,6 @@ public class DictionaryBaseTests : IClassFixture<DictionaryTestWebFactory>, IAsy
     {
         await using AsyncServiceScope scope = Services.CreateAsyncScope();
         DictionaryServiceDbContext dbContext = scope.ServiceProvider.GetRequiredService<DictionaryServiceDbContext>();
+        await action(dbContext);
     }
 }

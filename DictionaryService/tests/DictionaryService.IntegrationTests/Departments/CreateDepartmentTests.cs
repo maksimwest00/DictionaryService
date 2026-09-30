@@ -1,6 +1,9 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using DictionaryService.Contracts.Departments;
+using DictionaryService.Contracts.Departments.GetDepartmentById;
 using DictionaryService.Domain.Departments;
 using DictionaryService.Domain.Locations;
 using DictionaryService.IntegrationTests.Infrastructure;
@@ -38,13 +41,14 @@ public class CreateDepartmentTests : DictionaryBaseTests
             request,
             cancellationToken: cancellationToken);
 
-        var envelope = await response.Content.ReadFromJsonAsync<Envelope>(cancellationToken);
+
+        var envelope = await response.Content.ReadFromJsonAsync<Envelope<Guid>>(cancellationToken);
 
         // Assert
         await ExecuteInDb(async db =>
         {
             Department department = await db.Departments
-                .FirstAsync(d => d.Id == ((Guid)envelope.Result), cancellationToken);
+                .FirstAsync(d => d.Id == (envelope.Result), cancellationToken);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(envelope);

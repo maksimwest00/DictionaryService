@@ -7,12 +7,13 @@ public record Envelope
 {
     public DateTime TimeGenerated { get; }
 
-    [JsonConstructor]
-    private Envelope()
+    private Envelope(object? result)
     {
-
+        Result = result;
+        TimeGenerated = DateTime.UtcNow;
     }
 
+    [JsonConstructor]
     private Envelope(
         object? result,
         Errors errors)
@@ -30,4 +31,34 @@ public record Envelope
         new(result, new Errors([]));
 
     public static Envelope Error(Error error) => new(null, error.ToErrors());
+}
+
+public record Envelope<T>
+{
+    public DateTime TimeGenerated { get; }
+
+    private Envelope(T? result)
+    {
+        Result = result;
+        TimeGenerated = DateTime.UtcNow;
+    }
+
+    [JsonConstructor]
+    private Envelope(
+        T? result,
+        Errors errors)
+    {
+        Result = result;
+        Errors = errors;
+        TimeGenerated = DateTime.UtcNow;
+    }
+
+    public T? Result { get; }
+
+    public Errors Errors { get; }
+
+    public static Envelope<T> Ok(T? result = default) =>
+        new(result, new Errors([]));
+
+    public static Envelope<T> Error(Error error) => new(default, error.ToErrors());
 }

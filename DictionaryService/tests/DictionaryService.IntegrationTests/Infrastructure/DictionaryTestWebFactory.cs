@@ -1,11 +1,14 @@
 ﻿using System.Data.Common;
+using DictionaryService.Application.Database;
 using DictionaryService.Infrastructure;
+using DictionaryService.Infrastructure.Database;
 using DictionaryService.Web;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 using Respawn;
 using Testcontainers.PostgreSql;
@@ -71,9 +74,27 @@ public class DictionaryTestWebFactory : WebApplicationFactory<Program>, IAsyncLi
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<DictionaryServiceDbContext>();
+            services.RemoveAll<IReadDbContext>();
 
             services.AddScoped<DictionaryServiceDbContext>(_ =>
                 new DictionaryServiceDbContext(_dbContainer.GetConnectionString()));
+
+            services.AddScoped<IReadDbContext, DictionaryServiceDbContext>(_ =>
+                new DictionaryServiceDbContext(_dbContainer.GetConnectionString()));
+
+            services.RemoveAll<NpgsqlDataSource>();
+            services.AddSingleton(sp =>
+            {
+                string connectionString = _dbContainer.GetConnectionString();
+                var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+
+                dataSourceBuilder.UseLoggerFactory(sp.GetRequiredService<ILoggerFactory>());
+
+                return dataSourceBuilder.Build();
+            });
+
+            services.RemoveAll<IReadDbConnectionFactory>();
+            services.AddSingleton<IReadDbConnectionFactory, NpgsqlReadDbConnectionFactory>();
         });
     }
 }

@@ -47,7 +47,7 @@ public class UpdateDepartmentLocationsHandler : ICommandHandler<Guid, UpdateDepa
 
         if (!existDepartmentAndActive)
         {
-            return Result.Failure<Guid, Error>(Error.Failure(null, ["Department not found"]));
+            return Result.Failure<Guid, Error>(Error.NotFound(null, ["Department not found"], null));
         }
 
         bool existLocationsAndActive =
@@ -57,7 +57,7 @@ public class UpdateDepartmentLocationsHandler : ICommandHandler<Guid, UpdateDepa
 
         if (!existLocationsAndActive)
         {
-            return Result.Failure<Guid, Error>(Error.Failure(null, ["Locations not found"]));
+            return Result.Failure<Guid, Error>(Error.NotFound(null, ["Locations not found"], null));
         }
 
         IEnumerable<DepartmentLocation> departmentLocations = command.Request.LocationIds

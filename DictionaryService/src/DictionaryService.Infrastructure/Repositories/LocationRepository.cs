@@ -29,9 +29,11 @@ public class LocationRepository : ILocationRepository
 
     public async Task<bool> ExistsAndActiveAsync(
         Guid[] locationIds,
-        CancellationToken cancellationToken) =>
-        await _dbContext.Locations
+        CancellationToken cancellationToken)
+    {
+        return await _dbContext.Locations
             .AnyAsync(l => locationIds.Contains(l.Id) && l.IsActive, cancellationToken);
+    }
 
     public async Task<Result<Location, Error>> GetByIdAsync(
         Guid id,

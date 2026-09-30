@@ -1,12 +1,15 @@
 ﻿using System.Collections;
+using System.Text.Json.Serialization;
 
 namespace DictionaryService.Domain.Shared;
 
+[JsonConverter(typeof(ErrorsJsonConverter))]
 public class Errors : IEnumerable<Error>
 {
     private readonly List<Error> _errors;
 
-    public Errors(IEnumerable<Error> errors)
+    [JsonConstructor]
+    public Errors(List<Error> errors)
     {
         _errors = [..errors];
     }

@@ -86,6 +86,14 @@ public class CreatePositionHandler : ICommandHandler<Guid, CreatePositionCommand
             return addPositionResult.Error;
         }
 
+        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+
+        if (saveResult.IsFailure)
+        {
+            transactionScope.Rollback();
+            return saveResult.Error;
+        }
+
         var commitedResult = transactionScope.Commit();
 
         if (commitedResult.IsFailure)

@@ -28,7 +28,6 @@ public class PositionRepository : IPositionRepository
         try
         {
             await _dbContext.Positions.AddAsync(position, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
             return position.Id;
         }
         catch (Exception ex)

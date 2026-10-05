@@ -32,7 +32,6 @@ public class DepartmentRepository : IDepartmentRepository
         try
         {
             await _dbContext.Departments.AddAsync(department, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
             return department.Id;
         }
         catch (DbUpdateException ex)

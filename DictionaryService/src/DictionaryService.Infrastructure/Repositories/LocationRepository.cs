@@ -17,7 +17,6 @@ public class LocationRepository : ILocationRepository
         CancellationToken cancellationToken)
     {
         await _dbContext.AddAsync(location, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
         return location.Id;
     }
 

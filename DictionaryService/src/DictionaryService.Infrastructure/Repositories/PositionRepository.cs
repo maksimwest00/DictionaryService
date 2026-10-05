@@ -49,7 +49,7 @@ public class PositionRepository : IPositionRepository
         CancellationToken cancellationToken)
     {
         Position? position = await _dbContext.Positions
-            .FirstOrDefaultAsync(x => x.Id == id && x.IsActive, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
         if (position is null)
         {
@@ -64,6 +64,6 @@ public class PositionRepository : IPositionRepository
         CancellationToken cancellationToken)
     {
         return await _dbContext.Positions
-            .AnyAsync(x => x.Name.Value == positionName && x.IsActive, cancellationToken);
+            .AnyAsync(x => x.Name.Value == positionName, cancellationToken);
     }
 }

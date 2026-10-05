@@ -1,4 +1,4 @@
-﻿using DictionaryService.Application.Database;
+using DictionaryService.Application.Database;
 using DictionaryService.Domain.DepartmentLocations;
 using DictionaryService.Domain.DepartmentPositions;
 using DictionaryService.Domain.Departments;
@@ -42,5 +42,14 @@ public class DictionaryServiceDbContext : DbContext, IReadDbContext
     {
         modelBuilder.HasPostgresExtension("ltree");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DictionaryServiceDbContext).Assembly);
+
+        modelBuilder.Entity<Department>()
+            .HasQueryFilter(d => d.IsActive);
+
+        modelBuilder.Entity<Location>()
+            .HasQueryFilter(d => d.IsActive);
+
+        modelBuilder.Entity<Position>()
+            .HasQueryFilter(d => d.IsActive);
     }
 }

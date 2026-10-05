@@ -37,8 +37,7 @@ public class DeleteLocationTests : DictionaryBaseTests
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(envelope);
-            Assert.NotNull(location);
-            Assert.False(location.IsActive);
+            Assert.Null(location);
         });
     }
 

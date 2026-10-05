@@ -33,8 +33,7 @@ public class DeletePositionTests : DictionaryBaseTests
                 .FirstOrDefaultAsync(p => p.Id == positionId, cancellationToken);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.NotNull(position);
-            Assert.False(position.IsActive);
+            Assert.Null(position);
         });
     }
 

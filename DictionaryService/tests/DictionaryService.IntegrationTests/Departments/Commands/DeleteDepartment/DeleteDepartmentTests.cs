@@ -39,8 +39,7 @@ public class DeleteDepartmentTests : DictionaryBaseTests
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(envelope);
-            Assert.NotNull(department);
-            Assert.False(department.IsActive);
+            Assert.Null(department);
         });
     }
 

@@ -1,6 +1,6 @@
 ﻿namespace DictionaryService.Contracts.Shared;
 
-public class PagedResult<T>
+public record PagedResult<T>
 {
     public List<T> Data { get; set; }
 

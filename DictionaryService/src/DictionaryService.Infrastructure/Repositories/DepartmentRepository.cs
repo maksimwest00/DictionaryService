@@ -195,7 +195,7 @@ public class DepartmentRepository : IDepartmentRepository
                     x.DepartmentId == departmentPosition.DepartmentId &&
                     x.PositionId == departmentPosition.PositionId, cancellationToken))
         {
-            return Error.NotFound(null, ["This record is not exist"], null);
+            return Error.Conflict(null, ["This record exist"]);
         }
 
         await _dbContext.DepartmentPositions
@@ -204,19 +204,48 @@ public class DepartmentRepository : IDepartmentRepository
         return UnitResult.Success<Error>();
     }
 
+    public async Task<UnitResult<Error>> AddPositionsAsync(
+        IEnumerable<DepartmentPosition> departmentPositions,
+        CancellationToken cancellationToken)
+    {
+        var departmentPositionsList = departmentPositions.ToList();
+
+        // Check each pair individually
+        foreach (var dp in departmentPositionsList)
+        {
+            var exists = await _dbContext.DepartmentPositions
+                .AnyAsync(
+                    x =>
+                    x.DepartmentId == dp.DepartmentId &&
+                    x.PositionId == dp.PositionId, cancellationToken);
+
+            if (exists)
+            {
+                return Error.Conflict(null, ["This record exist"]);
+            }
+        }
+
+        await _dbContext.DepartmentPositions
+            .AddRangeAsync(departmentPositionsList, cancellationToken);
+
+        return UnitResult.Success<Error>();
+    }
+
     public async Task<UnitResult<Error>> DeletePositionAsync(
         DepartmentPosition departmentPosition,
         CancellationToken cancellationToken)
     {
-        if (!await _dbContext.DepartmentPositions.AnyAsync(
+        var dPosition = await _dbContext.DepartmentPositions.FirstOrDefaultAsync(
             x =>
                 x.DepartmentId == departmentPosition.DepartmentId &&
-                x.PositionId == departmentPosition.PositionId, cancellationToken))
+                x.PositionId == departmentPosition.PositionId, cancellationToken);
+
+        if (dPosition is null)
         {
             return Error.NotFound(null, ["This record is not exist"], null);
         }
 
-        _dbContext.DepartmentPositions.Remove(departmentPosition);
+        _dbContext.DepartmentPositions.Remove(dPosition);
 
         return UnitResult.Success<Error>();
     }

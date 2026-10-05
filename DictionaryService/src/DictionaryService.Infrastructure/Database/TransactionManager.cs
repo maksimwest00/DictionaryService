@@ -48,7 +48,7 @@ public class TransactionManager : ITransactionManager
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to save changes");
-            return Error.Failure("database",["Failed to save changes"]);
+            return Error.Failure("database", ["Failed to save changes"]);
         }
     }
 }

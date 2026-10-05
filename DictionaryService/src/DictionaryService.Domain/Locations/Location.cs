@@ -25,6 +25,7 @@ public class Location
         }
 
         Timezone = timezone;
+        IsActive = true;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }

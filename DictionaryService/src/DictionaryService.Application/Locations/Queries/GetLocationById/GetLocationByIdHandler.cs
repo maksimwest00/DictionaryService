@@ -34,7 +34,7 @@ public class GetLocationByIdHandler : IQueryHandler<GetLocationByIdResponse, Get
                 Timezone = location.Timezone,
                 IsActive = location.IsActive,
                 CreatedAt = location.CreatedAt,
-                UpdatedAt = location.UpdatedAt
+                UpdatedAt = location.UpdatedAt,
             })
             .FirstOrDefaultAsync(cancellationToken);
 

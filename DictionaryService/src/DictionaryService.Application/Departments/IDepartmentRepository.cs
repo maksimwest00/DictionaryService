@@ -40,6 +40,10 @@ public interface IDepartmentRepository
         DepartmentPosition departmentPosition,
         CancellationToken cancellationToken);
 
+    Task<UnitResult<Error>> AddPositionsAsync(
+        IEnumerable<DepartmentPosition> departmentPositions,
+        CancellationToken cancellationToken);
+
     Task<UnitResult<Error>> DeletePositionAsync(
         DepartmentPosition departmentPosition,
         CancellationToken cancellationToken);

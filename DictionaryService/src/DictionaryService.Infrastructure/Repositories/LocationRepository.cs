@@ -23,15 +23,22 @@ public class LocationRepository : ILocationRepository
 
     public async Task<bool> ExistsAsync(
         Guid[] locationIds,
-        CancellationToken cancellationToken) =>
-        await _dbContext.Locations
+        CancellationToken cancellationToken)
+    {
+        var a = await _dbContext.Locations
             .AnyAsync(l => locationIds.Contains(l.Id), cancellationToken);
+
+        return await _dbContext.Locations
+            .AnyAsync(l => locationIds.Contains(l.Id), cancellationToken);
+    }
 
     public async Task<bool> ExistsAndActiveAsync(
         Guid[] locationIds,
-        CancellationToken cancellationToken) =>
-        await _dbContext.Locations
+        CancellationToken cancellationToken)
+    {
+        return await _dbContext.Locations
             .AnyAsync(l => locationIds.Contains(l.Id) && l.IsActive, cancellationToken);
+    }
 
     public async Task<Result<Location, Error>> GetByIdAsync(
         Guid id,

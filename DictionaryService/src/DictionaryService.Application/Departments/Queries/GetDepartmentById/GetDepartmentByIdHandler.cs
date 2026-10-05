@@ -20,7 +20,7 @@ public class GetDepartmentByIdHandler : IQueryHandler<GetDepartmentByIdResponse,
         GetDepartmentByIdQuery query,
         CancellationToken cancellationToken)
     {
-        var location = await _readDbContext.DepartmentsRead
+        var department = await _readDbContext.DepartmentsRead
             .Where(x => x.Id == query.Id && x.IsActive)
             .Select(x => new GetDepartmentByIdResponse
             {
@@ -37,11 +37,11 @@ public class GetDepartmentByIdHandler : IQueryHandler<GetDepartmentByIdResponse,
             })
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (location is null)
+        if (department is null)
         {
             return Error.NotFound(null, ["Department not found"], query.Id);
         }
 
-        return location;
+        return department;
     }
 }

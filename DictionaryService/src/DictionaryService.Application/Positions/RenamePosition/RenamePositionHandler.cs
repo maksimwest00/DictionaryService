@@ -40,7 +40,7 @@ public class RenamePositionHandler : ICommandHandler<Guid, RenamePositionCommand
 
         if (await _positionRepository.IsExistPositionNameAsync(namePosition.Value, cancellationToken))
         {
-            return Error.Failure(null, ["Position name is exist and active"]);
+            return Error.Conflict(null, ["Position name is exist and active"]);
         }
 
         var positionResult =

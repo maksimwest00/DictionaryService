@@ -60,7 +60,7 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
         if (!locationsExist)
         {
             transactionScope.Rollback();
-            return Result.Failure<Guid, Error>(Error.Failure(null, ["Locations not found"]));
+            return Result.Failure<Guid, Error>(Error.NotFound(null, ["Locations not found"], null));
         }
 
         if (command.Request.ParentId.HasValue)

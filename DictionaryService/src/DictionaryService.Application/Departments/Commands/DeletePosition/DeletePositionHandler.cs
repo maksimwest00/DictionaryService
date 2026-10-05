@@ -59,13 +59,13 @@ public class DeletePositionHandler : ICommandHandler<Guid, DeletePositionCommand
 
         using ITransactionScope transactionScope = transactionScopeResult.Value;
 
-        var addPositionResult =
+        var deletePositionResult =
             await _departmentRepository.DeletePositionAsync(departmentPosition, cancellationToken);
 
-        if (addPositionResult.IsFailure)
+        if (deletePositionResult.IsFailure)
         {
             transactionScope.Rollback();
-            return addPositionResult.Error;
+            return deletePositionResult.Error;
         }
 
         var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);

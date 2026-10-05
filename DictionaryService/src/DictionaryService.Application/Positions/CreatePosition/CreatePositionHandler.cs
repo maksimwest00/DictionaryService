@@ -1,8 +1,9 @@
-﻿using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions;
 using DictionaryService.Application.Abstractions;
 using DictionaryService.Application.Database;
 using DictionaryService.Application.Departments;
 using DictionaryService.Application.Validation.ValidationExtensions;
+using DictionaryService.Domain.DepartmentPositions;
 using DictionaryService.Domain.Positions;
 using DictionaryService.Domain.Shared;
 using FluentValidation;
@@ -56,7 +57,7 @@ public class CreatePositionHandler : ICommandHandler<Guid, CreatePositionCommand
         if (await _positionRepository.IsExistPositionNameAsync(namePositionResult.Value.Value, cancellationToken))
         {
             transactionScope.Rollback();
-            return Result.Failure<Guid, Error>(Error.Failure(null, ["Position name is exist and active"]));
+            return Result.Failure<Guid, Error>(Error.Conflict(null, ["Position name is exist and active"]));
         }
 
         bool isDepartmentsExist = await _departmentRepository.ExistsAsync(
@@ -66,7 +67,10 @@ public class CreatePositionHandler : ICommandHandler<Guid, CreatePositionCommand
         if (!isDepartmentsExist)
         {
             transactionScope.Rollback();
-            return Result.Failure<Guid, Error>(Error.Failure(null, ["Departments not found"]));
+            return Result.Failure<Guid, Error>(Error.NotFound(
+                null,
+                ["Departments not found"],
+                null));
         }
 
         var position = Position.Create(
@@ -89,6 +93,6 @@ public class CreatePositionHandler : ICommandHandler<Guid, CreatePositionCommand
             return commitedResult.Error;
         }
 
-        return addPositionResult;
+        return addPositionResult.Value;
     }
 }

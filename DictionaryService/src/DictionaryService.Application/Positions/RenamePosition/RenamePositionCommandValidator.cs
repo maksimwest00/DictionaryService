@@ -1,4 +1,4 @@
-﻿using DictionaryService.Application.Validation;
+using DictionaryService.Application.Validation;
 using DictionaryService.Domain.Positions;
 using FluentValidation;
 

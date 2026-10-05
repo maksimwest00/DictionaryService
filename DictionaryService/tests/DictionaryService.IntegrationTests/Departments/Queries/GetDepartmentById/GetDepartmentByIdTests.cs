@@ -1,14 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
 using DictionaryService.Contracts.Departments.GetDepartmentById;
-using DictionaryService.Domain.Departments;
-using DictionaryService.Domain.Locations;
 using DictionaryService.IntegrationTests.Infrastructure;
 using DictionaryService.Presenters.ResponseExtensions;
-using Microsoft.EntityFrameworkCore;
-using Name = DictionaryService.Domain.Locations.Name;
 
-namespace DictionaryService.IntegrationTests.Departments;
+namespace DictionaryService.IntegrationTests.Departments.Queries.GetDepartmentById;
 
 public class GetDepartmentByIdTests : DictionaryBaseTests
 {
@@ -21,8 +17,8 @@ public class GetDepartmentByIdTests : DictionaryBaseTests
     public async Task GetDepartmentById_With_Valid_Id_Should_Succeed()
     {
         // Arrange
-        Guid locationId = await CreateLocation();
-        Guid departmentId = await CreateDepartment(locationId);
+        Guid locationId = await CreateLocationDb();
+        Guid departmentId = await CreateDepartmentDb(locationId);
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
@@ -61,7 +57,7 @@ public class GetDepartmentByIdTests : DictionaryBaseTests
     }
 
     [Fact]
-    public async Task GetDepartmentById_With_Invalid_Guid_Should_Return_BadRequest()
+    public async Task GetDepartmentById_With_Invalid_Guid_Should_Return_NotFound()
     {
         // Arrange
         CancellationToken cancellationToken = CancellationToken.None;
@@ -100,8 +96,8 @@ public class GetDepartmentByIdTests : DictionaryBaseTests
     public async Task GetDepartmentById_Should_Return_Department_With_All_Fields()
     {
         // Arrange
-        Guid locationId = await CreateLocation();
-        Guid departmentId = await CreateDepartment(locationId);
+        Guid locationId = await CreateLocationDb();
+        Guid departmentId = await CreateDepartmentDb(locationId);
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
@@ -127,39 +123,4 @@ public class GetDepartmentByIdTests : DictionaryBaseTests
         Assert.True(envelope.Result.CreatedAt > DateTime.MinValue);
         Assert.True(envelope.Result.UpdatedAt > DateTime.MinValue);
     }
-
-    private async Task<Guid> CreateLocation() =>
-        await ExecuteInDb(async db =>
-        {
-            Location location = new(
-                Name.Create("Локация").Value,
-                Address.Create(
-                    "Город",
-                    "Улица",
-                    "Дом",
-                    "Номер квартиры").Value,
-                "TimeZone");
-
-            db.Locations.Add(location);
-            await db.SaveChangesAsync();
-
-            return location.Id;
-        });
-
-    private async Task<Guid> CreateDepartment(Guid locationId) =>
-        await ExecuteInDb(async db =>
-        {
-            var departmentResult = Department.CreateParent(
-                DictionaryService.Domain.Departments.Name.Create("Подразделение").Value,
-                DictionaryService.Domain.Departments.Identifier.Create("ppp").Value,
-                [locationId]);
-
-            if (departmentResult.IsFailure)
-                throw new Exception(string.Join(", ", departmentResult.Error.Messages));
-
-            db.Departments.Add(departmentResult.Value);
-            await db.SaveChangesAsync();
-
-            return departmentResult.Value.Id;
-        });
 }

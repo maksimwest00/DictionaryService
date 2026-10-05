@@ -26,4 +26,9 @@
       <ProjectReference Include="..\..\src\DictionaryService.Web\DictionaryService.Web.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Positions\DeletePosition\" />
+      <Folder Include="Positions\RenamePosition\" />
+    </ItemGroup>
+
 </Project>

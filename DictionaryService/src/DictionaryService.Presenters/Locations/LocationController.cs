@@ -1,4 +1,4 @@
-﻿using DictionaryService.Application.Abstractions;
+using DictionaryService.Application.Abstractions;
 using DictionaryService.Application.Departments.Queries.GetDepartmentsByFilters;
 using DictionaryService.Application.Locations.Commands.CreateLocation;
 using DictionaryService.Application.Locations.Commands.DeleteLocation;
@@ -95,7 +95,7 @@ public class LocationController : ControllerBase
         return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
     }
 
-    [HttpGet("/top")]
+    [HttpGet("top")]
     public async Task<IActionResult> GetTop(
         [FromServices] ILogger<LocationController> logger,
         [FromServices] IQueryHandler<GetTopResponse> handler,

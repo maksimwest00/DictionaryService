@@ -204,6 +204,33 @@ public class DepartmentRepository : IDepartmentRepository
         return UnitResult.Success<Error>();
     }
 
+    public async Task<UnitResult<Error>> AddPositionsAsync(
+        IEnumerable<DepartmentPosition> departmentPositions,
+        CancellationToken cancellationToken)
+    {
+        var departmentPositionsList = departmentPositions.ToList();
+
+        // Check each pair individually
+        foreach (var dp in departmentPositionsList)
+        {
+            var exists = await _dbContext.DepartmentPositions
+                .AnyAsync(
+                    x =>
+                    x.DepartmentId == dp.DepartmentId &&
+                    x.PositionId == dp.PositionId, cancellationToken);
+
+            if (exists)
+            {
+                return Error.Conflict(null, ["This record exist"]);
+            }
+        }
+
+        await _dbContext.DepartmentPositions
+            .AddRangeAsync(departmentPositionsList, cancellationToken);
+
+        return UnitResult.Success<Error>();
+    }
+
     public async Task<UnitResult<Error>> DeletePositionAsync(
         DepartmentPosition departmentPosition,
         CancellationToken cancellationToken)

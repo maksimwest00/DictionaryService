@@ -1,14 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
-using DictionaryService.Domain.Departments;
-using DictionaryService.Domain.Locations;
-using DictionaryService.Domain.Positions;
 using DictionaryService.IntegrationTests.Infrastructure;
 using DictionaryService.Presenters.ResponseExtensions;
 using Microsoft.EntityFrameworkCore;
-using Name = DictionaryService.Domain.Locations.Name;
 
-namespace DictionaryService.IntegrationTests.Departments;
+namespace DictionaryService.IntegrationTests.Departments.Commands.AddPosition;
 
 public class AddPositionTests : DictionaryBaseTests
 {
@@ -21,8 +17,8 @@ public class AddPositionTests : DictionaryBaseTests
     public async Task AddPosition_With_Valid_Data_Should_Succeed()
     {
         // Arrange
-        Guid locationId = await CreateLocation();
-        Guid departmentId = await CreateDepartment(locationId);
+        Guid locationId = await CreateLocationDb();
+        Guid departmentId = await CreateDepartmentDb(locationId);
         Guid positionId = await CreatePosition();
         CancellationToken cancellationToken = CancellationToken.None;
 
@@ -72,8 +68,8 @@ public class AddPositionTests : DictionaryBaseTests
     public async Task AddPosition_With_Non_Existent_Position_Should_Return_NotFound()
     {
         // Arrange
-        Guid locationId = await CreateLocation();
-        Guid departmentId = await CreateDepartment(locationId);
+        Guid locationId = await CreateLocationDb();
+        Guid departmentId = await CreateDepartmentDb(locationId);
         Guid nonExistentPositionId = Guid.NewGuid();
         CancellationToken cancellationToken = CancellationToken.None;
 
@@ -93,8 +89,8 @@ public class AddPositionTests : DictionaryBaseTests
     public async Task AddPosition_When_Already_Added_Should_Return_Conflict()
     {
         // Arrange
-        Guid locationId = await CreateLocation();
-        Guid departmentId = await CreateDepartment(locationId);
+        Guid locationId = await CreateLocationDb();
+        Guid departmentId = await CreateDepartmentDb(locationId);
         Guid positionId = await CreatePosition();
         CancellationToken cancellationToken = CancellationToken.None;
 
@@ -117,7 +113,7 @@ public class AddPositionTests : DictionaryBaseTests
     }
 
     [Fact]
-    public async Task AddPosition_With_Invalid_Department_Guid_Should_Return_BadRequest()
+    public async Task AddPosition_With_Invalid_Department_Guid_Should_Return_NotFound()
     {
         // Arrange
         Guid positionId = await CreatePosition();
@@ -138,11 +134,11 @@ public class AddPositionTests : DictionaryBaseTests
     }
 
     [Fact]
-    public async Task AddPosition_With_Invalid_Position_Guid_Should_Return_BadRequest()
+    public async Task AddPosition_With_Invalid_Position_Guid_Should_Return_NotFound()
     {
         // Arrange
-        Guid locationId = await CreateLocation();
-        Guid departmentId = await CreateDepartment(locationId);
+        Guid locationId = await CreateLocationDb();
+        Guid departmentId = await CreateDepartmentDb(locationId);
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
@@ -158,53 +154,4 @@ public class AddPositionTests : DictionaryBaseTests
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
-
-    private async Task<Guid> CreateLocation() =>
-        await ExecuteInDb(async db =>
-        {
-            Location location = new(
-                Name.Create("Локация").Value,
-                Address.Create(
-                    "Город",
-                    "Улица",
-                    "Дом",
-                    "Номер квартиры").Value,
-                "TimeZone");
-
-            db.Locations.Add(location);
-            await db.SaveChangesAsync();
-
-            return location.Id;
-        });
-
-    private async Task<Guid> CreateDepartment(Guid locationId) =>
-        await ExecuteInDb(async db =>
-        {
-            var departmentResult = Department.CreateParent(
-                DictionaryService.Domain.Departments.Name.Create("Подразделение").Value,
-                DictionaryService.Domain.Departments.Identifier.Create("ppp").Value,
-                [locationId]);
-
-            if (departmentResult.IsFailure)
-                throw new Exception(string.Join(", ", departmentResult.Error.Messages));
-
-            db.Departments.Add(departmentResult.Value);
-            await db.SaveChangesAsync();
-
-            return departmentResult.Value.Id;
-        });
-
-    private async Task<Guid> CreatePosition() =>
-        await ExecuteInDb(async db =>
-        {
-            Position position = Position.Create(
-                DictionaryService.Domain.Positions.Name.Create("Должность").Value,
-                DictionaryService.Domain.Positions.Description.Create("Описание").Value,
-                []);
-
-            db.Positions.Add(position);
-            await db.SaveChangesAsync();
-
-            return position.Id;
-        });
 }

@@ -1,4 +1,4 @@
-﻿using DictionaryService.Application.Abstractions;
+using DictionaryService.Application.Abstractions;
 using DictionaryService.Application.Positions.CreatePosition;
 using DictionaryService.Application.Positions.DeletePosition;
 using DictionaryService.Application.Positions.RenamePosition;
@@ -66,7 +66,7 @@ public class PositionController : ControllerBase
     public async Task<IActionResult> DeleteAsync(
         [FromRoute] Guid id,
         [FromServices] ILogger<PositionController> logger,
-        [FromServices] ICommandHandler<Guid, DeletePositionCommand> handler,
+        [FromServices] ICommandHandler<DeletePositionCommand> handler,
         CancellationToken cancellationToken)
     {
         DeletePositionCommand command = new(id);
@@ -84,6 +84,6 @@ public class PositionController : ControllerBase
                 string.Join(',', deleteResult.Error.Messages));
         }
 
-        return deleteResult.IsFailure ? deleteResult.Error.ToResponse() : Ok(Envelope.Ok(deleteResult.Value));
+        return deleteResult.IsFailure ? deleteResult.Error.ToResponse() : Ok(Envelope.Ok());
     }
 }

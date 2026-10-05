@@ -2,14 +2,10 @@ using System.Net;
 using System.Net.Http.Json;
 using DictionaryService.Contracts.Departments.GetDepartmentsByFilters;
 using DictionaryService.Contracts.Shared;
-using DictionaryService.Domain.Departments;
-using DictionaryService.Domain.Locations;
 using DictionaryService.IntegrationTests.Infrastructure;
 using DictionaryService.Presenters.ResponseExtensions;
-using Microsoft.EntityFrameworkCore;
-using Name = DictionaryService.Domain.Locations.Name;
 
-namespace DictionaryService.IntegrationTests.Departments;
+namespace DictionaryService.IntegrationTests.Departments.Queries.GetDepartmentsByFilters;
 
 public class GetDepartmentsByFiltersTests : DictionaryBaseTests
 {
@@ -22,8 +18,8 @@ public class GetDepartmentsByFiltersTests : DictionaryBaseTests
     public async Task GetDepartmentsByFilters_With_Default_Params_Should_Succeed()
     {
         // Arrange
-        Guid locationId = await CreateLocation();
-        await CreateDepartment(locationId, "Подразделение1", "aaa");
+        Guid locationId = await CreateLocationDb();
+        await CreateDepartmentDb(locationId, "Подразделение1", "aaa");
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
@@ -47,9 +43,9 @@ public class GetDepartmentsByFiltersTests : DictionaryBaseTests
     public async Task GetDepartmentsByFilters_With_Search_Should_Filter_Results()
     {
         // Arrange
-        Guid locationId = await CreateLocation();
-        await CreateDepartment(locationId, "Подразделение1", "ppp");
-        await CreateDepartment(locationId, "Подразделение2", "rrr");
+        Guid locationId = await CreateLocationDb();
+        await CreateDepartmentDb(locationId, "Подразделение1", "ppp");
+        await CreateDepartmentDb(locationId, "Подразделение2", "rrr");
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
@@ -74,11 +70,11 @@ public class GetDepartmentsByFiltersTests : DictionaryBaseTests
     public async Task GetDepartmentsByFilters_With_Pagination_Should_Return_Correct_Page()
     {
         // Arrange
-        Guid locationId = await CreateLocation();
+        Guid locationId = await CreateLocationDb();
         char c = 'a';
         for (int i = 0; i < 5; i++)
         {
-            await CreateDepartment(locationId, $"Подразделение{i + 1}", $"{c}aa");
+            await CreateDepartmentDb(locationId, $"Подразделение{i + 1}", $"{c}aa");
             c++;
         }
         CancellationToken cancellationToken = CancellationToken.None;
@@ -104,8 +100,8 @@ public class GetDepartmentsByFiltersTests : DictionaryBaseTests
     public async Task GetDepartmentsByFilters_With_Invalid_Page_Should_Return_Empty_Result()
     {
         // Arrange
-        Guid locationId = await CreateLocation();
-        await CreateDepartment(locationId, "Подразделение1", "ppp");
+        Guid locationId = await CreateLocationDb();
+        await CreateDepartmentDb(locationId, "Подразделение1", "ppp");
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
@@ -163,9 +159,9 @@ public class GetDepartmentsByFiltersTests : DictionaryBaseTests
     public async Task GetDepartmentsByFilters_With_SortBy_Should_Order_Results()
     {
         // Arrange
-        Guid locationId = await CreateLocation();
-        await CreateDepartment(locationId, "B_Department", "aaa");
-        await CreateDepartment(locationId, "A_Department", "bbb");
+        Guid locationId = await CreateLocationDb();
+        await CreateDepartmentDb(locationId, "B_Department", "aaa");
+        await CreateDepartmentDb(locationId, "A_Department", "bbb");
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
@@ -185,45 +181,4 @@ public class GetDepartmentsByFiltersTests : DictionaryBaseTests
         Assert.True(result.Data.Count >= 2);
         Assert.Equal("A_Department", result.Data.First().Name);
     }
-
-    private async Task<Guid> CreateLocation() =>
-        await ExecuteInDb(async db =>
-        {
-            Location location = new(
-                Name.Create("Локация").Value,
-                Address.Create(
-                    "Город",
-                    "Улица",
-                    "Дом",
-                    "Номер квартиры").Value,
-                "TimeZone");
-
-            db.Locations.Add(location);
-            await db.SaveChangesAsync();
-
-            return location.Id;
-        });
-
-    private async Task<Guid> CreateDepartment(
-        Guid locationId,
-        string name = "Подразделение",
-        string identifier = "") =>
-        await ExecuteInDb(async db =>
-        {
-            var nameValue = DictionaryService.Domain.Departments.Name.Create(name).Value;
-            var identifierValue = DictionaryService.Domain.Departments.Identifier.Create(identifier).Value;
-
-            var departmentResult = Department.CreateParent(
-                nameValue,
-                identifierValue,
-                [locationId]);
-
-            if (departmentResult.IsFailure)
-                throw new Exception(string.Join(", ", departmentResult.Error.Messages));
-
-            db.Departments.Add(departmentResult.Value);
-            await db.SaveChangesAsync();
-
-            return departmentResult.Value.Id;
-        });
 }

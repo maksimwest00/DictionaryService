@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions;
 using DictionaryService.Application.Abstractions;
 using DictionaryService.Application.Database;
 using DictionaryService.Application.Validation.ValidationExtensions;
@@ -58,6 +58,14 @@ public class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand
         using var transactionScope = transactionScopeResult.Value;
 
         var locationId = await _locationRepository.AddAsync(location, cancellationToken);
+
+        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+
+        if (saveResult.IsFailure)
+        {
+            transactionScope.Rollback();
+            return saveResult.Error;
+        }
 
         var commitedResult = transactionScope.Commit();
 

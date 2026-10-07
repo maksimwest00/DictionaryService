@@ -1,7 +1,8 @@
-﻿using DictionaryService.Application.Database;
+using DictionaryService.Application.Database;
 using DictionaryService.Application.Departments;
 using DictionaryService.Application.Locations;
 using DictionaryService.Application.Positions;
+using DictionaryService.Infrastructure.BackgroundServices;
 using DictionaryService.Infrastructure.Database;
 using DictionaryService.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
@@ -40,6 +41,11 @@ public static class DepedencyInjection
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         services.AddScoped<IPositionRepository, PositionRepository>();
         services.AddScoped<ITransactionManager, TransactionManager>();
+
+        services.Configure<RecordCleanupOptions>(
+            configuration.GetSection("RecordCleanup"));
+        services.AddHostedService<RecordCleanupBackgroundService>();
+
         return services;
     }
 }

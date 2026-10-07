@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions;
 using DictionaryService.Application.Abstractions;
 using DictionaryService.Application.Database;
 using DictionaryService.Application.Locations;
@@ -95,6 +95,14 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
                 return addDepartmentResult.Error;
             }
 
+            var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+
+            if (saveResult.IsFailure)
+            {
+                transactionScope.Rollback();
+                return saveResult.Error;
+            }
+
             var commitedResult = transactionScope.Commit();
 
             if (commitedResult.IsFailure)
@@ -123,6 +131,14 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
             {
                 transactionScope.Rollback();
                 return addDepartmentResult.Error;
+            }
+
+            var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+
+            if (saveResult.IsFailure)
+            {
+                transactionScope.Rollback();
+                return saveResult.Error;
             }
 
             var commitedResult = transactionScope.Commit();

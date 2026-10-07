@@ -32,13 +32,19 @@ public class DeleteLocationTests : DictionaryBaseTests
         // Assert
         await ExecuteInDb(async db =>
         {
-            var location = await db.Locations
+            var locationWithoutFilter = await db.Locations
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(l => l.Id == locationId, cancellationToken);
+
+            var locationWithFilter = await db.Locations
                 .FirstOrDefaultAsync(l => l.Id == locationId, cancellationToken);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(envelope);
-            Assert.NotNull(location);
-            Assert.False(location.IsActive);
+            Assert.NotNull(locationWithoutFilter);
+            Assert.False(locationWithoutFilter.IsActive);
+            Assert.NotNull(locationWithoutFilter.DeletedAt);
+            Assert.Null(locationWithFilter);
         });
     }
 

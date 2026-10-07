@@ -21,7 +21,7 @@ public class GetDepartmentByIdHandler : IQueryHandler<GetDepartmentByIdResponse,
         CancellationToken cancellationToken)
     {
         var department = await _readDbContext.DepartmentsRead
-            .Where(x => x.Id == query.Id && x.IsActive)
+            .Where(x => x.Id == query.Id)
             .Select(x => new GetDepartmentByIdResponse
             {
                 Id = x.Id,

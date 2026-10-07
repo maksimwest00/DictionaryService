@@ -21,7 +21,7 @@ public class GetLocationByIdHandler : IQueryHandler<GetLocationByIdResponse, Get
         CancellationToken cancellationToken)
     {
         GetLocationByIdResponse? location = await _readDbContext.LocationsRead
-            .Where(x => x.Id == query.Id && x.IsActive)
+            .Where(x => x.Id == query.Id)
             .Select(location => new GetLocationByIdResponse
             {
                 Id = location.Id,

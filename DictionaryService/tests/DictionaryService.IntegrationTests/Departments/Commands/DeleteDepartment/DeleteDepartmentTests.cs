@@ -34,12 +34,19 @@ public class DeleteDepartmentTests : DictionaryBaseTests
         // Assert
         await ExecuteInDb(async db =>
         {
-            Department? department = await db.Departments
+            Department? departmentWithoutFilter = await db.Departments
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(d => d.Id == departmentId, cancellationToken);
+
+            Department? departmentWithFilter = await db.Departments
                 .FirstOrDefaultAsync(d => d.Id == departmentId, cancellationToken);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(envelope);
-            Assert.Null(department);
+            Assert.NotNull(departmentWithoutFilter);
+            Assert.False(departmentWithoutFilter.IsActive);
+            Assert.NotNull(departmentWithoutFilter.DeletedAt);
+            Assert.Null(departmentWithFilter);
         });
     }
 

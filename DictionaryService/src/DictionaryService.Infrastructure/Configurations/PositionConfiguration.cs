@@ -1,4 +1,4 @@
-﻿using DictionaryService.Domain;
+using DictionaryService.Domain;
 using DictionaryService.Domain.Positions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -45,6 +45,10 @@ public class PositionConfiguration : IEntityTypeConfiguration<Position>
         builder.Property(p => p.UpdatedAt)
             .IsRequired()
             .HasColumnName("updated_at");
+
+        builder.Property(p => p.DeletedAt)
+            .IsRequired(false)
+            .HasColumnName("deleted_at");
 
         builder.HasMany(p => p.DepartmentPositions)
             .WithOne()

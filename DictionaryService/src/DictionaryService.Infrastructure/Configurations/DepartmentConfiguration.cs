@@ -1,4 +1,4 @@
-﻿using DictionaryService.Domain;
+using DictionaryService.Domain;
 using DictionaryService.Domain.Departments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -66,6 +66,10 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
         builder.Property(d => d.UpdatedAt)
             .IsRequired()
             .HasColumnName("updated_at");
+
+        builder.Property(d => d.DeletedAt)
+            .IsRequired(false)
+            .HasColumnName("deleted_at");
 
         builder.Property(d => d.ParentId)
             .IsRequired(false)

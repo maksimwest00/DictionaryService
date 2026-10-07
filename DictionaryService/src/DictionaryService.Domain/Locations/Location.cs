@@ -44,10 +44,13 @@ public class Location
 
     public DateTime UpdatedAt { get; private set; }
 
+    public DateTime? DeletedAt { get; private set; }
+
     public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations;
 
     public void Deactivate()
     {
         IsActive = false;
+        DeletedAt = DateTime.UtcNow;
     }
 }

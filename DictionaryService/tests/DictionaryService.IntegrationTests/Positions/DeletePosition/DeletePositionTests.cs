@@ -29,11 +29,18 @@ public class DeletePositionTests : DictionaryBaseTests
         // Assert
         await ExecuteInDb(async db =>
         {
-            Position? position = await db.Positions
+            Position? positionWithoutFilter = await db.Positions
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(p => p.Id == positionId, cancellationToken);
+
+            Position? positionWithFilter = await db.Positions
                 .FirstOrDefaultAsync(p => p.Id == positionId, cancellationToken);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Null(position);
+            Assert.NotNull(positionWithoutFilter);
+            Assert.False(positionWithoutFilter.IsActive);
+            Assert.NotNull(positionWithoutFilter.DeletedAt);
+            Assert.Null(positionWithFilter);
         });
     }
 

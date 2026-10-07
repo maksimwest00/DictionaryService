@@ -54,14 +54,14 @@ public class RecordCleanupBackgroundService : BackgroundService
         var dbContext = scope.ServiceProvider.GetRequiredService<DictionaryServiceDbContext>();
 
         var cutoffDate = DateTime.UtcNow.AddDays(-_options.RetentionDays);
-        _logger.LogInformation("Начало очистки записей старее {CutoffDate}", cutoffDate);
+        _logger.LogInformation("Начало очистки записей, деактивированных старее {CutoffDate}", cutoffDate);
 
         int totalDeleted = 0;
 
         totalDeleted += await DeleteRecordsInBatches(
             dbContext.Departments
                 .IgnoreQueryFilters()
-                .Where(d => !d.IsActive && d.CreatedAt < cutoffDate),
+                .Where(d => !d.IsActive && d.DeletedAt < cutoffDate),
             dbContext,
             cancellationToken,
             "отделов");
@@ -69,7 +69,7 @@ public class RecordCleanupBackgroundService : BackgroundService
         totalDeleted += await DeleteRecordsInBatches(
             dbContext.Locations
                 .IgnoreQueryFilters()
-                .Where(l => !l.IsActive && l.CreatedAt < cutoffDate),
+                .Where(l => !l.IsActive && l.DeletedAt < cutoffDate),
             dbContext,
             cancellationToken,
             "локаций");
@@ -77,7 +77,7 @@ public class RecordCleanupBackgroundService : BackgroundService
         totalDeleted += await DeleteRecordsInBatches(
             dbContext.Positions
                 .IgnoreQueryFilters()
-                .Where(p => !p.IsActive && p.CreatedAt < cutoffDate),
+                .Where(p => !p.IsActive && p.DeletedAt < cutoffDate),
             dbContext,
             cancellationToken,
             "должностей");

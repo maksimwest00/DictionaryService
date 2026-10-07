@@ -1,6 +1,7 @@
 ﻿using System.Data.Common;
 using DictionaryService.Application.Database;
 using DictionaryService.Infrastructure;
+using DictionaryService.Infrastructure.BackgroundServices;
 using DictionaryService.Infrastructure.Database;
 using DictionaryService.Web;
 using Microsoft.AspNetCore.Hosting;
@@ -95,6 +96,8 @@ public class DictionaryTestWebFactory : WebApplicationFactory<Program>, IAsyncLi
 
             services.RemoveAll<IReadDbConnectionFactory>();
             services.AddSingleton<IReadDbConnectionFactory, NpgsqlReadDbConnectionFactory>();
+
+            services.RemoveAll<RecordCleanupBackgroundService>();
         });
     }
 }

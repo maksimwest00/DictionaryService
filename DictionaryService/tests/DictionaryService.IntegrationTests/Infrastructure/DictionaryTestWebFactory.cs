@@ -86,7 +86,7 @@ public class DictionaryTestWebFactory : WebApplicationFactory<Program>, IAsyncLi
                 services.RemoveAll<IReadDbConnectionFactory>();
                 services.AddSingleton<IReadDbConnectionFactory, NpgsqlReadDbConnectionFactory>();
 
-                // services.RemoveAll<RecordCleanupBackgroundService>();
+                services.RemoveAll<RecordCleanupBackgroundService>();
             });
         }
 

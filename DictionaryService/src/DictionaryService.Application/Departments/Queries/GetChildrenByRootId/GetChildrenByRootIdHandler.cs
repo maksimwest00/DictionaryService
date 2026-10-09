@@ -52,7 +52,7 @@ public class GetChildrenByRootIdHandler : IQueryHandler<List<GetDepartmentsTreeR
                             COALESCE(COUNT(DC.id), 0) > 0 as HasChildren
                         FROM departments AS D
                         LEFT JOIN departments AS DC ON DC.parent_id = D.id
-                        WHERE D.parent_id = @RootId
+                        WHERE D.parent_id = @RootId AND D.is_active = true
                         GROUP BY D.id, D.name, D.identifier, D.path, D.depth
                     """,
                 param: parameters);

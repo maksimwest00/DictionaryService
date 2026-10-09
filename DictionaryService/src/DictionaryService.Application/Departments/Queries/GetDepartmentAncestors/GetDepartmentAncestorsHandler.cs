@@ -54,6 +54,7 @@ public class GetDepartmentAncestorsHandler : IQueryHandler<List<GetDepartmentsTr
                         LEFT JOIN departments AS DC ON DC.parent_id = D.id
                         WHERE @path::ltree <@ D.path
                           AND D.path != @path::ltree
+                          AND D.is_active = true
                         GROUP BY D.id, D.name, D.identifier, D.path, D.depth
                         ORDER BY D.depth;
                     """,

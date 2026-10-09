@@ -44,7 +44,7 @@ public static class DepedencyInjection
 
         services.Configure<RecordCleanupOptions>(
             configuration.GetSection("RecordCleanup"));
-        services.AddHostedService<RecordCleanupBackgroundService>();
+        // services.AddHostedService<RecordCleanupBackgroundService>();
 
         return services;
     }

@@ -41,6 +41,7 @@ public class GetDepartmentsTreeBySearchHandler : IQueryHandler<List<GetDepartmen
                         LEFT JOIN departments AS DC ON DC.parent_id = D.id
                         WHERE D.parent_id IS NULL
                           AND D.name ILIKE '%' || @search || '%'
+                          AND D.is_active = true
                         GROUP BY D.id, D.name, D.identifier, D.path, D.depth
                 """,
                 param: parameters);

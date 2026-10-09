@@ -1,4 +1,4 @@
-﻿using System.Data.Common;
+using System.Data.Common;
 using DictionaryService.Application.Database;
 using DictionaryService.Infrastructure;
 using DictionaryService.Infrastructure.BackgroundServices;
@@ -59,6 +59,37 @@ public class DictionaryTestWebFactory : WebApplicationFactory<Program>, IAsyncLi
         await _respawner.ResetAsync(_dbConnection);
     }
 
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            builder.ConfigureTestServices(services =>
+            {
+                services.RemoveAll<DictionaryServiceDbContext>();
+                services.RemoveAll<IReadDbContext>();
+
+                services.AddScoped<DictionaryServiceDbContext>(_ =>
+                    new DictionaryServiceDbContext(_dbContainer.GetConnectionString()));
+
+                services.AddScoped<IReadDbContext, DictionaryServiceDbContext>(_ =>
+                    new DictionaryServiceDbContext(_dbContainer.GetConnectionString()));
+
+                services.RemoveAll<NpgsqlDataSource>();
+                services.AddSingleton(sp =>
+                {
+                    string connectionString = _dbContainer.GetConnectionString();
+                    var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+
+                    dataSourceBuilder.UseLoggerFactory(sp.GetRequiredService<ILoggerFactory>());
+
+                    return dataSourceBuilder.Build();
+                });
+
+                services.RemoveAll<IReadDbConnectionFactory>();
+                services.AddSingleton<IReadDbConnectionFactory, NpgsqlReadDbConnectionFactory>();
+
+                // services.RemoveAll<RecordCleanupBackgroundService>();
+            });
+        }
+
     private async Task InitializeRespawner()
     {
         _respawner = await Respawner.CreateAsync(
@@ -70,34 +101,4 @@ public class DictionaryTestWebFactory : WebApplicationFactory<Program>, IAsyncLi
             });
     }
 
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        builder.ConfigureTestServices(services =>
-        {
-            services.RemoveAll<DictionaryServiceDbContext>();
-            services.RemoveAll<IReadDbContext>();
-
-            services.AddScoped<DictionaryServiceDbContext>(_ =>
-                new DictionaryServiceDbContext(_dbContainer.GetConnectionString()));
-
-            services.AddScoped<IReadDbContext, DictionaryServiceDbContext>(_ =>
-                new DictionaryServiceDbContext(_dbContainer.GetConnectionString()));
-
-            services.RemoveAll<NpgsqlDataSource>();
-            services.AddSingleton(sp =>
-            {
-                string connectionString = _dbContainer.GetConnectionString();
-                var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
-
-                dataSourceBuilder.UseLoggerFactory(sp.GetRequiredService<ILoggerFactory>());
-
-                return dataSourceBuilder.Build();
-            });
-
-            services.RemoveAll<IReadDbConnectionFactory>();
-            services.AddSingleton<IReadDbConnectionFactory, NpgsqlReadDbConnectionFactory>();
-
-            services.RemoveAll<RecordCleanupBackgroundService>();
-        });
-    }
 }

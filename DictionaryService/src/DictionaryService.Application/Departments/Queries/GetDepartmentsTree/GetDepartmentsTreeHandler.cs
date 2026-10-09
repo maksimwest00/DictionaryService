@@ -26,28 +26,17 @@ public class GetDepartmentsTreeHandler : IQueryHandler<List<GetDepartmentsTreeRe
         var dp =
             await connection.QueryAsync<GetDepartmentsTreeResponse>(
                 """
-                         SELECT 
-                             Id,
-                             Name,
-                             Slug,
-                             Path,
-                             Depth,
-                             HasChildren
-                         FROM (
-                             SELECT 
-                                 D.id as Id,
-                                 D.name as Name,
-                                 D.identifier as Slug,
-                                 D.path as Path,
-                                 D.depth as Depth,
-                                 (
-                                     SELECT COUNT(*)
-                                     FROM departments AS D1
-                                     WHERE D1.parent_id = D.id
-                                 ) > 0 as HasChildren
-                             FROM departments AS D
-                             WHERE parent_id IS NULL
-                         ) AS DepartmentsData;
+                         SELECT
+                             D.id as Id,
+                             D.name as Name,
+                             D.identifier as Slug,
+                             D.path as Path,
+                             D.depth as Depth,
+                             COALESCE(COUNT(DC.id), 0) > 0 as HasChildren
+                         FROM departments AS D
+                         LEFT JOIN departments AS DC ON DC.parent_id = D.id
+                         WHERE D.parent_id IS NULL AND D.is_active = true
+                         GROUP BY D.id, D.name, D.identifier, D.path, D.depth
                  """);
 
         return dp.ToList();

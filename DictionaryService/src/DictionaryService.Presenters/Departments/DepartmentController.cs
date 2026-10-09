@@ -6,8 +6,8 @@ using DictionaryService.Application.Departments.Commands.DeleteDepartment;
 using DictionaryService.Application.Departments.Commands.DeletePosition;
 using DictionaryService.Application.Departments.Commands.TransferDepartment;
 using DictionaryService.Application.Departments.Commands.UpdateDepartmentLocations;
-using DictionaryService.Application.Departments.Queries;
 using DictionaryService.Application.Departments.Queries.GetChildrenByRootId;
+using DictionaryService.Application.Departments.Queries.GetDepartmentAncestors;
 using DictionaryService.Application.Departments.Queries.GetDepartmentById;
 using DictionaryService.Application.Departments.Queries.GetDepartmentsByFilters;
 using DictionaryService.Application.Departments.Queries.GetDepartmentsTreeBySearch;
@@ -255,7 +255,7 @@ public class DepartmentController : ControllerBase
 
     [HttpGet("/api/departments/{id:Guid}/children")]
     public async Task<IActionResult> GetChildrenByRootId(
-        [FromQuery] Guid id,
+        [FromRoute] Guid id,
         [FromServices] ILogger<DepartmentController> logger,
         [FromServices] IQueryHandler<List<GetDepartmentsTreeResponse>, GetChildrenByRootIdQuery> handler,
         CancellationToken cancellationToken)
@@ -285,12 +285,12 @@ public class DepartmentController : ControllerBase
     // отдаёт цепочку предков в правильном порядке одним tree-запросом.
     [HttpGet("/api/departments/{id:Guid}/ancestors")]
     public async Task<IActionResult> GetDepartmentAncestors(
-        [FromQuery] Guid id,
+        [FromRoute] Guid id,
         [FromServices] ILogger<DepartmentController> logger,
-        [FromServices] IQueryHandler<List<GetDepartmentsTreeResponse>, GetChildrenByRootIdQuery> handler,
+        [FromServices] IQueryHandler<List<GetDepartmentsTreeResponse>, GetDepartmentAncestorsQuery> handler,
         CancellationToken cancellationToken)
     {
-        var query = new GetChildrenByRootIdQuery(id);
+        var query = new GetDepartmentAncestorsQuery(id);
 
         var result = await handler.HandleAsync(query, cancellationToken);
 
@@ -311,7 +311,7 @@ public class DepartmentController : ControllerBase
         return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
     }
 
-    [HttpGet("/api/departments/tree/search?q={search}")]
+    [HttpGet("/api/departments/tree/search")]
     public async Task<IActionResult> GetDepartmentsTreeBySearch(
         [FromQuery] string search,
         [FromServices] ILogger<DepartmentController> logger,

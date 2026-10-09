@@ -39,7 +39,8 @@ public sealed class Department
         UpdatedAt = DateTime.UtcNow;
         Parent = parent;
         _children = children;
-        _departmentLocations = locationIds.Select(locationId => new DepartmentLocation(this.Id, locationId)).ToList();
+        _departmentLocations = locationIds.Select(
+            locationId => new DepartmentLocation(this.Id, locationId)).ToList();
         _departmentPositions = departmentPositions.ToList();
     }
 
@@ -82,7 +83,9 @@ public sealed class Department
 
         if (departmentLocationsList.Count == 0)
         {
-            return Error.Validation("department.location", ["Department locations must contain at least one location"]);
+            return Error.Validation(
+                "department.location",
+                ["Department locations must contain at least one location"]);
         }
 
         var path = Path.CreateParent(identifier);

@@ -6,12 +6,15 @@ using DictionaryService.Application.Departments.Commands.DeleteDepartment;
 using DictionaryService.Application.Departments.Commands.DeletePosition;
 using DictionaryService.Application.Departments.Commands.TransferDepartment;
 using DictionaryService.Application.Departments.Commands.UpdateDepartmentLocations;
-using DictionaryService.Application.Departments.Queries;
+using DictionaryService.Application.Departments.Queries.GetChildrenByRootId;
+using DictionaryService.Application.Departments.Queries.GetDepartmentAncestors;
 using DictionaryService.Application.Departments.Queries.GetDepartmentById;
 using DictionaryService.Application.Departments.Queries.GetDepartmentsByFilters;
+using DictionaryService.Application.Departments.Queries.GetDepartmentsTreeBySearch;
 using DictionaryService.Contracts.Departments;
 using DictionaryService.Contracts.Departments.GetDepartmentById;
 using DictionaryService.Contracts.Departments.GetDepartmentsByFilters;
+using DictionaryService.Contracts.Departments.GetDepartmentsTree;
 using DictionaryService.Contracts.Shared;
 using DictionaryService.Domain.Shared;
 using DictionaryService.Presenters.ResponseExtensions;
@@ -222,6 +225,111 @@ public class DepartmentController : ControllerBase
         {
             logger.LogInformation(
                 "Ошибка получения подразделений: {ErrorMessage}",
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
+    }
+
+    [HttpGet("/api/departments/tree")]
+    public async Task<IActionResult> GetDepartmentsTree(
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] IQueryHandler<List<GetDepartmentsTreeResponse>> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation("Root узлы подразделений успешно получены");
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения root узлов подразделений: {ErrorMessage}",
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
+    }
+
+    [HttpGet("/api/departments/{id:Guid}/children")]
+    public async Task<IActionResult> GetChildrenByRootId(
+        [FromRoute] Guid id,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] IQueryHandler<List<GetDepartmentsTreeResponse>, GetChildrenByRootIdQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetChildrenByRootIdQuery(id);
+
+        var result = await handler.HandleAsync(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation(
+                "Дети подразделения {QueryId} успешно получены",
+                query.Id);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения детей подразделения {QueryId}: {ErrorMessage}",
+                query.Id,
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
+    }
+
+    // GET /departments/{id}/ancestors
+    // отдаёт цепочку предков в правильном порядке одним tree-запросом.
+    [HttpGet("/api/departments/{id:Guid}/ancestors")]
+    public async Task<IActionResult> GetDepartmentAncestors(
+        [FromRoute] Guid id,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] IQueryHandler<List<GetDepartmentsTreeResponse>, GetDepartmentAncestorsQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetDepartmentAncestorsQuery(id);
+
+        var result = await handler.HandleAsync(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation(
+                "Цепочка предков {QueryId} успешно получена",
+                query.Id);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения цепочки предков {QueryId}: {ErrorMessage}",
+                query.Id,
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
+    }
+
+    [HttpGet("/api/departments/tree/search")]
+    public async Task<IActionResult> GetDepartmentsTreeBySearch(
+        [FromQuery] string search,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] IQueryHandler<List<GetDepartmentsTreeResponse>, GetDepartmentsTreeBySearchQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetDepartmentsTreeBySearchQuery(search);
+
+        var result = await handler.HandleAsync(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation("Root узлы подразделений по search успешно получены");
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения root узлов подразделений по search : {ErrorMessage}",
                 string.Join(',', result.Error.Messages));
         }
 

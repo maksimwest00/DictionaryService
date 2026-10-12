@@ -60,7 +60,7 @@ public class GetDepartmentsByFiltersHandler : IQueryHandler<PagedResult<Departme
 
         if (!string.IsNullOrWhiteSpace(query.Search))
         {
-            conditions.Add("name ILIKE @search");
+            conditions.Add("LOWER(name) ILIKE @search");
             parameters.Add("@search", $"%{query.Search}%");
         }
 

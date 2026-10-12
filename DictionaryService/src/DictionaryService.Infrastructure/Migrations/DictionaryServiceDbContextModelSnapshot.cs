@@ -22,6 +22,7 @@ namespace DictionaryService.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "ltree");
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("DictionaryService.Domain.DepartmentLocations.DepartmentLocation", b =>
@@ -108,17 +109,6 @@ namespace DictionaryService.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
-
-                    b.ComplexProperty<Dictionary<string, object>>("Name", "DictionaryService.Domain.Departments.Department.Name#Name", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(150)
-                                .HasColumnType("character varying(150)")
-                                .HasColumnName("name");
-                        });
 
                     b.ComplexProperty<Dictionary<string, object>>("Path", "DictionaryService.Domain.Departments.Department.Path#Path", b1 =>
                         {
@@ -322,7 +312,29 @@ namespace DictionaryService.Infrastructure.Migrations
                                 .HasForeignKey("DepartmentId");
                         });
 
+                    b.OwnsOne("DictionaryService.Domain.Departments.Name", "Name", b1 =>
+                        {
+                            b1.Property<Guid>("DepartmentId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(150)
+                                .HasColumnType("character varying(150)")
+                                .HasColumnName("name");
+
+                            b1.HasKey("DepartmentId");
+
+                            b1.ToTable("departments");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DepartmentId");
+                        });
+
                     b.Navigation("Identifier")
+                        .IsRequired();
+
+                    b.Navigation("Name")
                         .IsRequired();
 
                     b.Navigation("Parent");

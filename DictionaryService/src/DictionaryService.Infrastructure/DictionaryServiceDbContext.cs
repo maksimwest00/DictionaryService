@@ -41,6 +41,7 @@ public class DictionaryServiceDbContext : DbContext, IReadDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresExtension("ltree");
+        modelBuilder.HasPostgresExtension("pg_trgm");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DictionaryServiceDbContext).Assembly);
 
         modelBuilder.Entity<Department>()

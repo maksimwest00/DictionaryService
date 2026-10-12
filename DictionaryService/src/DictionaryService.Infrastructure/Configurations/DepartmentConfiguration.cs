@@ -18,7 +18,7 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
             .IsRequired()
             .HasColumnName("id");
 
-        builder.ComplexProperty(d => d.Name, nb =>
+        builder.OwnsOne(d => d.Name, nb =>
         {
             nb.Property(t => t.Value)
                 .HasMaxLength(Name.NAME_MAX_LENGTH)

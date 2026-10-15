@@ -1,24 +1,39 @@
 ﻿using CSharpFunctionalExtensions;
 using DictionaryService.Application.Abstractions;
+using DictionaryService.Application.Validation.ValidationExtensions;
+using DictionaryService.Contracts.Departments.TransferDepartment;
 using DictionaryService.Domain.Shared;
+using FluentValidation;
+using FluentValidation.Results;
 
 namespace DictionaryService.Application.Departments.Commands.TransferDepartment;
 
-public class TransferDepartmentHandler : ICommandHandler<Guid, TransferDepartmentCommand>
+public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentResponse, TransferDepartmentCommand>
 {
     private readonly IDepartmentRepository _departmentRepository;
+    private readonly IValidator<TransferDepartmentCommand> _validator;
 
     public TransferDepartmentHandler(
-        IDepartmentRepository departmentRepository)
+        IDepartmentRepository departmentRepository,
+        IValidator<TransferDepartmentCommand> validator)
     {
         _departmentRepository = departmentRepository;
+        _validator = validator;
     }
 
-    public async Task<Result<Guid, Error>> HandleAsync(
+    public async Task<Result<TransferDepartmentResponse, Error>> HandleAsync(
         TransferDepartmentCommand command,
         CancellationToken cancellationToken)
     {
-        // Проверить, что существует ли подразделение с таким departmentId и оно активно
+        // parentId не равен departmentId;
+        ValidationResult? validationResult = await _validator.ValidateAsync(command, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToError();
+        }
+
+        // двигаемое подразделение существует и не soft-deleted;
         var departmentResult = await _departmentRepository.GetByIdAsync(
             command.DepartmentId,
             cancellationToken);
@@ -27,6 +42,22 @@ public class TransferDepartmentHandler : ICommandHandler<Guid, TransferDepartmen
         {
             return departmentResult.Error;
         }
+
+        // новый родитель либо null, либо существует и не soft-deleted;
+        if (command.Request.ParentId.HasValue)
+        {
+            if (!await _departmentRepository.ExistsAndActiveAsync(command.Request.ParentId.Value, cancellationToken))
+            {
+                return Error.NotFound(
+                    null,
+                    ["New parent is not exist or is not active"],
+                    command.Request.ParentId.Value);
+            }
+        }
+
+        // TODO
+        // новый родитель не находится внутри поддерева двигаемого узла;
+        // если родитель уже такой же, операция завершается как no-op без обновления БД.
 
         if (command.Request.ParentId.HasValue)
         {
@@ -53,10 +84,10 @@ public class TransferDepartmentHandler : ICommandHandler<Guid, TransferDepartmen
 
                 if (isDepartmentContainsResult.IsFailure)
                 {
-                    return Result.Failure<Guid, Error>(Error.NotFound(
+                    return Error.NotFound(
                         null,
                         ["New parent is children of department"],
-                        command.DepartmentId));
+                        command.DepartmentId);
                 }
 
                 await _departmentRepository.TransferAsync(
@@ -64,15 +95,13 @@ public class TransferDepartmentHandler : ICommandHandler<Guid, TransferDepartmen
                     newParentDepartmentResult.Value,
                     cancellationToken);
 
-                return command.DepartmentId;
-
-
+                return null as TransferDepartmentResponse;
             }
 
-            return Result.Failure<Guid, Error>(Error.NotFound(
+            return Error.NotFound(
                 null,
                 ["Department id equals new parent id"],
-                command.DepartmentId));
+                command.DepartmentId);
         }
 
         await _departmentRepository.TransferAsync(
@@ -80,7 +109,6 @@ public class TransferDepartmentHandler : ICommandHandler<Guid, TransferDepartmen
             null,
             cancellationToken);
 
-        return command.DepartmentId;
-
+        return null as TransferDepartmentResponse;
     }
 }

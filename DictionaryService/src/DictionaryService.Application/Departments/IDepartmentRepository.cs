@@ -31,11 +31,6 @@ public interface IDepartmentRepository
         Department newParent,
         CancellationToken cancellationToken);
 
-    Task<UnitResult<Error>> TransferAsync(
-        Department department,
-        Department? newParent,
-        CancellationToken cancellationToken);
-
     Task<UnitResult<Error>> AddPositionAsync(
         DepartmentPosition departmentPosition,
         CancellationToken cancellationToken);
@@ -46,5 +41,10 @@ public interface IDepartmentRepository
 
     Task<UnitResult<Error>> DeletePositionAsync(
         DepartmentPosition departmentPosition,
+        CancellationToken cancellationToken);
+
+    Task<UnitResult<Error>> TransferAsync(
+        Department department,
+        Department? newParent,
         CancellationToken cancellationToken);
 }

@@ -35,7 +35,7 @@ export function TodoList() {
 
       {tasks.map((task) => (
         <div key={task.id} className="flex flex-row items-center gap-x-2">
-          <span>{task.text}</span>
+          <span className={task.isCompleted ? 'line-through' : ''}>{task.text}</span>
           <Button onClick={() => toggleTaskIsCompleted(task.id)}>
             {task.isCompleted
               ? "Отметить невыполненной"

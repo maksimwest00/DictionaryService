@@ -27,7 +27,7 @@ export function TodoList() {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           className="border px-2 py-1"
-        />
+          onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
         <Button onClick={handleAdd}>Добавить задачу</Button>
       </div>
 

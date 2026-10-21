@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import AppShell from "@/widgets/app-shell/app-shell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,16 +15,18 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Directory Service",
-  description: "Directory Service Next App",
+  description: "Админка справочника Directory Service",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="ru"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-svh">
+        <AppShell>{children}</AppShell>
+      </body>
     </html>
   );
 }

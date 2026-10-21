@@ -1,0 +1,99 @@
+name: Publish Shared.Kernel
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/Shared/Shared.Kernel/**"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Версия пакета (например 0.1.0 или 0.2.0-preview-1). Пусто — взять из Shared.Kernel.csproj"
+        required: false
+        type: string
+
+env:
+  DOTNET_VERSION: "9.0.x"
+  PROJECT_PATH: "backend/Shared/Shared.Kernel/Shared.Kernel.csproj"
+  PACKAGE_ID: "MaksimWest00.SharedKernel"
+
+jobs:
+  publish:
+    name: Pack & Push Shared.Kernel
+    runs-on: ubuntu-latest
+    # Ручной запуск по ТЗ: на push в main job выполняется, но при желании можно
+    # переключить на when: manual-эквивалент через workflow_dispatch.
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # 1. Явно переданная версия (workflow_dispatch input)
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          # 2. Git-тег vX.Y.Z на текущем коммите
+          elif TAG=$(git describe --tags --exact-match --match 'v*' 2>/dev/null); then
+            VERSION="${TAG#v}"
+          # 3. Иначе — версия из .csproj
+          else
+            VERSION=$(grep -oP '(?<=<Version>)[^<]+' "$PROJECT_PATH" | head -n1)
+          fi
+
+          if [ -z "${VERSION:-}" ]; then
+            echo "::error::Не удалось определить версию пакета" >&2
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Определена версия: $VERSION"
+
+      - name: Restore
+        run: dotnet restore "$PROJECT_PATH"
+
+      - name: Build
+        run: dotnet build "$PROJECT_PATH" -c Release --no-restore /p:ContinuousIntegrationBuild=true
+
+      - name: Pack
+        run: >-
+          dotnet pack "$PROJECT_PATH"
+          -c Release
+          --no-build
+          -p:PackageVersion=${{ steps.version.outputs.version }}
+          -p:ContinuousIntegrationBuild=true
+          -o ./artifacts
+
+      - name: Show package contents
+        run: |
+          ls -la ./artifacts
+          for f in ./artifacts/*.nupkg; do
+            echo "== $f =="
+            unzip -l "$f"
+          done
+
+      - name: Push to GitHub Packages
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet nuget push ./artifacts/*.nupkg \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --api-key "$GITHUB_TOKEN" \
+            --skip-duplicate

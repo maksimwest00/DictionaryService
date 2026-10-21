@@ -1,0 +1,106 @@
+using CSharpFunctionalExtensions;
+using Shared.Core.Abstractions;
+using Shared.Core.Database;
+using DictionaryService.Application.Departments;
+using Shared.Core.Validation.ValidationExtensions;
+using DictionaryService.Domain.DepartmentPositions;
+using DictionaryService.Domain.Positions;
+using Shared.Kernel;
+using FluentValidation;
+using FluentValidation.Results;
+
+namespace DictionaryService.Application.Positions.CreatePosition;
+
+public class CreatePositionHandler : ICommandHandler<Guid, CreatePositionCommand>
+{
+    private readonly IDepartmentRepository _departmentRepository;
+    private readonly IPositionRepository _positionRepository;
+    private readonly IValidator<CreatePositionCommand> _validator;
+    private readonly ITransactionManager _transactionManager;
+
+    public CreatePositionHandler(
+        IDepartmentRepository departmentRepository,
+        IPositionRepository positionRepository,
+        IValidator<CreatePositionCommand> validator,
+        ITransactionManager transactionManager)
+    {
+        _departmentRepository = departmentRepository;
+        _positionRepository = positionRepository;
+        _validator = validator;
+        _transactionManager = transactionManager;
+    }
+
+    public async Task<Result<Guid, Error>> HandleAsync(
+        CreatePositionCommand command,
+        CancellationToken cancellationToken)
+    {
+        ValidationResult? validationResult = await _validator.ValidateAsync(command, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToError();
+        }
+
+        var namePositionResult = Name.Create(command.Request.Name);
+        var descriptionPositionResult = Description.Create(command.Request.Description);
+        var departmentIds = command.Request.DepartmentIds;
+
+        var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+
+        if (transactionScopeResult.IsFailure)
+        {
+            return transactionScopeResult.Error;
+        }
+
+        using var transactionScope = transactionScopeResult.Value;
+
+        if (await _positionRepository.IsExistPositionNameAsync(namePositionResult.Value.Value, cancellationToken))
+        {
+            transactionScope.Rollback();
+            return Result.Failure<Guid, Error>(Error.Conflict(null, ["Position name is exist and active"]));
+        }
+
+        bool isDepartmentsExist = await _departmentRepository.ExistsAsync(
+            departmentIds,
+            cancellationToken);
+
+        if (!isDepartmentsExist)
+        {
+            transactionScope.Rollback();
+            return Result.Failure<Guid, Error>(Error.NotFound(
+                null,
+                ["Departments not found"],
+                null));
+        }
+
+        var position = Position.Create(
+            namePositionResult.Value,
+            descriptionPositionResult.Value,
+            departmentIds);
+
+        var addPositionResult = await _positionRepository.AddAsync(position, cancellationToken);
+
+        if (addPositionResult.IsFailure)
+        {
+            transactionScope.Rollback();
+            return addPositionResult.Error;
+        }
+
+        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+
+        if (saveResult.IsFailure)
+        {
+            transactionScope.Rollback();
+            return saveResult.Error;
+        }
+
+        var commitedResult = transactionScope.Commit();
+
+        if (commitedResult.IsFailure)
+        {
+            return commitedResult.Error;
+        }
+
+        return addPositionResult.Value;
+    }
+}

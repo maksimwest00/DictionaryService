@@ -1,0 +1,338 @@
+using CSharpFunctionalExtensions;
+using DictionaryService.Application.Departments.Commands.AddPosition;
+using DictionaryService.Application.Departments.Commands.CreateDepartment;
+using DictionaryService.Application.Departments.Commands.DeleteDepartment;
+using DictionaryService.Application.Departments.Commands.DeletePosition;
+using DictionaryService.Application.Departments.Commands.TransferDepartment;
+using DictionaryService.Application.Departments.Commands.UpdateDepartmentLocations;
+using DictionaryService.Application.Departments.Queries.GetChildrenByRootId;
+using DictionaryService.Application.Departments.Queries.GetDepartmentAncestors;
+using DictionaryService.Application.Departments.Queries.GetDepartmentById;
+using DictionaryService.Application.Departments.Queries.GetDepartmentsByFilters;
+using DictionaryService.Application.Departments.Queries.GetDepartmentsTreeBySearch;
+using DictionaryService.Contracts.Departments;
+using DictionaryService.Contracts.Departments.GetDepartmentById;
+using DictionaryService.Contracts.Departments.GetDepartmentsByFilters;
+using DictionaryService.Contracts.Departments.GetDepartmentsTree;
+using DictionaryService.Contracts.Shared;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Shared.Core.Abstractions;
+using Shared.Framework.ResponseExtensions;
+using Shared.Kernel;
+
+namespace DictionaryService.Presenters.Departments;
+
+[ApiController]
+[Route("/api/departments")]
+public class DepartmentController : ControllerBase
+{
+    [HttpPost]
+    public async Task<IActionResult> CreateAsync(
+        [FromBody] CreateDepartmentRequest request,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] ICommandHandler<Guid, CreateDepartmentCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        CreateDepartmentCommand command = new(request);
+
+        Result<Guid, Error> createResult = await handler.HandleAsync(command, cancellationToken);
+
+        if (createResult.IsSuccess)
+        {
+            logger.LogInformation("Подразделение успешно создано с id: {CreateResultValue}", createResult.Value);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка создания подразделения: {ErrorMessage}",
+                string.Join(',', createResult.Error.Messages));
+        }
+
+        return createResult.IsFailure ? createResult.Error.ToResponse() : Ok(Envelope.Ok(createResult.Value));
+    }
+
+    [HttpPut]
+    [Route("/api/departments/{departmentId}/locations")]
+    public async Task<IActionResult> UpdateLocationsAsync(
+        [FromRoute] Guid departmentId,
+        [FromBody] UpdateDepartmentLocationsRequest request,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] ICommandHandler<Guid, UpdateDepartmentLocationsCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        UpdateDepartmentLocationsCommand command = new(departmentId, request);
+
+        Result<Guid, Error> updateResult = await handler.HandleAsync(command, cancellationToken);
+
+        if (updateResult.IsSuccess)
+        {
+            logger.LogInformation("Подразделение успешно обновлено {UpdateResultValue}", updateResult.Value);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка обновления подразделения: {ErrorMessage}",
+                string.Join(',', updateResult.Error.Messages));
+        }
+
+        return updateResult.IsFailure ? updateResult.Error.ToResponse() : Ok(Envelope.Ok(updateResult.Value));
+    }
+
+    [HttpPut]
+    [Route("/api/departments/{departmentId}/parent")]
+    public async Task<IActionResult> TransferDepartmentAsync(
+        [FromRoute] Guid departmentId,
+        [FromBody] TransferDepartmentRequest request,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] ICommandHandler<Guid, TransferDepartmentCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        TransferDepartmentCommand command = new TransferDepartmentCommand(departmentId, request);
+
+        var transferResult = await handler.HandleAsync(command, cancellationToken);
+
+        if (transferResult.IsSuccess)
+        {
+            logger.LogInformation("Подразделение успешно перемещено {UpdateResultValue}", transferResult.Value);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка перемещения подразделения: {ErrorMessage}",
+                string.Join(',', transferResult.Error.Messages));
+        }
+
+        return transferResult.IsFailure ? transferResult.Error.ToResponse() : Ok(Envelope.Ok(transferResult.Value));
+    }
+
+    [HttpDelete("{id:Guid}")]
+    public async Task<IActionResult> DeleteAsync(
+        [FromRoute] Guid id,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] ICommandHandler<DeleteDepartmentCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        DeleteDepartmentCommand command = new(id);
+
+        var deleteResult = await handler.HandleAsync(command, cancellationToken);
+
+        if (deleteResult.IsSuccess)
+        {
+            logger.LogInformation("Подразделение успешно удалено id: {id}", command.Id);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка удаления подразделения: {ErrorMessage}",
+                string.Join(',', deleteResult.Error.Messages));
+        }
+
+        return deleteResult.IsFailure ? deleteResult.Error.ToResponse() : Ok(Envelope.Ok());
+    }
+
+    [HttpPost("{deptId:Guid}/positions/{posId:Guid}")]
+    public async Task<IActionResult> AddPositionAsync(
+        [FromRoute] Guid deptId,
+        [FromRoute] Guid posId,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] ICommandHandler<Guid, AddPositionCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new AddPositionCommand(deptId, posId);
+
+        var addPositionResult = await handler.HandleAsync(command, cancellationToken);
+
+        if (addPositionResult.IsSuccess)
+        {
+            logger.LogInformation("Должность успешно привязана id: {id}", command.PosId);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка привязки должности: {ErrorMessage}",
+                string.Join(',', addPositionResult.Error.Messages));
+        }
+
+        return addPositionResult.IsFailure ? addPositionResult.Error.ToResponse() : Ok(Envelope.Ok(addPositionResult.Value));
+    }
+
+    [HttpDelete("{deptId:Guid}/positions/{posId:Guid}")]
+    public async Task<IActionResult> DeletePositionAsync(
+        [FromRoute] Guid deptId,
+        [FromRoute] Guid posId,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] ICommandHandler<Guid, DeletePositionCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new DeletePositionCommand(deptId, posId);
+
+        var deletePositionResult = await handler.HandleAsync(command, cancellationToken);
+
+        if (deletePositionResult.IsSuccess)
+        {
+            logger.LogInformation("Должность успешно отвязана id: {id}", command.PosId);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка отвязки должности: {ErrorMessage}",
+                string.Join(',', deletePositionResult.Error.Messages));
+        }
+
+        return deletePositionResult.IsFailure ? deletePositionResult.Error.ToResponse() : Ok(Envelope.Ok(deletePositionResult.Value));
+    }
+
+    [HttpGet("{id:Guid}")]
+    public async Task<IActionResult> GetByIdAsync(
+        [FromRoute] Guid id,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] IQueryHandler<GetDepartmentByIdResponse, GetDepartmentByIdQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetDepartmentByIdQuery(id);
+
+        var result = await handler.HandleAsync(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation("Подразделение успешно получено id: {id}", query.Id);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения подразделения: {ErrorMessage}",
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetDepartmentsByFiltersAsync(
+        [FromQuery] GetDepartmentsByFiltersQuery query,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] IQueryHandler<PagedResult<DepartmentListItemResponse>, GetDepartmentsByFiltersQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation("Подразделения успешно получены");
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения подразделений: {ErrorMessage}",
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
+    }
+
+    [HttpGet("/api/departments/tree")]
+    public async Task<IActionResult> GetDepartmentsTree(
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] IQueryHandler<List<GetDepartmentsTreeResponse>> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation("Root узлы подразделений успешно получены");
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения root узлов подразделений: {ErrorMessage}",
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
+    }
+
+    [HttpGet("/api/departments/{id:Guid}/children")]
+    public async Task<IActionResult> GetChildrenByRootId(
+        [FromRoute] Guid id,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] IQueryHandler<List<GetDepartmentsTreeResponse>, GetChildrenByRootIdQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetChildrenByRootIdQuery(id);
+
+        var result = await handler.HandleAsync(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation(
+                "Дети подразделения {QueryId} успешно получены",
+                query.Id);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения детей подразделения {QueryId}: {ErrorMessage}",
+                query.Id,
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
+    }
+
+    // GET /departments/{id}/ancestors
+    // отдаёт цепочку предков в правильном порядке одним tree-запросом.
+    [HttpGet("/api/departments/{id:Guid}/ancestors")]
+    public async Task<IActionResult> GetDepartmentAncestors(
+        [FromRoute] Guid id,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] IQueryHandler<List<GetDepartmentsTreeResponse>, GetDepartmentAncestorsQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetDepartmentAncestorsQuery(id);
+
+        var result = await handler.HandleAsync(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation(
+                "Цепочка предков {QueryId} успешно получена",
+                query.Id);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения цепочки предков {QueryId}: {ErrorMessage}",
+                query.Id,
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
+    }
+
+    [HttpGet("/api/departments/tree/search")]
+    public async Task<IActionResult> GetDepartmentsTreeBySearch(
+        [FromQuery] string search,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] IQueryHandler<List<GetDepartmentsTreeResponse>, GetDepartmentsTreeBySearchQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetDepartmentsTreeBySearchQuery(search);
+
+        var result = await handler.HandleAsync(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation("Root узлы подразделений по search успешно получены");
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения root узлов подразделений по search : {ErrorMessage}",
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
+    }
+}

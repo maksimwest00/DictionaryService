@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+      <PackageId>MaksimWest00.SharedKernel</PackageId>
+      <Version>0.1.0</Version>
+      <Authors>maksimwest00</Authors>
+      <Company>maksimwest00</Company>
+      <PackageDescription>Shared Kernel</PackageDescription>
+      <RepositoryUrl>https://github.com/maksimwest00/DictionaryService</RepositoryUrl>
+    </PropertyGroup>
+
+</Project>

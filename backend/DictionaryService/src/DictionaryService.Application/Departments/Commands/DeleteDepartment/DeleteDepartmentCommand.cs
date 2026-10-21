@@ -1,4 +1,4 @@
-using Shared.Core.Abstractions;
+﻿using Shared.Core.Abstractions;
 
 namespace DictionaryService.Application.Departments.Commands.DeleteDepartment;
 

@@ -1,4 +1,4 @@
-using DictionaryService.Application;
+﻿using DictionaryService.Application;
 using DictionaryService.Infrastructure;
 using Shared.Framework.Logging;
 

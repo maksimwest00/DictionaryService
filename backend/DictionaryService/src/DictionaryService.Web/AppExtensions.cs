@@ -1,4 +1,4 @@
-using Serilog;
+﻿using Serilog;
 using Shared.Framework.Middlewares;
 
 namespace DictionaryService.Web;

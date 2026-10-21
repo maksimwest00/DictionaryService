@@ -1,4 +1,4 @@
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using DictionaryService.Domain.DepartmentLocations;
 using DictionaryService.Domain.DepartmentPositions;
 using Shared.Kernel;

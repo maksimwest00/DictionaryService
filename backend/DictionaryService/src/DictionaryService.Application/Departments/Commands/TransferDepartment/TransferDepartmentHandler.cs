@@ -1,4 +1,4 @@
-using CSharpFunctionalExtensions;
+п»їusing CSharpFunctionalExtensions;
 using Shared.Core.Abstractions;
 using Shared.Kernel;
 
@@ -18,7 +18,7 @@ public class TransferDepartmentHandler : ICommandHandler<Guid, TransferDepartmen
         TransferDepartmentCommand command,
         CancellationToken cancellationToken)
     {
-        // Проверить, что существует ли подразделение с таким departmentId и оно активно
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ departmentId пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         var departmentResult = await _departmentRepository.GetByIdAsync(
             command.DepartmentId,
             cancellationToken);
@@ -30,7 +30,7 @@ public class TransferDepartmentHandler : ICommandHandler<Guid, TransferDepartmen
 
         if (command.Request.ParentId.HasValue)
         {
-            // Проверить, что новый parentId (если не null) существует, активен и не совпадает с departmentId
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ parentId (пїЅпїЅпїЅпїЅ пїЅпїЅ null) пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ departmentId
             if (command.Request.ParentId != command.DepartmentId)
             {
                 var newParentDepartmentResult = await _departmentRepository.GetByIdAsync(
@@ -45,7 +45,7 @@ public class TransferDepartmentHandler : ICommandHandler<Guid, TransferDepartmen
                         command.DepartmentId);
                 }
 
-                // Нельзя выбрать родителем своё "дочернее" подразделение (чтобы не было зацикливания структуры)
+                // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ" пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
                 var isDepartmentContainsResult = await _departmentRepository.IsDepartmentContains(
                     departmentResult.Value,
                     newParentDepartmentResult.Value,

@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using DictionaryService.IntegrationTests.Infrastructure;
 using Shared.Framework.ResponseExtensions;

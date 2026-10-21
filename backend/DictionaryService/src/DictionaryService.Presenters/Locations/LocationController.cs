@@ -1,4 +1,4 @@
-using DictionaryService.Application.Departments.Queries.GetDepartmentsByFilters;
+﻿using DictionaryService.Application.Departments.Queries.GetDepartmentsByFilters;
 using DictionaryService.Application.Locations.Commands.CreateLocation;
 using DictionaryService.Application.Locations.Commands.DeleteLocation;
 using DictionaryService.Application.Locations.Queries.GetLocationById;

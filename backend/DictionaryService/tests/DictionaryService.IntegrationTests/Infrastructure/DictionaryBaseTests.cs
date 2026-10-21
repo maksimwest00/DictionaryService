@@ -1,4 +1,4 @@
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using DictionaryService.Application.Departments.Commands.CreateDepartment;
 using DictionaryService.Contracts.Departments;
 using DictionaryService.Domain.Departments;

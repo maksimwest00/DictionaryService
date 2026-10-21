@@ -1,4 +1,4 @@
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using Dapper;
 using DictionaryService.Application.Departments;
 using DictionaryService.Domain.DepartmentLocations;

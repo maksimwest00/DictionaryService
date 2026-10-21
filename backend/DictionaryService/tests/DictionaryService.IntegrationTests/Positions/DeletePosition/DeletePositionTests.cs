@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using DictionaryService.Domain.Positions;
 using DictionaryService.IntegrationTests.Infrastructure;
 using Microsoft.EntityFrameworkCore;

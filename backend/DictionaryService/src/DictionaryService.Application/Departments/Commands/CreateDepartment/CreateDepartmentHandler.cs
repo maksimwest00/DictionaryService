@@ -1,4 +1,4 @@
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using Shared.Core.Abstractions;
 using Shared.Core.Database;
 using DictionaryService.Application.Locations;

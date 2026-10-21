@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using CSharpFunctionalExtensions;
 using Dapper;
 using Shared.Core.Abstractions;

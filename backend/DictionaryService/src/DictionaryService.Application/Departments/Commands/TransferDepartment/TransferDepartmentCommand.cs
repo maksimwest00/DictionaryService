@@ -1,4 +1,4 @@
-using Shared.Core.Abstractions;
+﻿using Shared.Core.Abstractions;
 using DictionaryService.Contracts.Departments;
 
 namespace DictionaryService.Application.Departments.Commands.TransferDepartment;

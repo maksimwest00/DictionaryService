@@ -1,4 +1,4 @@
-using Shared.Core.Validation;
+﻿using Shared.Core.Validation;
 using DictionaryService.Domain.Positions;
 using FluentValidation;
 

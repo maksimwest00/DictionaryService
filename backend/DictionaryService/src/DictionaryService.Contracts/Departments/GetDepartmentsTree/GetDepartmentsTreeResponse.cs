@@ -1,4 +1,4 @@
-namespace DictionaryService.Contracts.Departments.GetDepartmentsTree;
+﻿namespace DictionaryService.Contracts.Departments.GetDepartmentsTree;
 
 public record GetDepartmentsTreeResponse(
     Guid Id,        // id uuid

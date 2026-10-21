@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using DictionaryService.Domain.Departments;
 using DictionaryService.IntegrationTests.Infrastructure;

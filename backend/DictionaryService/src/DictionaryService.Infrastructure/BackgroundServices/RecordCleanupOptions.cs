@@ -1,4 +1,4 @@
-namespace DictionaryService.Infrastructure.BackgroundServices;
+﻿namespace DictionaryService.Infrastructure.BackgroundServices;
 
 public class RecordCleanupOptions
 {

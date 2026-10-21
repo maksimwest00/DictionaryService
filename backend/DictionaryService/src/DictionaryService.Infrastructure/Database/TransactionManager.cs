@@ -1,4 +1,4 @@
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using Shared.Core.Database;
 using Shared.Kernel;
 using Microsoft.EntityFrameworkCore.Storage;

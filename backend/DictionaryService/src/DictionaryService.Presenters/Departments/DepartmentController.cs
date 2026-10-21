@@ -1,4 +1,4 @@
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using DictionaryService.Application.Departments.Commands.AddPosition;
 using DictionaryService.Application.Departments.Commands.CreateDepartment;
 using DictionaryService.Application.Departments.Commands.DeleteDepartment;

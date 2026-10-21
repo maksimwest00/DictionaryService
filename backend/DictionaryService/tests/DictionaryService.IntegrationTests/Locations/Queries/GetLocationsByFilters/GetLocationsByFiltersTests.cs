@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using DictionaryService.Contracts.Locations.GetLocationsByFilters;
 using DictionaryService.Contracts.Shared;

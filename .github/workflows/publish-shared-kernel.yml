@@ -1,4 +1,4 @@
-name: Publish Shared.Kernel
+﻿name: Publish Shared.Kernel
 
 on:
   push:

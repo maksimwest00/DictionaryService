@@ -1,4 +1,4 @@
-using Shared.Core.Validation;
+п»їusing Shared.Core.Validation;
 using DictionaryService.Domain.Departments;
 using FluentValidation;
 
@@ -15,8 +15,8 @@ public class CreateDepartmentCommandValidator : AbstractValidator<CreateDepartme
             .MustBeValueObject(Identifier.Create);
 
         RuleFor(x => x.Request.LocationIds)
-            .NotEmpty().WithMessage("LocationIds не может быть пустым массивом")
-            .Must(HaveNoDuplicates).WithMessage("LocationIds не должен содержать дубликатов");
+            .NotEmpty().WithMessage("LocationIds пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ")
+            .Must(HaveNoDuplicates).WithMessage("LocationIds пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
     }
 
     private bool HaveNoDuplicates(Guid[] locationIds)

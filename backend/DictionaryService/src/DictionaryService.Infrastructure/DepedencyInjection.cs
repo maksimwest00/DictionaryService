@@ -1,4 +1,4 @@
-using DictionaryService.Application.Database;
+﻿using DictionaryService.Application.Database;
 using DictionaryService.Application.Departments;
 using DictionaryService.Application.Locations;
 using DictionaryService.Application.Positions;

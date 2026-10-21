@@ -1,4 +1,4 @@
-using System.Data.Common;
+﻿using System.Data.Common;
 using DictionaryService.Application.Database;
 using DictionaryService.Infrastructure;
 using DictionaryService.Infrastructure.BackgroundServices;

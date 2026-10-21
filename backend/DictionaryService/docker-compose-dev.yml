@@ -1,4 +1,4 @@
-services:
+﻿services:
   dictionary-service:
     container_name: dictionary-service
     build:

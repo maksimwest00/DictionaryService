@@ -1,4 +1,4 @@
-using CSharpFunctionalExtensions;
+п»їusing CSharpFunctionalExtensions;
 using DictionaryService.Application.Positions;
 using DictionaryService.Domain.Positions;
 using Shared.Kernel;
@@ -34,7 +34,7 @@ public class PositionRepository : IPositionRepository
         {
             _logger.LogError(
                 ex,
-                "Ошибка при сохранении должности в БД (PositionId={PositionId})",
+                "пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅ (PositionId={PositionId})",
                 position.Id);
 
             return Result.Failure<Guid, Error>(Error.Conflict(

@@ -1,4 +1,4 @@
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using Shared.Kernel;
 
 namespace DictionaryService.Domain.Locations;

@@ -1,4 +1,4 @@
-using System.Data;
+ï»¿using System.Data;
 using System.Data.Common;
 using CSharpFunctionalExtensions;
 using Dapper;
@@ -74,7 +74,7 @@ public class GetDepartmentsByFiltersHandler : IQueryHandler<PagedResult<Departme
 
         string sortColumn = SortColumns.TryGetValue(query.SortBy ?? string.Empty, out string? col)
             ? col
-            : "created_at"; // äåôîëò
+            : "created_at"; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
         string sortDir = SortDirections.TryGetValue(query.SortDir ?? string.Empty, out string? dir)
             ? dir

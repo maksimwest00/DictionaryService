@@ -1,4 +1,4 @@
-using DictionaryService.Application.Positions.CreatePosition;
+﻿using DictionaryService.Application.Positions.CreatePosition;
 using DictionaryService.Application.Positions.DeletePosition;
 using DictionaryService.Application.Positions.RenamePosition;
 using DictionaryService.Contracts.Positions;

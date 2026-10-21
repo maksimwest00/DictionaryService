@@ -1,0 +1,56 @@
+﻿using DictionaryService.Application.Database;
+using DictionaryService.Domain.DepartmentLocations;
+using DictionaryService.Domain.DepartmentPositions;
+using DictionaryService.Domain.Departments;
+using DictionaryService.Domain.Locations;
+using DictionaryService.Domain.Positions;
+using Microsoft.EntityFrameworkCore;
+
+namespace DictionaryService.Infrastructure;
+
+public class DictionaryServiceDbContext : DbContext, IReadDbContext
+{
+    private readonly string _connectionString;
+
+    public DictionaryServiceDbContext(string connectionString)
+    {
+        _connectionString = connectionString;
+    }
+
+    public DbSet<Department> Departments => Set<Department>();
+
+    public DbSet<DepartmentLocation> DepartmentLocations => Set<DepartmentLocation>();
+
+    public DbSet<DepartmentPosition> DepartmentPositions => Set<DepartmentPosition>();
+
+    public DbSet<Location> Locations => Set<Location>();
+
+    public DbSet<Position> Positions => Set<Position>();
+
+    public IQueryable<Location> LocationsRead => Set<Location>().AsNoTracking();
+
+    public IQueryable<Department> DepartmentsRead => Set<Department>().AsNoTracking();
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        optionsBuilder.UseNpgsql(_connectionString);
+        optionsBuilder.LogTo(Console.WriteLine);
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.HasPostgresExtension("ltree");
+        modelBuilder.HasPostgresExtension("pg_trgm");
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(DictionaryServiceDbContext).Assembly);
+
+        modelBuilder.Entity<Department>()
+            .HasQueryFilter(d => d.IsActive);
+
+        modelBuilder.Entity<Location>()
+            .HasQueryFilter(d => d.IsActive);
+
+        modelBuilder.Entity<Position>()
+            .HasQueryFilter(d => d.IsActive);
+    }
+}

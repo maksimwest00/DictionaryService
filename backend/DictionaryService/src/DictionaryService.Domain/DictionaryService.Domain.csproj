@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="CSharpFunctionalExtensions"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MaksimWest00.SharedKernel" />
+  </ItemGroup>
+
+</Project>

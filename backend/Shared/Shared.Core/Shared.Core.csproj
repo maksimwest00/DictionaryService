@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+      <PackageReference Include="CSharpFunctionalExtensions" />
+      <PackageReference Include="FluentValidation" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+      <PackageReference Include="Scrutor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Shared.Kernel\Shared.Kernel.csproj" />
+    </ItemGroup>
+
+  <PropertyGroup>
+    <PackageId>MaksimWest00.SharedCore</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>maksimwest00</Authors>
+    <Company>maksimwest00</Company>
+    <PackageDescription>Shared Core</PackageDescription>
+    <RepositoryUrl>https://github.com/maksimwest00/DictionaryService</RepositoryUrl>
+  </PropertyGroup>
+
+</Project>

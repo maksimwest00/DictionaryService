@@ -1,6 +1,7 @@
-﻿using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions;
 using Dapper;
 using DictionaryService.Application.Departments;
+using DictionaryService.Contracts.Departments.TransferDepartment;
 using DictionaryService.Domain.DepartmentLocations;
 using DictionaryService.Domain.DepartmentPositions;
 using DictionaryService.Domain.Departments;
@@ -70,7 +71,7 @@ public class DepartmentRepository : IDepartmentRepository
 
         if (position is null)
         {
-            return Error.NotFound(null, ["Department not found"], id);
+            return Error.NotFound("department.not_found", ["Department not found"], id);
         }
 
         return position;
@@ -215,38 +216,80 @@ public class DepartmentRepository : IDepartmentRepository
         return UnitResult.Success<Error>();
     }
 
-    public async Task<UnitResult<Error>> TransferAsync(
+    public async Task<Result<TransferDepartmentResponse, Error>> TransferAsync(
         Department department,
         Department? newParent,
         CancellationToken cancellationToken)
     {
         var connection = _dbContext.Database.GetDbConnection();
 
-        const string query = """
-                             UPDATE departments
-                             SET path = @newPath::ltree || subpath(path, depth),
-                                 parent_id = @newParentId,
-                                 depth = nlevel(@newPath::ltree)
-                             WHERE path = @oldPath::ltree;
+        string query;
 
-                             UPDATE departments
-                             SET path = @newPath::ltree || subpath(path, depth - 1),
-                                 depth = nlevel(@newPath::ltree) + (nlevel(@oldPath::ltree) - 1)
-                             WHERE path <@ @oldPath::ltree
-                               AND path != @oldPath::ltree;
-                             """;
+        if (newParent is not null)
+        {
+            query = """
+                    BEGIN;
+                    UPDATE departments
+                    SET path = @newPath::ltree || subpath(path, depth),
+                        parent_id = @newParentId,
+                        depth = nlevel(@newPath::ltree)
+                    WHERE path = @oldPath::ltree;
 
-        await connection.ExecuteAsync(
-            query,
-            param: new
-            {
-                id = department.Id,
-                oldPath = department.Path.Value,
-                newPath = newParent?.Path.Value,
-                newParentId = newParent?.Id,
-            });
+                    UPDATE departments
+                    SET path = @newPath::ltree || subpath(path, depth - 1),
+                        depth = nlevel(@newPath::ltree) + (nlevel(@oldPath::ltree) - 1)
+                    WHERE path <@ @oldPath::ltree
+                      AND path != @oldPath::ltree;
+                    COMMIT;
+                    """;
+        }
+        else
+        {
+            query = """
+                    BEGIN;
+                    UPDATE departments
+                    SET path = subpath(path, depth),
+                        parent_id = NULL,
+                        depth = 0
+                    WHERE path = @oldPath::ltree;
 
-        return UnitResult.Success<Error>();
+                    UPDATE departments
+                    SET path = subpath(@oldPath::ltree, nlevel(@oldPath::ltree) - 1) || subpath(path, nlevel(@oldPath::ltree)),
+                        depth = nlevel(path) - nlevel(@oldPath::ltree) + 1
+                    WHERE path <@ @oldPath::ltree
+                      AND path != @oldPath::ltree;
+                    COMMIT;
+                    """;
+        }
+
+        try
+        {
+            await connection.ExecuteAsync(
+                query,
+                param: new
+                {
+                    id = department.Id,
+                    oldPath = department.Path.Value,
+                    newPath = newParent?.Path.Value,
+                    newParentId = newParent?.Id,
+                });
+        }
+        catch
+        {
+            await connection.ExecuteAsync("ROLLBACK");
+            throw;
+        }
+
+        var departmentAfterUpdate = await _dbContext.Departments
+            .FirstAsync(
+                x => x.Id == department.Id,
+                cancellationToken);
+
+        return new TransferDepartmentResponse(
+            departmentAfterUpdate.Id,
+            departmentAfterUpdate.ParentId,
+            departmentAfterUpdate.Path.Value,
+            departmentAfterUpdate.Depth,
+            departmentAfterUpdate.UpdatedAt);
     }
-
 }

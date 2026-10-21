@@ -4,10 +4,10 @@ using DictionaryService.Application.Departments;
 using DictionaryService.Domain.DepartmentLocations;
 using DictionaryService.Domain.DepartmentPositions;
 using DictionaryService.Domain.Departments;
-using Shared.Kernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using Shared.Kernel;
 using Path = DictionaryService.Domain.Departments.Path;
 
 namespace DictionaryService.Infrastructure.Repositories;
@@ -151,40 +151,6 @@ public class DepartmentRepository : IDepartmentRepository
         }
     }
 
-    public async Task<UnitResult<Error>> TransferAsync(
-        Department department,
-        Department? newParent,
-        CancellationToken cancellationToken)
-    {
-        var connection = _dbContext.Database.GetDbConnection();
-
-        const string query = """
-                             UPDATE departments
-                             SET path = @newPath::ltree || subpath(path, depth),
-                                 parent_id = @newParentId,
-                                 depth = nlevel(@newPath::ltree)
-                             WHERE path = @oldPath::ltree;
-
-                             UPDATE departments
-                             SET path = @newPath::ltree || subpath(path, depth - 1),
-                                 depth = nlevel(@newPath::ltree) + (nlevel(@oldPath::ltree) - 1)
-                             WHERE path <@ @oldPath::ltree
-                               AND path != @oldPath::ltree;
-                             """;
-
-        await connection.ExecuteAsync(
-            query,
-            param: new
-            {
-                id = department.Id,
-                oldPath = department.Path.Value,
-                newPath = newParent?.Path.Value,
-                newParentId = newParent?.Id,
-            });
-
-        return UnitResult.Success<Error>();
-    }
-
     public async Task<UnitResult<Error>> AddPositionAsync(
         DepartmentPosition departmentPosition,
         CancellationToken cancellationToken)
@@ -248,4 +214,39 @@ public class DepartmentRepository : IDepartmentRepository
 
         return UnitResult.Success<Error>();
     }
+
+    public async Task<UnitResult<Error>> TransferAsync(
+        Department department,
+        Department? newParent,
+        CancellationToken cancellationToken)
+    {
+        var connection = _dbContext.Database.GetDbConnection();
+
+        const string query = """
+                             UPDATE departments
+                             SET path = @newPath::ltree || subpath(path, depth),
+                                 parent_id = @newParentId,
+                                 depth = nlevel(@newPath::ltree)
+                             WHERE path = @oldPath::ltree;
+
+                             UPDATE departments
+                             SET path = @newPath::ltree || subpath(path, depth - 1),
+                                 depth = nlevel(@newPath::ltree) + (nlevel(@oldPath::ltree) - 1)
+                             WHERE path <@ @oldPath::ltree
+                               AND path != @oldPath::ltree;
+                             """;
+
+        await connection.ExecuteAsync(
+            query,
+            param: new
+            {
+                id = department.Id,
+                oldPath = department.Path.Value,
+                newPath = newParent?.Path.Value,
+                newParentId = newParent?.Id,
+            });
+
+        return UnitResult.Success<Error>();
+    }
+
 }

@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using DictionaryService.Contracts.Departments.GetDepartmentById;
 using DictionaryService.IntegrationTests.Infrastructure;

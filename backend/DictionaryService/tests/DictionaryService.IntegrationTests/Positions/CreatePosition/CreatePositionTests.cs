@@ -1,4 +1,4 @@
-п»їusing System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using DictionaryService.Contracts.Positions;
 using DictionaryService.Domain.Departments;
@@ -20,14 +20,14 @@ public class CreatePositionTests : DictionaryBaseTests
     public async Task CreatePosition_With_Valid_Data_Should_Succeed()
     {
         // Arrange
-        Guid locationId = await CreateLocationDb("Р›РѕРєР°С†РёСЏ 1");
+        Guid locationId = await CreateLocationDb("Локация 1");
         Guid departmentId = await CreateDepartmentDb(
             locationId,
-            "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ",
+            "Подразделение",
             "aaa");
         CancellationToken cancellationToken = CancellationToken.None;
 
-        string uniquePositionName = $"РџРѕР·РёС†РёСЏ_{Guid.NewGuid()}";
+        string uniquePositionName = $"Позиция_{Guid.NewGuid()}";
 
         // Act
         using var client = this.CreateClient();
@@ -35,7 +35,7 @@ public class CreatePositionTests : DictionaryBaseTests
         Guid[] departmentIds = [departmentId];
         CreatePositionRequest request = new(
             uniquePositionName,
-            "РћРїРёСЃР°РЅРёРµ",
+            "Описание",
             departmentIds);
 
         using var response = await client.PostAsJsonAsync(
@@ -58,7 +58,7 @@ public class CreatePositionTests : DictionaryBaseTests
             Assert.NotNull(envelope);
             Assert.NotEqual(Guid.Empty, envelope.Result);
             Assert.Equal(uniquePositionName, position.Name.Value);
-            Assert.Equal("РћРїРёСЃР°РЅРёРµ", position.Description.Value);
+            Assert.Equal("Описание", position.Description.Value);
             Assert.Single(position.DepartmentPositions);
             Assert.Equal(departmentId, position.DepartmentPositions.First().DepartmentId);
             Assert.NotEqual(Guid.Empty, position.DepartmentPositions.First().Id);
@@ -72,21 +72,21 @@ public class CreatePositionTests : DictionaryBaseTests
     public async Task CreatePosition_With_Duplicate_Name_Should_Return_Conflict()
     {
         // Arrange
-        Guid locationId = await CreateLocationDb("Р›РѕРєР°С†РёСЏ 1");
+        Guid locationId = await CreateLocationDb("Локация 1");
         Guid departmentId = await CreateDepartmentDb(
             locationId,
-            "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ",
+            "Подразделение",
             "aaa");
         CancellationToken cancellationToken = CancellationToken.None;
 
-        string positionName = $"РџРѕР·РёС†РёСЏ_{Guid.NewGuid()}";
+        string positionName = $"Позиция_{Guid.NewGuid()}";
 
         // Create first position
         using var client = this.CreateClient();
 
         CreatePositionRequest request1 = new(
             positionName,
-            "РћРїРёСЃР°РЅРёРµ",
+            "Описание",
             [departmentId]);
 
         await client.PostAsJsonAsync(
@@ -97,7 +97,7 @@ public class CreatePositionTests : DictionaryBaseTests
         // Act - try to create with same name
         CreatePositionRequest request2 = new(
             positionName,
-            "РћРїРёСЃР°РЅРёРµ2",
+            "Описание2",
             [departmentId]);
 
         using var response = await client.PostAsJsonAsync(
@@ -120,8 +120,8 @@ public class CreatePositionTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreatePositionRequest request = new(
-            "РџРѕР·РёС†РёСЏ",
-            "РћРїРёСЃР°РЅРёРµ",
+            "Позиция",
+            "Описание",
             [nonExistentDepartmentId]);
 
         using var response = await client.PostAsJsonAsync(
@@ -143,8 +143,8 @@ public class CreatePositionTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreatePositionRequest request = new(
-            "РџРѕР·РёС†РёСЏ",
-            "РћРїРёСЃР°РЅРёРµ",
+            "Позиция",
+            "Описание",
             Array.Empty<Guid>());
 
         using var response = await client.PostAsJsonAsync(
@@ -167,7 +167,7 @@ public class CreatePositionTests : DictionaryBaseTests
 
         CreatePositionRequest request = new(
             "",
-            "РћРїРёСЃР°РЅРёРµ",
+            "Описание",
             [Guid.NewGuid()]);
 
         using var response = await client.PostAsJsonAsync(
@@ -190,7 +190,7 @@ public class CreatePositionTests : DictionaryBaseTests
 
         CreatePositionRequest request = new(
             "ab",
-            "РћРїРёСЃР°РЅРёРµ",
+            "Описание",
             [Guid.NewGuid()]);
 
         using var response = await client.PostAsJsonAsync(
@@ -214,7 +214,7 @@ public class CreatePositionTests : DictionaryBaseTests
 
         CreatePositionRequest request = new(
             longName,
-            "РћРїРёСЃР°РЅРёРµ",
+            "Описание",
             [Guid.NewGuid()]);
 
         using var response = await client.PostAsJsonAsync(
@@ -237,7 +237,7 @@ public class CreatePositionTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreatePositionRequest request = new(
-            "РџРѕР·РёС†РёСЏ",
+            "Позиция",
             longDescription,
             [Guid.NewGuid()]);
 
@@ -261,8 +261,8 @@ public class CreatePositionTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreatePositionRequest request = new(
-            "РџРѕР·РёС†РёСЏ",
-            "РћРїРёСЃР°РЅРёРµ",
+            "Позиция",
+            "Описание",
             [departmentId, departmentId]);
 
         using var response = await client.PostAsJsonAsync(

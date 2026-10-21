@@ -1,4 +1,4 @@
-п»їusing System.Net.Http.Json;
+using System.Net.Http.Json;
 using DictionaryService.Application.Departments.Commands.CreateDepartment;
 using DictionaryService.Contracts.Departments;
 using DictionaryService.Domain.Departments;
@@ -62,17 +62,17 @@ public class DictionaryBaseTests : IClassFixture<DictionaryTestWebFactory>, IAsy
         await action(dbContext);
     }
 
-    protected async Task<Guid> CreateLocationDb(string name = "Р›РѕРєР°С†РёСЏ")
+    protected async Task<Guid> CreateLocationDb(string name = "Локация")
     {
         return await ExecuteInDb(async db =>
         {
             Location location = new(
                 Name.Create(name).Value,
                 Address.Create(
-                    "Р“РѕСЂРѕРґ",
-                    "РЈР»РёС†Р°",
-                    "Р”РѕРј",
-                    "РќРѕРјРµСЂ РєРІР°СЂС‚РёСЂС‹").Value,
+                    "Город",
+                    "Улица",
+                    "Дом",
+                    "Номер квартиры").Value,
                 "TimeZone");
 
             db.Locations.Add(location);
@@ -82,7 +82,7 @@ public class DictionaryBaseTests : IClassFixture<DictionaryTestWebFactory>, IAsy
         });
     }
 
-    protected async Task<Guid> CreateDepartmentDb(Guid locationId, string name = "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ", string identifier = "ppp")
+    protected async Task<Guid> CreateDepartmentDb(Guid locationId, string name = "Подразделение", string identifier = "ppp")
     {
         return await ExecuteInDb(async db =>
         {
@@ -119,7 +119,7 @@ public class DictionaryBaseTests : IClassFixture<DictionaryTestWebFactory>, IAsy
         response.EnsureSuccessStatusCode();
     }
 
-    protected async Task<Guid> CreatePosition(string name = "Р”РѕР»Р¶РЅРѕСЃС‚СЊ", string description = "РћРїРёСЃР°РЅРёРµ")
+    protected async Task<Guid> CreatePosition(string name = "Должность", string description = "Описание")
     {
         return await ExecuteInDb(async db =>
         {

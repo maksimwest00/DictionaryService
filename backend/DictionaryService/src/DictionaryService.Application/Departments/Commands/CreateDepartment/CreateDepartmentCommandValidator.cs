@@ -15,8 +15,8 @@ public class CreateDepartmentCommandValidator : AbstractValidator<CreateDepartme
             .MustBeValueObject(Identifier.Create);
 
         RuleFor(x => x.Request.LocationIds)
-            .NotEmpty().WithMessage("LocationIds �� ����� ���� ������ ��������")
-            .Must(HaveNoDuplicates).WithMessage("LocationIds �� ������ ��������� ����������");
+            .NotEmpty().WithMessage("LocationIds не может быть пустым массивом")
+            .Must(HaveNoDuplicates).WithMessage("LocationIds не должен содержать дубликатов");
     }
 
     private bool HaveNoDuplicates(Guid[] locationIds)

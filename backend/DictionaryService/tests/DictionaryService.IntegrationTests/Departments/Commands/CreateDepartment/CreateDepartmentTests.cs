@@ -1,4 +1,4 @@
-п»їusing System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using DictionaryService.Contracts.Departments;
 using DictionaryService.Domain.Departments;
@@ -28,7 +28,7 @@ public class CreateDepartmentTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateDepartmentRequest request = new(
-            "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ",
+            "Подразделение",
             "ppp",
             null,
             [locationId]);
@@ -139,7 +139,7 @@ public class CreateDepartmentTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateDepartmentRequest request = new(
-            "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ",
+            "Подразделение",
             "",
             null,
             [locationId]);
@@ -164,7 +164,7 @@ public class CreateDepartmentTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateDepartmentRequest request = new(
-            "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ",
+            "Подразделение",
             "ab",
             null,
             [locationId]);
@@ -189,7 +189,7 @@ public class CreateDepartmentTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateDepartmentRequest request = new(
-            "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ",
+            "Подразделение",
             new string('a', 151),
             null,
             [locationId]);
@@ -214,8 +214,8 @@ public class CreateDepartmentTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateDepartmentRequest request = new(
-            "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ",
-            "РїРїРї",
+            "Подразделение",
+            "ппп",
             null,
             [locationId]);
 
@@ -239,7 +239,7 @@ public class CreateDepartmentTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateDepartmentRequest request = new(
-            "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ",
+            "Подразделение",
             "ppp123",
             null,
             [locationId]);
@@ -263,7 +263,7 @@ public class CreateDepartmentTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateDepartmentRequest request = new(
-            "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ",
+            "Подразделение",
             "ppp",
             null,
             []);
@@ -288,7 +288,7 @@ public class CreateDepartmentTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateDepartmentRequest request = new(
-            "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ",
+            "Подразделение",
             "ppp",
             null,
             [locationId, locationId]);
@@ -312,7 +312,7 @@ public class CreateDepartmentTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateDepartmentRequest request = new(
-            "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ",
+            "Подразделение",
             "ppp",
             null,
             [Guid.NewGuid()]);
@@ -337,7 +337,7 @@ public class CreateDepartmentTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateDepartmentRequest request = new(
-            "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ",
+            "Подразделение",
             "ppp",
             Guid.NewGuid(),
             [locationId]);
@@ -355,12 +355,12 @@ public class CreateDepartmentTests : DictionaryBaseTests
         await ExecuteInDb(async db =>
         {
             Location location = new(
-                Name.Create("Р›РѕРєР°С†РёСЏ").Value,
+                Name.Create("Локация").Value,
                 Address.Create(
-                    "Р“РѕСЂРѕРґ",
-                    "РЈР»РёС†Р°",
-                    "Р”РѕРј",
-                    "РќРѕРјРµСЂ РєРІР°СЂС‚РёСЂС‹").Value,
+                    "Город",
+                    "Улица",
+                    "Дом",
+                    "Номер квартиры").Value,
                 "TimeZone");
 
             db.Locations.Add(location);

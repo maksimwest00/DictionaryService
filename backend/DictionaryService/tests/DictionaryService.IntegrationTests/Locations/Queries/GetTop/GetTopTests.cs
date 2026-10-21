@@ -1,4 +1,4 @@
-п»їusing System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using DictionaryService.Contracts.Locations.GetTop;
 using DictionaryService.IntegrationTests.Infrastructure;
@@ -17,10 +17,10 @@ public class GetTopTests : DictionaryBaseTests
     public async Task GetTop_Should_Return_Top_Locations()
     {
         // Arrange
-        Guid locationId1 = await CreateLocationDb("Р›РѕРєР°С†РёСЏ1");
-        Guid locationId2 = await CreateLocationDb("Р›РѕРєР°С†РёСЏ2");
-        await CreateDepartmentApi(locationId1, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ1", "pppa");
-        await CreateDepartmentApi(locationId2, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ2", "pppb");
+        Guid locationId1 = await CreateLocationDb("Локация1");
+        Guid locationId2 = await CreateLocationDb("Локация2");
+        await CreateDepartmentApi(locationId1, "Подразделение1", "pppa");
+        await CreateDepartmentApi(locationId2, "Подразделение2", "pppb");
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
@@ -50,8 +50,8 @@ public class GetTopTests : DictionaryBaseTests
     public async Task GetTop_With_No_Departments_Should_Return_Empty_List()
     {
         // Arrange
-        await CreateLocationDb("Р›РѕРєР°С†РёСЏ1");
-        await CreateLocationDb("Р›РѕРєР°С†РёСЏ2");
+        await CreateLocationDb("Локация1");
+        await CreateLocationDb("Локация2");
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
@@ -79,8 +79,8 @@ public class GetTopTests : DictionaryBaseTests
         char c = 'a';
         for (int i = 0; i < 7; i++)
         {
-            Guid locationId = await CreateLocationDb($"Р›РѕРєР°С†РёСЏ{i}");
-            await CreateDepartmentApi(locationId, $"РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ{i}", $"ppp{c}");
+            Guid locationId = await CreateLocationDb($"Локация{i}");
+            await CreateDepartmentApi(locationId, $"Подразделение{i}", $"ppp{c}");
             c++;
         }
         CancellationToken cancellationToken = CancellationToken.None;
@@ -107,18 +107,18 @@ public class GetTopTests : DictionaryBaseTests
     public async Task GetTop_Should_Order_By_DepartmentCount_Desc()
     {
         // Arrange
-        Guid locationId1 = await CreateLocationDb("Р›РѕРєР°С†РёСЏ1");
-        Guid locationId2 = await CreateLocationDb("Р›РѕРєР°С†РёСЏ2");
-        Guid locationId3 = await CreateLocationDb("Р›РѕРєР°С†РёСЏ3");
+        Guid locationId1 = await CreateLocationDb("Локация1");
+        Guid locationId2 = await CreateLocationDb("Локация2");
+        Guid locationId3 = await CreateLocationDb("Локация3");
         
-        await CreateDepartmentApi(locationId1, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ1", "pppa");
-        await CreateDepartmentApi(locationId1, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ2", "pppb");
-        await CreateDepartmentApi(locationId1, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ3", "pppc");
+        await CreateDepartmentApi(locationId1, "Подразделение1", "pppa");
+        await CreateDepartmentApi(locationId1, "Подразделение2", "pppb");
+        await CreateDepartmentApi(locationId1, "Подразделение3", "pppc");
         
-        await CreateDepartmentApi(locationId2, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ4", "pppd");
-        await CreateDepartmentApi(locationId2, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ5", "pppe");
+        await CreateDepartmentApi(locationId2, "Подразделение4", "pppd");
+        await CreateDepartmentApi(locationId2, "Подразделение5", "pppe");
         
-        await CreateDepartmentApi(locationId3, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ6", "pppf");
+        await CreateDepartmentApi(locationId3, "Подразделение6", "pppf");
         
         CancellationToken cancellationToken = CancellationToken.None;
 

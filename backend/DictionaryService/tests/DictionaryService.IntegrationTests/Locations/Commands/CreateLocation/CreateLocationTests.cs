@@ -1,4 +1,4 @@
-п»їusing System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using DictionaryService.Contracts.Locations.CreateLocation;
 using DictionaryService.IntegrationTests.Infrastructure;
@@ -24,8 +24,8 @@ public class CreateLocationTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateLocationRequest request = new(
-            "Р›РѕРєР°С†РёСЏ",
-            new AddressDto("Р“РѕСЂРѕРґ", "РЈР»РёС†Р°", "Р”РѕРј", "РќРѕРјРµСЂ РєРІР°СЂС‚РёСЂС‹"),
+            "Локация",
+            new AddressDto("Город", "Улица", "Дом", "Номер квартиры"),
             "TimeZone");
 
         using var response = await client.PostAsJsonAsync(
@@ -59,7 +59,7 @@ public class CreateLocationTests : DictionaryBaseTests
 
         CreateLocationRequest request = new(
             "",
-            new AddressDto("Р“РѕСЂРѕРґ", "РЈР»РёС†Р°", "Р”РѕРј", "РќРѕРјРµСЂ РєРІР°СЂС‚РёСЂС‹"),
+            new AddressDto("Город", "Улица", "Дом", "Номер квартиры"),
             "TimeZone");
 
         using var response = await client.PostAsJsonAsync(
@@ -82,7 +82,7 @@ public class CreateLocationTests : DictionaryBaseTests
 
         CreateLocationRequest request = new(
             "ab",
-            new AddressDto("Р“РѕСЂРѕРґ", "РЈР»РёС†Р°", "Р”РѕРј", "РќРѕРјРµСЂ РєРІР°СЂС‚РёСЂС‹"),
+            new AddressDto("Город", "Улица", "Дом", "Номер квартиры"),
             "TimeZone");
 
         using var response = await client.PostAsJsonAsync(
@@ -105,7 +105,7 @@ public class CreateLocationTests : DictionaryBaseTests
 
         CreateLocationRequest request = new(
             new string('a', 121),
-            new AddressDto("Р“РѕСЂРѕРґ", "РЈР»РёС†Р°", "Р”РѕРј", "РќРѕРјРµСЂ РєРІР°СЂС‚РёСЂС‹"),
+            new AddressDto("Город", "Улица", "Дом", "Номер квартиры"),
             "TimeZone");
 
         using var response = await client.PostAsJsonAsync(
@@ -127,8 +127,8 @@ public class CreateLocationTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateLocationRequest request = new(
-            "Р›РѕРєР°С†РёСЏ",
-            new AddressDto("", "РЈР»РёС†Р°", "Р”РѕРј", "РќРѕРјРµСЂ РєРІР°СЂС‚РёСЂС‹"),
+            "Локация",
+            new AddressDto("", "Улица", "Дом", "Номер квартиры"),
             "TimeZone");
 
         using var response = await client.PostAsJsonAsync(
@@ -150,8 +150,8 @@ public class CreateLocationTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateLocationRequest request = new(
-            "Р›РѕРєР°С†РёСЏ",
-            new AddressDto("Р“РѕСЂРѕРґ", "", "Р”РѕРј", "РќРѕРјРµСЂ РєРІР°СЂС‚РёСЂС‹"),
+            "Локация",
+            new AddressDto("Город", "", "Дом", "Номер квартиры"),
             "TimeZone");
 
         using var response = await client.PostAsJsonAsync(
@@ -173,8 +173,8 @@ public class CreateLocationTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateLocationRequest request = new(
-            "Р›РѕРєР°С†РёСЏ",
-            new AddressDto("Р“РѕСЂРѕРґ", "РЈР»РёС†Р°", "", "РќРѕРјРµСЂ РєРІР°СЂС‚РёСЂС‹"),
+            "Локация",
+            new AddressDto("Город", "Улица", "", "Номер квартиры"),
             "TimeZone");
 
         using var response = await client.PostAsJsonAsync(
@@ -196,8 +196,8 @@ public class CreateLocationTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateLocationRequest request = new(
-            "Р›РѕРєР°С†РёСЏ",
-            new AddressDto("Р“РѕСЂРѕРґ", "РЈР»РёС†Р°", "Р”РѕРј", ""),
+            "Локация",
+            new AddressDto("Город", "Улица", "Дом", ""),
             "TimeZone");
 
         using var response = await client.PostAsJsonAsync(
@@ -219,8 +219,8 @@ public class CreateLocationTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         CreateLocationRequest request = new(
-            "Р›РѕРєР°С†РёСЏ",
-            new AddressDto("Р“РѕСЂРѕРґ", "РЈР»РёС†Р°", "Р”РѕРј", "РќРѕРјРµСЂ РєРІР°СЂС‚РёСЂС‹"),
+            "Локация",
+            new AddressDto("Город", "Улица", "Дом", "Номер квартиры"),
             "");
 
         using var response = await client.PostAsJsonAsync(

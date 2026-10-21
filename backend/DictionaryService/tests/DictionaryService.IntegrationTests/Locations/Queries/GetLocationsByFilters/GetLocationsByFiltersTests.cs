@@ -1,4 +1,4 @@
-п»їusing System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using DictionaryService.Contracts.Locations.GetLocationsByFilters;
 using DictionaryService.Contracts.Shared;
@@ -18,7 +18,7 @@ public class GetLocationsByFiltersTests : DictionaryBaseTests
     public async Task GetLocationsByFilters_With_Default_Params_Should_Succeed()
     {
         // Arrange
-        await CreateLocationDb("Р›РѕРєР°С†РёСЏ1");
+        await CreateLocationDb("Локация1");
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
@@ -59,15 +59,15 @@ public class GetLocationsByFiltersTests : DictionaryBaseTests
     public async Task GetLocationsByFilters_With_Search_Should_Filter_Results()
     {
         // Arrange
-        await CreateLocationDb("Р›РѕРєР°С†РёСЏ1");
-        await CreateLocationDb("Р›РѕРєР°С†РёСЏ2");
+        await CreateLocationDb("Локация1");
+        await CreateLocationDb("Локация2");
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
         using var client = this.CreateClient();
 
         using var response = await client.GetAsync(
-            "/api/locations?search=Р›РѕРєР°С†РёСЏ1",
+            "/api/locations?search=Локация1",
             cancellationToken);
 
         var envelope = await response.Content.ReadFromJsonAsync<Envelope<PagedResult<LocationListItemResponse>>>(cancellationToken);
@@ -78,7 +78,7 @@ public class GetLocationsByFiltersTests : DictionaryBaseTests
         Assert.NotNull(envelope);
         Assert.NotNull(result);
         Assert.Single(result.Data);
-        Assert.Contains("Р›РѕРєР°С†РёСЏ1", result.Data.First().Name);
+        Assert.Contains("Локация1", result.Data.First().Name);
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public class GetLocationsByFiltersTests : DictionaryBaseTests
         // Arrange
         for (int i = 0; i < 5; i++)
         {
-            await CreateLocationDb($"Р›РѕРєР°С†РёСЏ{i + 1}");
+            await CreateLocationDb($"Локация{i + 1}");
         }
         CancellationToken cancellationToken = CancellationToken.None;
 
@@ -138,15 +138,15 @@ public class GetLocationsByFiltersTests : DictionaryBaseTests
     public async Task GetLocationsByFilters_With_MinDepartmentCount_Should_Filter_Results()
     {
         // Arrange
-        Guid locationId1 = await CreateLocationDb("Р›РѕРєР°С†РёСЏ1");
-        Guid locationId2 = await CreateLocationDb("Р›РѕРєР°С†РёСЏ2");
+        Guid locationId1 = await CreateLocationDb("Локация1");
+        Guid locationId2 = await CreateLocationDb("Локация2");
         
         // Create departments for location1
-        await CreateDepartmentApi(locationId1, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ1", "pppa");
-        await CreateDepartmentApi(locationId1, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ2", "pppb");
+        await CreateDepartmentApi(locationId1, "Подразделение1", "pppa");
+        await CreateDepartmentApi(locationId1, "Подразделение2", "pppb");
         
         // Create one department for location2
-        await CreateDepartmentApi(locationId2, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ3", "pppc");
+        await CreateDepartmentApi(locationId2, "Подразделение3", "pppc");
         
         CancellationToken cancellationToken = CancellationToken.None;
 

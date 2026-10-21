@@ -1,4 +1,4 @@
-п»їusing System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using DictionaryService.Contracts.Departments.GetDepartmentsTree;
 using DictionaryService.IntegrationTests.Infrastructure;
@@ -18,7 +18,7 @@ public class GetDepartmentsTreeBySearchTests : DictionaryBaseTests
     {
         // Arrange
         Guid locationId = await CreateLocationDb();
-        await CreateDepartmentDb(locationId, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ", "dept");
+        await CreateDepartmentDb(locationId, "Подразделение", "dept");
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
@@ -42,7 +42,7 @@ public class GetDepartmentsTreeBySearchTests : DictionaryBaseTests
     {
         // Arrange
         Guid locationId = await CreateLocationDb();
-        await CreateDepartmentDb(locationId, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ", "dept");
+        await CreateDepartmentDb(locationId, "Подразделение", "dept");
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
@@ -66,14 +66,14 @@ public class GetDepartmentsTreeBySearchTests : DictionaryBaseTests
     {
         // Arrange
         Guid locationId = await CreateLocationDb();
-        Guid departmentId = await CreateDepartmentDb(locationId, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ", "dept");
+        Guid departmentId = await CreateDepartmentDb(locationId, "Подразделение", "dept");
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
         using var client = this.CreateClient();
 
         using var response = await client.GetAsync(
-            "/api/departments/tree/search?search=РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ",
+            "/api/departments/tree/search?search=Подразделение",
             cancellationToken);
 
         var envelope = await response.Content.ReadFromJsonAsync<Envelope<List<GetDepartmentsTreeResponse>>>(cancellationToken);
@@ -91,14 +91,14 @@ public class GetDepartmentsTreeBySearchTests : DictionaryBaseTests
     {
         // Arrange
         Guid locationId = await CreateLocationDb();
-        Guid departmentId = await CreateDepartmentDb(locationId, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ", "dept");
+        Guid departmentId = await CreateDepartmentDb(locationId, "Подразделение", "dept");
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
         using var client = this.CreateClient();
 
         using var response = await client.GetAsync(
-            "/api/departments/tree/search?search=РїРѕРґ",
+            "/api/departments/tree/search?search=под",
             cancellationToken);
 
         var envelope = await response.Content.ReadFromJsonAsync<Envelope<List<GetDepartmentsTreeResponse>>>(cancellationToken);
@@ -116,7 +116,7 @@ public class GetDepartmentsTreeBySearchTests : DictionaryBaseTests
     {
         // Arrange
         Guid locationId = await CreateLocationDb();
-        Guid departmentId = await CreateDepartmentDb(locationId, "РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ", "dept");
+        Guid departmentId = await CreateDepartmentDb(locationId, "Подразделение", "dept");
 
         await ExecuteInDb(async db =>
         {
@@ -131,7 +131,7 @@ public class GetDepartmentsTreeBySearchTests : DictionaryBaseTests
         using var client = this.CreateClient();
 
         using var response = await client.GetAsync(
-            "/api/departments/tree/search?search=РџРѕРґСЂР°Р·РґРµР»РµРЅРёРµ",
+            "/api/departments/tree/search?search=Подразделение",
             cancellationToken);
 
         var envelope = await response.Content.ReadFromJsonAsync<Envelope<List<GetDepartmentsTreeResponse>>>(cancellationToken);

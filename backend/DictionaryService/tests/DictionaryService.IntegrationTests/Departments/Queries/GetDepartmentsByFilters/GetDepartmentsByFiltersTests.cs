@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using DictionaryService.Contracts.Departments.GetDepartmentsByFilters;
 using DictionaryService.Contracts.Shared;
@@ -19,7 +19,7 @@ public class GetDepartmentsByFiltersTests : DictionaryBaseTests
     {
         // Arrange
         Guid locationId = await CreateLocationDb();
-        await CreateDepartmentDb(locationId, "Подразделение1", "aaa");
+        await CreateDepartmentDb(locationId, "�������������1", "aaa");
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
@@ -44,15 +44,15 @@ public class GetDepartmentsByFiltersTests : DictionaryBaseTests
     {
         // Arrange
         Guid locationId = await CreateLocationDb();
-        await CreateDepartmentDb(locationId, "Подразделение1", "ppp");
-        await CreateDepartmentDb(locationId, "Подразделение2", "rrr");
+        await CreateDepartmentDb(locationId, "�������������1", "ppp");
+        await CreateDepartmentDb(locationId, "�������������2", "rrr");
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
         using var client = this.CreateClient();
 
         using var response = await client.GetAsync(
-            "/api/departments?search=Подразделение1",
+            "/api/departments?search=�������������1",
             cancellationToken);
 
         var envelope = await response.Content.ReadFromJsonAsync<Envelope<PagedResult<DepartmentListItemResponse>>>(cancellationToken);
@@ -63,7 +63,7 @@ public class GetDepartmentsByFiltersTests : DictionaryBaseTests
         Assert.NotNull(envelope);
         Assert.NotNull(result);
         Assert.Single(result.Data);
-        Assert.Contains("Подразделение1", result.Data.First().Name);
+        Assert.Contains("�������������1", result.Data.First().Name);
     }
 
     [Fact]
@@ -74,7 +74,7 @@ public class GetDepartmentsByFiltersTests : DictionaryBaseTests
         char c = 'a';
         for (int i = 0; i < 5; i++)
         {
-            await CreateDepartmentDb(locationId, $"Подразделение{i + 1}", $"{c}aa");
+            await CreateDepartmentDb(locationId, $"�������������{i + 1}", $"{c}aa");
             c++;
         }
         CancellationToken cancellationToken = CancellationToken.None;
@@ -101,7 +101,7 @@ public class GetDepartmentsByFiltersTests : DictionaryBaseTests
     {
         // Arrange
         Guid locationId = await CreateLocationDb();
-        await CreateDepartmentDb(locationId, "Подразделение1", "ppp");
+        await CreateDepartmentDb(locationId, "�������������1", "ppp");
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act

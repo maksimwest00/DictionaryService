@@ -1,4 +1,4 @@
-п»їusing System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using DictionaryService.Contracts.Positions;
 using DictionaryService.Domain.Positions;
@@ -20,7 +20,7 @@ public class RenamePositionTests : DictionaryBaseTests
     {
         // Arrange
         Guid positionId = await CreatePosition();
-        string newName = $"РќРѕРІРѕРµ РёРјСЏ_{Guid.NewGuid()}";
+        string newName = $"Новое имя_{Guid.NewGuid()}";
         CancellationToken cancellationToken = CancellationToken.None;
 
         // Act
@@ -54,7 +54,7 @@ public class RenamePositionTests : DictionaryBaseTests
         // Act
         using var client = this.CreateClient();
 
-        RenamePositionRequest request = new("РќРѕРІРѕРµ РёРјСЏ");
+        RenamePositionRequest request = new("Новое имя");
 
         using var response = await client.PatchAsJsonAsync(
             $"/api/positions/{nonExistentPositionId}",
@@ -76,7 +76,7 @@ public class RenamePositionTests : DictionaryBaseTests
 
         var invalidGuid = Guid.Empty;
 
-        RenamePositionRequest request = new("РќРѕРІРѕРµ РёРјСЏ");
+        RenamePositionRequest request = new("Новое имя");
 
         using var response = await client.PatchAsJsonAsync(
             $"/api/positions/{invalidGuid}",
@@ -93,7 +93,7 @@ public class RenamePositionTests : DictionaryBaseTests
         // Arrange
         Guid positionId1 = await CreatePosition();
         Guid positionId2 = await CreatePosition();
-        string duplicateName = $"Р”СѓР±Р»РёРєР°С‚_{Guid.NewGuid()}";
+        string duplicateName = $"Дубликат_{Guid.NewGuid()}";
 
         // First rename position1 to the duplicate name
         using var client = this.CreateClient();

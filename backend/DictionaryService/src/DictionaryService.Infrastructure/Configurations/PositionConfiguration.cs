@@ -1,5 +1,4 @@
-﻿using DictionaryService.Domain;
-using DictionaryService.Domain.Positions;
+﻿using DictionaryService.Domain.Positions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

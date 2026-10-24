@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
+using DictionaryService.Domain.Positions;
 using Shared.Core.Abstractions;
 using Shared.Core.Database;
-using DictionaryService.Domain.Positions;
 using Shared.Kernel;
 
 namespace DictionaryService.Application.Positions.DeletePosition;

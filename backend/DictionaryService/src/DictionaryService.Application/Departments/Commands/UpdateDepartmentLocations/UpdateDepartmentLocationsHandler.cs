@@ -1,12 +1,12 @@
 ﻿using CSharpFunctionalExtensions;
-using Shared.Core.Abstractions;
-using Shared.Core.Database;
 using DictionaryService.Application.Locations;
-using Shared.Core.Validation.ValidationExtensions;
 using DictionaryService.Domain.DepartmentLocations;
-using Shared.Kernel;
 using FluentValidation;
 using FluentValidation.Results;
+using Shared.Core.Abstractions;
+using Shared.Core.Database;
+using Shared.Core.Validation.ValidationExtensions;
+using Shared.Kernel;
 
 namespace DictionaryService.Application.Departments.Commands.UpdateDepartmentLocations;
 

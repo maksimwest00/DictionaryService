@@ -8,6 +8,7 @@ using DictionaryService.Domain.Departments;
 using FluentValidation;
 using FluentValidation.Results;
 using Shared.Core.Abstractions;
+using Shared.Core.Database;
 using Shared.Kernel;
 
 namespace DictionaryService.Application.Departments.Commands.TransferDepartment;
@@ -17,15 +18,18 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
     private readonly IDepartmentRepository _departmentRepository;
     private readonly IReadDbConnectionFactory _readDbConnectionFactory;
     private readonly IValidator<TransferDepartmentCommand> _validator;
+    private readonly ITransactionManager _transactionManager;
 
     public TransferDepartmentHandler(
         IDepartmentRepository departmentRepository,
         IReadDbConnectionFactory readDbConnectionFactory,
-        IValidator<TransferDepartmentCommand> validator)
+        IValidator<TransferDepartmentCommand> validator,
+        ITransactionManager transactionManager)
     {
         _departmentRepository = departmentRepository;
         _readDbConnectionFactory = readDbConnectionFactory;
         _validator = validator;
+        _transactionManager = transactionManager;
     }
 
     public async Task<Result<TransferDepartmentResponse, Error>> HandleAsync(
@@ -61,6 +65,27 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
             }
         }
 
+        // если родитель уже такой же, операция завершается как no-op без обновления БД.
+        if (command.Request.ParentId.HasValue &&
+            departmentResult.Value.ParentId == command.Request.ParentId.Value)
+        {
+            return new TransferDepartmentResponse(
+                departmentResult.Value.Id,
+                departmentResult.Value.ParentId,
+                departmentResult.Value.Path.Value,
+                departmentResult.Value.Depth,
+                departmentResult.Value.UpdatedAt);
+        }
+
+        var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+
+        if (transactionScopeResult.IsFailure)
+        {
+            return transactionScopeResult.Error;
+        }
+
+        using var transactionScope = transactionScopeResult.Value;
+
         // новый родитель не находится внутри поддерева двигаемого узла;
         if (command.Request.ParentId.HasValue)
         {
@@ -82,7 +107,7 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
                         WHERE path::ltree <@ (SELECT path FROM parent)
                           AND path::ltree <> (SELECT path FROM parent)
                     )
-                    
+
                     -- смотрим есть ли среди детей тот департамент в который мы перемещаем
                     SELECT 1
                     FROM childrens
@@ -96,22 +121,11 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
 
             if (cond)
             {
+                transactionScope.Rollback();
                 return Error.Conflict(
                     "department.move.cycle",
                     ["Cannot move department into its own subtree"]);
             }
-        }
-
-        // если родитель уже такой же, операция завершается как no-op без обновления БД.
-        if (command.Request.ParentId.HasValue &&
-            departmentResult.Value.ParentId == command.Request.ParentId.Value)
-        {
-            return new TransferDepartmentResponse(
-                departmentResult.Value.Id,
-                departmentResult.Value.ParentId,
-                departmentResult.Value.Path.Value,
-                departmentResult.Value.Depth,
-                departmentResult.Value.UpdatedAt);
         }
 
         Department? newParent = null;
@@ -123,6 +137,7 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
 
             if (newParentResult.IsFailure)
             {
+                transactionScope.Rollback();
                 return Error.NotFound(
                     "department.parent.not_found",
                     ["Parent department not found"],
@@ -132,9 +147,24 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
             newParent = newParentResult.Value;
         }
 
-        return await _departmentRepository.TransferAsync(
+        var transferResult = await _departmentRepository.TransferAsync(
             departmentResult.Value,
             newParent,
             cancellationToken);
+
+        if (transferResult.IsFailure)
+        {
+            transactionScope.Rollback();
+            return transferResult.Error;
+        }
+
+        var commitResult = transactionScope.Commit();
+
+        if (commitResult.IsFailure)
+        {
+            return commitResult.Error;
+        }
+
+        return transferResult;
     }
 }

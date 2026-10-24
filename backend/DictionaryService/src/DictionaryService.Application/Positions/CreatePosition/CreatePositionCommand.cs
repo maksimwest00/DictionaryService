@@ -1,6 +1,5 @@
-﻿using Shared.Core.Abstractions;
-using DictionaryService.Contracts;
-using DictionaryService.Contracts.Positions;
+﻿using DictionaryService.Contracts.Positions;
+using Shared.Core.Abstractions;
 
 namespace DictionaryService.Application.Positions.CreatePosition;
 

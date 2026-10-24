@@ -115,7 +115,7 @@ public class TransferDepartmentTests : DictionaryBaseTests
             Assert.NotNull(envelope.Result);
             Assert.Null(childDepartment.ParentId);
             Assert.Equal(0, childDepartment.Depth);
-            Assert.Equal(1, envelope.Result.Depth);
+            Assert.Equal(0, envelope.Result.Depth);
         });
     }
 
@@ -336,7 +336,7 @@ public class TransferDepartmentTests : DictionaryBaseTests
     }
 
     [Fact]
-    public async Task TransferDepartment_With_Non_Existent_Parent_Should_Return_NotFound()
+    public async Task TransferDepartment_With_Non_Existent_Parent_Should_Return_Conflict()
     {
         // Arrange
         Guid locationId = await CreateLocationDb();

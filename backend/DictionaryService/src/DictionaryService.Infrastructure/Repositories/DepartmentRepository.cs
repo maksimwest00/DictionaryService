@@ -223,12 +223,20 @@ public class DepartmentRepository : IDepartmentRepository
     {
         var connection = _dbContext.Database.GetDbConnection();
 
-        string query;
-
-        if (newParent is not null)
+        try
         {
-            query = """
-                    BEGIN;
+            var parameters = new
+            {
+                id = department.Id,
+                oldPath = department.Path.Value,
+                newPath = newParent?.Path.Value,
+                newParentId = newParent?.Id,
+            };
+
+            if (newParent is not null)
+            {
+                await connection.ExecuteAsync(
+                    """
                     UPDATE departments
                     SET path = @newPath::ltree || subpath(path, depth),
                         parent_id = @newParentId,
@@ -240,15 +248,15 @@ public class DepartmentRepository : IDepartmentRepository
                         depth = nlevel(@newPath::ltree) + (nlevel(@oldPath::ltree) - 1)
                     WHERE path <@ @oldPath::ltree
                       AND path != @oldPath::ltree;
-                    COMMIT;
-                    """;
-        }
-        else
-        {
-            query = """
-                    BEGIN;
+                    """,
+                    parameters);
+            }
+            else
+            {
+                await connection.ExecuteAsync(
+                    """
                     UPDATE departments
-                    SET path = subpath(path, depth),
+                    SET path = subpath(path, nlevel(path) - 1),
                         parent_id = NULL,
                         depth = 0
                     WHERE path = @oldPath::ltree;
@@ -258,38 +266,36 @@ public class DepartmentRepository : IDepartmentRepository
                         depth = nlevel(path) - nlevel(@oldPath::ltree) + 1
                     WHERE path <@ @oldPath::ltree
                       AND path != @oldPath::ltree;
-                    COMMIT;
-                    """;
+                    """,
+                    parameters);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Ошибка при перемещении отдела в БД (DepartmentId={DepartmentId})",
+                department.Id);
+
+            return Result.Failure<TransferDepartmentResponse, Error>(
+                Error.Conflict(
+                    null,
+                    ["An error occurred while transfer the department to the database"]));
         }
 
-        try
-        {
-            await connection.ExecuteAsync(
-                query,
-                param: new
-                {
-                    id = department.Id,
-                    oldPath = department.Path.Value,
-                    newPath = newParent?.Path.Value,
-                    newParentId = newParent?.Id,
-                });
-        }
-        catch
-        {
-            await connection.ExecuteAsync("ROLLBACK");
-            throw;
-        }
-
-        var departmentAfterUpdate = await _dbContext.Departments
-            .FirstAsync(
-                x => x.Id == department.Id,
-                cancellationToken);
+        var departmentEntity = await connection.QuerySingleAsync(
+            """
+                    SELECT id, parent_id, path, depth, updated_at
+                    FROM departments
+                    WHERE id = @id
+                """,
+            new { id = department.Id });
 
         return new TransferDepartmentResponse(
-            departmentAfterUpdate.Id,
-            departmentAfterUpdate.ParentId,
-            departmentAfterUpdate.Path.Value,
-            departmentAfterUpdate.Depth,
-            departmentAfterUpdate.UpdatedAt);
+            departmentEntity.id,
+            departmentEntity.parent_id,
+            departmentEntity.path,
+            departmentEntity.depth,
+            departmentEntity.updated_at);
     }
 }

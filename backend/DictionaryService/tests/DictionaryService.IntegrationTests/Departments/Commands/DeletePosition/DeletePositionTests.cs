@@ -89,7 +89,7 @@ public class DeletePositionTests : DictionaryBaseTests
     }
 
     [Fact]
-    public async Task DeletePosition_When_Not_Added_Should_Return_Conflict()
+    public async Task DeletePosition_When_Not_Added_Should_Return_NotFound()
     {
         // Arrange
         Guid locationId = await CreateLocationDb();

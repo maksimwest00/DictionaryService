@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
+using DictionaryService.Domain.Locations;
 using Shared.Core.Abstractions;
 using Shared.Core.Database;
-using DictionaryService.Domain.Locations;
 using Shared.Kernel;
 
 namespace DictionaryService.Application.Locations.Commands.DeleteLocation;

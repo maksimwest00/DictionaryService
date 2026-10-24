@@ -1,16 +1,14 @@
 ﻿using System.Data;
-using System.Data.Common;
 using CSharpFunctionalExtensions;
 using Dapper;
-using Shared.Core.Abstractions;
 using DictionaryService.Application.Database;
-using Shared.Core.Database;
-using Shared.Core.Validation.ValidationExtensions;
 using DictionaryService.Contracts.Departments.GetDepartmentsByFilters;
 using DictionaryService.Contracts.Shared;
-using Shared.Kernel;
 using FluentValidation;
 using FluentValidation.Results;
+using Shared.Core.Abstractions;
+using Shared.Core.Validation.ValidationExtensions;
+using Shared.Kernel;
 
 namespace DictionaryService.Application.Departments.Queries.GetDepartmentsByFilters;
 

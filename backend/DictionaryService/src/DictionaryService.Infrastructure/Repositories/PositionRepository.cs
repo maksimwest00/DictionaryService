@@ -1,10 +1,9 @@
 ﻿using CSharpFunctionalExtensions;
 using DictionaryService.Application.Positions;
 using DictionaryService.Domain.Positions;
-using Shared.Kernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Npgsql;
+using Shared.Kernel;
 
 namespace DictionaryService.Infrastructure.Repositories;
 

@@ -1,5 +1,5 @@
-﻿using Shared.Core.Abstractions;
-using DictionaryService.Contracts.Locations.CreateLocation;
+﻿using DictionaryService.Contracts.Locations.CreateLocation;
+using Shared.Core.Abstractions;
 
 namespace DictionaryService.Application.Locations.Commands.CreateLocation;
 

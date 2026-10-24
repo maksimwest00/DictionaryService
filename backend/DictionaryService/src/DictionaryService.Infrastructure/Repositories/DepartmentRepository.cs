@@ -1,13 +1,14 @@
-﻿using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions;
 using Dapper;
 using DictionaryService.Application.Departments;
+using DictionaryService.Contracts.Departments.TransferDepartment;
 using DictionaryService.Domain.DepartmentLocations;
 using DictionaryService.Domain.DepartmentPositions;
 using DictionaryService.Domain.Departments;
-using Shared.Kernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using Shared.Kernel;
 using Path = DictionaryService.Domain.Departments.Path;
 
 namespace DictionaryService.Infrastructure.Repositories;
@@ -70,7 +71,7 @@ public class DepartmentRepository : IDepartmentRepository
 
         if (position is null)
         {
-            return Error.NotFound(null, ["Department not found"], id);
+            return Error.NotFound("department.not_found", ["Department not found"], id);
         }
 
         return position;
@@ -151,40 +152,6 @@ public class DepartmentRepository : IDepartmentRepository
         }
     }
 
-    public async Task<UnitResult<Error>> TransferAsync(
-        Department department,
-        Department? newParent,
-        CancellationToken cancellationToken)
-    {
-        var connection = _dbContext.Database.GetDbConnection();
-
-        const string query = """
-                             UPDATE departments
-                             SET path = @newPath::ltree || subpath(path, depth),
-                                 parent_id = @newParentId,
-                                 depth = nlevel(@newPath::ltree)
-                             WHERE path = @oldPath::ltree;
-
-                             UPDATE departments
-                             SET path = @newPath::ltree || subpath(path, depth - 1),
-                                 depth = nlevel(@newPath::ltree) + (nlevel(@oldPath::ltree) - 1)
-                             WHERE path <@ @oldPath::ltree
-                               AND path != @oldPath::ltree;
-                             """;
-
-        await connection.ExecuteAsync(
-            query,
-            param: new
-            {
-                id = department.Id,
-                oldPath = department.Path.Value,
-                newPath = newParent?.Path.Value,
-                newParentId = newParent?.Id,
-            });
-
-        return UnitResult.Success<Error>();
-    }
-
     public async Task<UnitResult<Error>> AddPositionAsync(
         DepartmentPosition departmentPosition,
         CancellationToken cancellationToken)
@@ -247,5 +214,88 @@ public class DepartmentRepository : IDepartmentRepository
         _dbContext.DepartmentPositions.Remove(dPosition);
 
         return UnitResult.Success<Error>();
+    }
+
+    public async Task<Result<TransferDepartmentResponse, Error>> TransferAsync(
+        Department department,
+        Department? newParent,
+        CancellationToken cancellationToken)
+    {
+        var connection = _dbContext.Database.GetDbConnection();
+
+        try
+        {
+            var parameters = new
+            {
+                id = department.Id,
+                oldPath = department.Path.Value,
+                newPath = newParent?.Path.Value,
+                newParentId = newParent?.Id,
+            };
+
+            if (newParent is not null)
+            {
+                await connection.ExecuteAsync(
+                    """
+                    UPDATE departments
+                    SET path = @newPath::ltree || subpath(path, depth),
+                        parent_id = @newParentId,
+                        depth = nlevel(@newPath::ltree)
+                    WHERE path = @oldPath::ltree;
+
+                    UPDATE departments
+                    SET path = @newPath::ltree || subpath(path, depth - 1),
+                        depth = nlevel(@newPath::ltree) + (nlevel(@oldPath::ltree) - 1)
+                    WHERE path <@ @oldPath::ltree
+                      AND path != @oldPath::ltree;
+                    """,
+                    parameters);
+            }
+            else
+            {
+                await connection.ExecuteAsync(
+                    """
+                    UPDATE departments
+                    SET path = subpath(path, nlevel(path) - 1),
+                        parent_id = NULL,
+                        depth = 0
+                    WHERE path = @oldPath::ltree;
+
+                    UPDATE departments
+                    SET path = subpath(@oldPath::ltree, nlevel(@oldPath::ltree) - 1) || subpath(path, nlevel(@oldPath::ltree)),
+                        depth = nlevel(path) - nlevel(@oldPath::ltree) + 1
+                    WHERE path <@ @oldPath::ltree
+                      AND path != @oldPath::ltree;
+                    """,
+                    parameters);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Ошибка при перемещении отдела в БД (DepartmentId={DepartmentId})",
+                department.Id);
+
+            return Result.Failure<TransferDepartmentResponse, Error>(
+                Error.Conflict(
+                    null,
+                    ["An error occurred while transfer the department to the database"]));
+        }
+
+        var departmentEntity = await connection.QuerySingleAsync(
+            """
+                    SELECT id, parent_id, path, depth, updated_at
+                    FROM departments
+                    WHERE id = @id
+                """,
+            new { id = department.Id });
+
+        return new TransferDepartmentResponse(
+            departmentEntity.id,
+            departmentEntity.parent_id,
+            departmentEntity.path,
+            departmentEntity.depth,
+            departmentEntity.updated_at);
     }
 }

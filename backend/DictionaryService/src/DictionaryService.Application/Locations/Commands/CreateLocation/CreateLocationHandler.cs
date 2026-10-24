@@ -1,10 +1,10 @@
 ﻿using CSharpFunctionalExtensions;
+using DictionaryService.Domain.Locations;
+using FluentValidation;
 using Shared.Core.Abstractions;
 using Shared.Core.Database;
 using Shared.Core.Validation.ValidationExtensions;
-using DictionaryService.Domain.Locations;
 using Shared.Kernel;
-using FluentValidation;
 
 namespace DictionaryService.Application.Locations.Commands.CreateLocation;
 

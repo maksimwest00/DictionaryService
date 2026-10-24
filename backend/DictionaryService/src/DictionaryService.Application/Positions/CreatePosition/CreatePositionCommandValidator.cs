@@ -1,6 +1,6 @@
-﻿using Shared.Core.Validation;
-using DictionaryService.Domain.Positions;
+﻿using DictionaryService.Domain.Positions;
 using FluentValidation;
+using Shared.Core.Validation;
 
 namespace DictionaryService.Application.Positions.CreatePosition;
 

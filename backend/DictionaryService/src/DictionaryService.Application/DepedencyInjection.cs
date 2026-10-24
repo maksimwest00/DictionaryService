@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using Shared.Core.Abstractions;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Core.Abstractions;
 
 namespace DictionaryService.Application;
 

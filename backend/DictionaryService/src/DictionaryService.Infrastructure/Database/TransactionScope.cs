@@ -1,8 +1,8 @@
 ﻿using System.Data;
 using CSharpFunctionalExtensions;
+using Microsoft.Extensions.Logging;
 using Shared.Core.Database;
 using Shared.Kernel;
-using Microsoft.Extensions.Logging;
 
 namespace DictionaryService.Infrastructure.Database;
 

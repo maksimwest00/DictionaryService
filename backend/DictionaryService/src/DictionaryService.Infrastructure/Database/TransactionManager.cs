@@ -1,8 +1,8 @@
 ﻿using CSharpFunctionalExtensions;
-using Shared.Core.Database;
-using Shared.Kernel;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+using Shared.Core.Database;
+using Shared.Kernel;
 
 namespace DictionaryService.Infrastructure.Database;
 

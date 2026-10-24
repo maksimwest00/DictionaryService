@@ -14,6 +14,7 @@ using DictionaryService.Contracts.Departments;
 using DictionaryService.Contracts.Departments.GetDepartmentById;
 using DictionaryService.Contracts.Departments.GetDepartmentsByFilters;
 using DictionaryService.Contracts.Departments.GetDepartmentsTree;
+using DictionaryService.Contracts.Departments.TransferDepartment;
 using DictionaryService.Contracts.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -77,33 +78,6 @@ public class DepartmentController : ControllerBase
         }
 
         return updateResult.IsFailure ? updateResult.Error.ToResponse() : Ok(Envelope.Ok(updateResult.Value));
-    }
-
-    [HttpPut]
-    [Route("/api/departments/{departmentId}/parent")]
-    public async Task<IActionResult> TransferDepartmentAsync(
-        [FromRoute] Guid departmentId,
-        [FromBody] TransferDepartmentRequest request,
-        [FromServices] ILogger<DepartmentController> logger,
-        [FromServices] ICommandHandler<Guid, TransferDepartmentCommand> handler,
-        CancellationToken cancellationToken)
-    {
-        TransferDepartmentCommand command = new TransferDepartmentCommand(departmentId, request);
-
-        var transferResult = await handler.HandleAsync(command, cancellationToken);
-
-        if (transferResult.IsSuccess)
-        {
-            logger.LogInformation("Подразделение успешно перемещено {UpdateResultValue}", transferResult.Value);
-        }
-        else
-        {
-            logger.LogInformation(
-                "Ошибка перемещения подразделения: {ErrorMessage}",
-                string.Join(',', transferResult.Error.Messages));
-        }
-
-        return transferResult.IsFailure ? transferResult.Error.ToResponse() : Ok(Envelope.Ok(transferResult.Value));
     }
 
     [HttpDelete("{id:Guid}")]
@@ -281,8 +255,6 @@ public class DepartmentController : ControllerBase
         return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
     }
 
-    // GET /departments/{id}/ancestors
-    // отдаёт цепочку предков в правильном порядке одним tree-запросом.
     [HttpGet("/api/departments/{id:Guid}/ancestors")]
     public async Task<IActionResult> GetDepartmentAncestors(
         [FromRoute] Guid id,
@@ -334,5 +306,32 @@ public class DepartmentController : ControllerBase
         }
 
         return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
+    }
+
+    [HttpPut]
+    [Route("/api/departments/{departmentId}/parent")]
+    public async Task<IActionResult> TransferDepartmentAsync(
+        [FromRoute] Guid departmentId,
+        [FromBody] TransferDepartmentRequest request,
+        [FromServices] ILogger<DepartmentController> logger,
+        [FromServices] ICommandHandler<TransferDepartmentResponse, TransferDepartmentCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        TransferDepartmentCommand command = new TransferDepartmentCommand(departmentId, request);
+
+        var transferResult = await handler.HandleAsync(command, cancellationToken);
+
+        if (transferResult.IsSuccess)
+        {
+            logger.LogInformation("Подразделение успешно перемещено {UpdateResultValue}", transferResult.Value);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка перемещения подразделения: {ErrorMessage}",
+                string.Join(',', transferResult.Error.Messages));
+        }
+
+        return transferResult.IsFailure ? transferResult.Error.ToResponse() : Ok(Envelope.Ok(transferResult.Value));
     }
 }

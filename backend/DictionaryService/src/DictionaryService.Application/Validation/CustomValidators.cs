@@ -1,8 +1,7 @@
 ﻿using System.Text.Json;
 using CSharpFunctionalExtensions;
-using Shared.Kernel;
 using FluentValidation;
-using FluentValidation.Results;
+using Shared.Kernel;
 
 namespace DictionaryService.Application.Validation;
 

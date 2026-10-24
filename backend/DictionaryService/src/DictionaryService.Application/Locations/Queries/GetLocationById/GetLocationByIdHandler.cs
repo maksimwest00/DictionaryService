@@ -1,10 +1,9 @@
 ﻿using CSharpFunctionalExtensions;
-using Shared.Core.Abstractions;
 using DictionaryService.Application.Database;
-using Shared.Core.Database;
 using DictionaryService.Contracts.Locations.GetLocationById;
-using Shared.Kernel;
 using Microsoft.EntityFrameworkCore;
+using Shared.Core.Abstractions;
+using Shared.Kernel;
 
 namespace DictionaryService.Application.Locations.Queries.GetLocationById;
 

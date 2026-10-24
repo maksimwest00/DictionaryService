@@ -1,5 +1,4 @@
-﻿using DictionaryService.Domain;
-using DictionaryService.Domain.Departments;
+﻿using DictionaryService.Domain.Departments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

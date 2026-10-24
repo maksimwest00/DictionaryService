@@ -1,7 +1,7 @@
-﻿using Shared.Core.Validation;
-using DictionaryService.Domain.Locations;
-using Shared.Kernel;
+﻿using DictionaryService.Domain.Locations;
 using FluentValidation;
+using Shared.Core.Validation;
+using Shared.Kernel;
 
 namespace DictionaryService.Application.Locations.Commands.CreateLocation;
 

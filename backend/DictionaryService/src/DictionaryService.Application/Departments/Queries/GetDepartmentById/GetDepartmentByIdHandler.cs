@@ -1,10 +1,9 @@
 ﻿using CSharpFunctionalExtensions;
-using Shared.Core.Abstractions;
 using DictionaryService.Application.Database;
-using Shared.Core.Database;
 using DictionaryService.Contracts.Departments.GetDepartmentById;
-using Shared.Kernel;
 using Microsoft.EntityFrameworkCore;
+using Shared.Core.Abstractions;
+using Shared.Kernel;
 
 namespace DictionaryService.Application.Departments.Queries.GetDepartmentById;
 

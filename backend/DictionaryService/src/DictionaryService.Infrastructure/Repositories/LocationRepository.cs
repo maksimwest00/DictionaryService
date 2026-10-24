@@ -1,8 +1,8 @@
 ﻿using CSharpFunctionalExtensions;
 using DictionaryService.Application.Locations;
 using DictionaryService.Domain.Locations;
-using Shared.Kernel;
 using Microsoft.EntityFrameworkCore;
+using Shared.Kernel;
 
 namespace DictionaryService.Infrastructure.Repositories;
 

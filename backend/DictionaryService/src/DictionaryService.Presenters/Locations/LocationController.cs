@@ -1,16 +1,12 @@
-﻿using DictionaryService.Application.Departments.Queries.GetDepartmentsByFilters;
-using DictionaryService.Application.Locations.Commands.CreateLocation;
+﻿using DictionaryService.Application.Locations.Commands.CreateLocation;
 using DictionaryService.Application.Locations.Commands.DeleteLocation;
 using DictionaryService.Application.Locations.Queries.GetLocationById;
 using DictionaryService.Application.Locations.Queries.GetLocationsByFilters;
-using DictionaryService.Application.Locations.Queries.GetTop;
-using DictionaryService.Contracts.Departments.GetDepartmentsByFilters;
 using DictionaryService.Contracts.Locations.CreateLocation;
 using DictionaryService.Contracts.Locations.GetLocationById;
 using DictionaryService.Contracts.Locations.GetLocationsByFilters;
 using DictionaryService.Contracts.Locations.GetTop;
 using DictionaryService.Contracts.Shared;
-using DictionaryService.Presenters.Departments;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Shared.Core.Abstractions;

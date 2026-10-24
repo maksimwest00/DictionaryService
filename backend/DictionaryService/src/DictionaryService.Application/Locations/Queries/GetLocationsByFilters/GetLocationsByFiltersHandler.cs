@@ -1,15 +1,14 @@
 ﻿using System.Data;
 using CSharpFunctionalExtensions;
 using Dapper;
-using Shared.Core.Abstractions;
 using DictionaryService.Application.Database;
-using Shared.Core.Database;
-using Shared.Core.Validation.ValidationExtensions;
 using DictionaryService.Contracts.Locations.GetLocationsByFilters;
 using DictionaryService.Contracts.Shared;
-using Shared.Kernel;
 using FluentValidation;
 using FluentValidation.Results;
+using Shared.Core.Abstractions;
+using Shared.Core.Validation.ValidationExtensions;
+using Shared.Kernel;
 
 namespace DictionaryService.Application.Locations.Queries.GetLocationsByFilters;
 

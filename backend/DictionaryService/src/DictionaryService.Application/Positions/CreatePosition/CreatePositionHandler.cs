@@ -1,13 +1,12 @@
 ﻿using CSharpFunctionalExtensions;
-using Shared.Core.Abstractions;
-using Shared.Core.Database;
 using DictionaryService.Application.Departments;
-using Shared.Core.Validation.ValidationExtensions;
-using DictionaryService.Domain.DepartmentPositions;
 using DictionaryService.Domain.Positions;
-using Shared.Kernel;
 using FluentValidation;
 using FluentValidation.Results;
+using Shared.Core.Abstractions;
+using Shared.Core.Database;
+using Shared.Core.Validation.ValidationExtensions;
+using Shared.Kernel;
 
 namespace DictionaryService.Application.Positions.CreatePosition;
 

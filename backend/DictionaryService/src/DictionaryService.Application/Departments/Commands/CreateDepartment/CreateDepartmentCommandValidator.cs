@@ -1,6 +1,6 @@
-﻿using Shared.Core.Validation;
-using DictionaryService.Domain.Departments;
+﻿using DictionaryService.Domain.Departments;
 using FluentValidation;
+using Shared.Core.Validation;
 
 namespace DictionaryService.Application.Departments.Commands.CreateDepartment;
 

@@ -1,11 +1,11 @@
 ﻿using CSharpFunctionalExtensions;
+using DictionaryService.Domain.Positions;
+using FluentValidation;
+using FluentValidation.Results;
 using Shared.Core.Abstractions;
 using Shared.Core.Database;
 using Shared.Core.Validation.ValidationExtensions;
-using DictionaryService.Domain.Positions;
 using Shared.Kernel;
-using FluentValidation;
-using FluentValidation.Results;
 
 namespace DictionaryService.Application.Positions.RenamePosition;
 

@@ -7,12 +7,9 @@ export interface PagedResult<T> {
 
 export interface Envelope<T> {
   result?: T | null;
-  errors: Errors;
+  // Backend сериализует Errors через ErrorsJsonConverter как массив
+  errors: ApiError[];
   timeGenerated: Date;
-}
-
-export interface Errors {
-  items: Error[];
 }
 
 export interface ApiError {

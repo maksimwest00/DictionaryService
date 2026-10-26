@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
+import DepartmentsClient from "./departments-client";
 
 export const metadata: Metadata = {
-  title: "Departments",
-  description: "Departments Next App",
+  title: "Подразделения",
+  description: "Список подразделений справочника",
 };
 
-export default function Home() {
-  return (
-    <main className="flex flex-col gap-2 p-10">
-      <h1 className="text-2xl font-semibold">Подразделения</h1>
-    </main>
-  );
+export default function Page() {
+  return <DepartmentsClient />;
 }

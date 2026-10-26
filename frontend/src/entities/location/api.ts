@@ -1,6 +1,6 @@
 import { apiClient } from "@/shared/api/axios-instance";
 import { LocationListItemResponse } from "./types";
-import { Envelope, PagedResult } from "@/shared/api/types";
+import { PagedResult } from "@/shared/api/types";
 
 export type GetLocationsByFiltersQuery = {
   search?: string;
@@ -12,17 +12,12 @@ export type GetLocationsByFiltersQuery = {
 };
 
 export const locationsApi = {
-  getLocations: async (
+  getLocations: (
     request: GetLocationsByFiltersQuery,
     signal?: AbortSignal,
-  ): Promise<LocationListItemResponse[]> => {
-    const response = await apiClient.get<
-      Envelope<PagedResult<LocationListItemResponse>>
-    >("/locations", {
+  ): Promise<PagedResult<LocationListItemResponse>> =>
+    apiClient.get<PagedResult<LocationListItemResponse>>("/locations", {
       params: request,
       signal,
-    });
-
-    return response.data.result?.data || [];
-  },
+    }),
 };

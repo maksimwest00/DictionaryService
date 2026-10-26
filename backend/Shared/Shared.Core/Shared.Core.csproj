@@ -13,7 +13,7 @@
 
   <PropertyGroup>
     <PackageId>MaksimWest00.SharedCore</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Authors>maksimwest00</Authors>
     <Company>maksimwest00</Company>
     <PackageDescription>Shared Core</PackageDescription>

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { locationQueries } from "@/entities/location/queries";
 import { DataState } from "@/shared/ui/data-state";
 import { PaginationBar } from "@/shared/ui/pagination-bar";
+import { CreateLocationDialog } from "@/features/create-location";
 
 const PAGE_SIZE = 12;
 
@@ -20,11 +21,14 @@ export default function LocationsClient() {
 
   return (
     <main className="flex flex-col gap-6 p-10">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold">Локации</h1>
-        <p className="text-sm text-gray-500">
-          Список доступных локаций: города, регионы и страны.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-semibold">Локации</h1>
+          <p className="text-sm text-gray-500">
+            Список доступных локаций: города, регионы и страны.
+          </p>
+        </div>
+        <CreateLocationDialog />
       </div>
 
       <DataState

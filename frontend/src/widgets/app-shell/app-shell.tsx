@@ -1,11 +1,13 @@
 "use client";
 
+import { Suspense } from "react";
 import { SidebarInset, SidebarProvider } from "@/shared/ui/sidebar";
 import { cn } from "@/shared/lib/cn";
 import Header from "@/widgets/header/header";
 import SideBar from "@/widgets/sidebar/sidebar";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/shared/api/query-client";
+import { Toaster } from "@/shared/ui/sonner";
 
 type AppShellProps = {
   children: React.ReactNode;
@@ -20,7 +22,9 @@ export default function AppShell({
     <>
       <QueryClientProvider client={queryClient}>
         <SidebarProvider>
-          <SideBar />
+          <Suspense fallback={null}>
+            <SideBar />
+          </Suspense>
           <SidebarInset>
             <Header />
             <div className={cn("flex-1 p-10", contentClassName)}>
@@ -28,6 +32,7 @@ export default function AppShell({
             </div>
           </SidebarInset>
         </SidebarProvider>
+        <Toaster position="top-right" richColors />
       </QueryClientProvider>
     </>
   );

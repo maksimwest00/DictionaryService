@@ -106,7 +106,7 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
         var department = departmentResult.Value;
 
         // если родитель уже такой же, операция завершается как no-op без обновления БД.
-        if (department.ParentId == newParent?.ParentId)
+        if (department.ParentId == newParent?.Id)
         {
             return new TransferDepartmentResponse(
                 department.Id,

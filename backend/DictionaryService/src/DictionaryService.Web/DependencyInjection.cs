@@ -19,6 +19,8 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.AddCors();
+        
         services.AddSerilogLogging(configuration, "DictionaryService");
         services.AddControllers();
         services.AddOpenApi();

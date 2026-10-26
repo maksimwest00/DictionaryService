@@ -17,8 +17,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export default function SideBar() {
-  const pathName = usePathname();
-
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="px-4 py-3 text-lg font-semibold">
@@ -31,7 +29,7 @@ export default function SideBar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {NAV_ITEMS.map((item) => (
-                <MyLink key={item.href} pathName={pathName} item={item} />
+                <MyLink key={item.href} item={item} />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
@@ -42,7 +40,8 @@ export default function SideBar() {
   );
 }
 
-function MyLink({ pathName, item }: { pathName: string; item: NavItem }) {
+function MyLink({ item }: { item: NavItem }) {
+  const pathName = usePathname();
   const { isMobile, setOpenMobile } = useSidebar();
   const isActive =
     pathName === item.href || pathName.startsWith(`${item.href}/`);

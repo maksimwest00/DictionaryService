@@ -1,10 +1,10 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "cn"
+import { cn } from "@/shared/lib/cn"
 
 import { useIsMobile } from "@/shared/lib/hooks/use-mobile"
 import { Button } from "@/shared/ui/button"

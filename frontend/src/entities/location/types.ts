@@ -1,7 +1,8 @@
 export type LocationListItemResponse = {
   id: string;
   name: string;
-  createdAt: Date;
+  // Приходит с сервера как ISO-строка; для форматирования оборачиваем в new Date(...)
+  createdAt: string;
   departmentCount: number;
   address: AddressDto;
 };

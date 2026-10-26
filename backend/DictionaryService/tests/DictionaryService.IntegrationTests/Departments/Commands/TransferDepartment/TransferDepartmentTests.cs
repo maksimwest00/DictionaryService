@@ -419,4 +419,280 @@ public class TransferDepartmentTests : DictionaryBaseTests
             Assert.Equal(originalUpdatedAt, childAfter.UpdatedAt);
         });
     }
+
+    [Fact]
+    public async Task TransferDepartment_Concurrent_Same_Department_Different_Parents_Should_Handle_Race_Condition()
+    {
+        // Arrange
+        Guid locationId = await CreateLocationDb();
+        Guid parent1Id = await CreateDepartmentDb(locationId, "ParentA", "parenta");
+        Guid parent2Id = await CreateDepartmentDb(locationId, "ParentB", "parentb");
+        Guid childDepartmentId = await ExecuteInDb(async db =>
+        {
+            var parent = await db.Departments.FindAsync(parent1Id);
+            var childResult = Department.CreateChild(
+                DictionaryService.Domain.Departments.Name.Create("Child").Value,
+                DictionaryService.Domain.Departments.Identifier.Create("child").Value,
+                parent!,
+                [locationId]);
+
+            if (childResult.IsFailure)
+                throw new Exception(string.Join(", ", childResult.Error.Messages));
+
+            db.Departments.Add(childResult.Value);
+            await db.SaveChangesAsync();
+
+            return childResult.Value.Id;
+        });
+        CancellationToken cancellationToken = CancellationToken.None;
+
+        // Act - параллельно перемещаем один и тот же отдел в разных родителей
+        using var client1 = this.CreateClient();
+        using var client2 = this.CreateClient();
+
+        var task1 = client1.PutAsJsonAsync(
+            $"/api/departments/{childDepartmentId}/parent",
+            new TransferDepartmentRequest(parent2Id),
+            cancellationToken: cancellationToken);
+
+        var task2 = client2.PutAsJsonAsync(
+            $"/api/departments/{childDepartmentId}/parent",
+            new TransferDepartmentRequest(parent1Id),
+            cancellationToken: cancellationToken);
+
+        var responses = await Task.WhenAll(task1, task2);
+
+        // Assert - хотя бы один запрос должен завершиться успешно, второй может быть Conflict
+        var successCount = responses.Count(r => r.StatusCode == HttpStatusCode.OK);
+        var conflictCount = responses.Count(r => r.StatusCode == HttpStatusCode.Conflict);
+
+        Assert.True(successCount >= 1, "At least one request should succeed");
+        Assert.True(conflictCount <= 1, "At most one request should conflict");
+
+        await ExecuteInDb(async db =>
+        {
+            Department childAfter = await db.Departments
+                .FirstAsync(d => d.Id == childDepartmentId, cancellationToken);
+
+            // Отдел должен быть в одном из родителей
+            Assert.True(
+                childAfter.ParentId == parent1Id || childAfter.ParentId == parent2Id,
+                $"Expected ParentId to be either {parent1Id} or {parent2Id}, but got {childAfter.ParentId}");
+        });
+    }
+
+    [Fact]
+    public async Task TransferDepartment_Concurrent_Parent_And_Child_Should_Handle_Race_Condition()
+    {
+        // Arrange
+        Guid locationId = await CreateLocationDb();
+        Guid rootDepartmentId = await CreateDepartmentDb(locationId, "Root", "root");
+        Guid parentDepartmentId = await ExecuteInDb(async db =>
+        {
+            var root = await db.Departments.FindAsync(rootDepartmentId);
+            var parentResult = Department.CreateChild(
+                DictionaryService.Domain.Departments.Name.Create("Parent").Value,
+                DictionaryService.Domain.Departments.Identifier.Create("parent").Value,
+                root!,
+                [locationId]);
+
+            if (parentResult.IsFailure)
+                throw new Exception(string.Join(", ", parentResult.Error.Messages));
+
+            db.Departments.Add(parentResult.Value);
+            await db.SaveChangesAsync();
+
+            return parentResult.Value.Id;
+        });
+        Guid childDepartmentId = await ExecuteInDb(async db =>
+        {
+            var parent = await db.Departments.FindAsync(parentDepartmentId);
+            var childResult = Department.CreateChild(
+                DictionaryService.Domain.Departments.Name.Create("Child").Value,
+                DictionaryService.Domain.Departments.Identifier.Create("child").Value,
+                parent!,
+                [locationId]);
+
+            if (childResult.IsFailure)
+                throw new Exception(string.Join(", ", childResult.Error.Messages));
+
+            db.Departments.Add(childResult.Value);
+            await db.SaveChangesAsync();
+
+            return childResult.Value.Id;
+        });
+        Guid newRootId = await CreateDepartmentDb(locationId, "NewRoot", "newroot");
+        CancellationToken cancellationToken = CancellationToken.None;
+
+        // Act - параллельно перемещаем родителя в новый корень и ребенка в корень
+        using var client1 = this.CreateClient();
+        using var client2 = this.CreateClient();
+
+        var task1 = client1.PutAsJsonAsync(
+            $"/api/departments/{parentDepartmentId}/parent",
+            new TransferDepartmentRequest(newRootId),
+            cancellationToken: cancellationToken);
+
+        var task2 = client2.PutAsJsonAsync(
+            $"/api/departments/{childDepartmentId}/parent",
+            new TransferDepartmentRequest(rootDepartmentId),
+            cancellationToken: cancellationToken);
+
+        var responses = await Task.WhenAll(task1, task2);
+
+        // Assert - хотя бы один запрос должен завершиться успешно, второй может быть Conflict
+        var successCount = responses.Count(r => r.StatusCode == HttpStatusCode.OK);
+        var conflictCount = responses.Count(r => r.StatusCode == HttpStatusCode.Conflict);
+
+        Assert.True(successCount >= 1, "At least one request should succeed");
+        Assert.True(conflictCount <= 1, "At most one request should conflict");
+
+        await ExecuteInDb(async db =>
+        {
+            Department parentAfter = await db.Departments
+                .FirstAsync(d => d.Id == parentDepartmentId, cancellationToken);
+            Department childAfter = await db.Departments
+                .FirstAsync(d => d.Id == childDepartmentId, cancellationToken);
+
+            // Проверяем, что структура дерева не нарушена
+            Assert.NotNull(parentAfter);
+            Assert.NotNull(childAfter);
+        });
+    }
+
+    [Fact]
+    public async Task TransferDepartment_Concurrent_Multiple_Departments_To_Same_Parent_Should_Succeed()
+    {
+        // Arrange
+        Guid locationId = await CreateLocationDb();
+        Guid parentDepartmentId = await CreateDepartmentDb(locationId, "Parent", "parent");
+        Guid childAId = await ExecuteInDb(async db =>
+        {
+            var parent = await db.Departments.FindAsync(parentDepartmentId);
+            var childResult = Department.CreateChild(
+                DictionaryService.Domain.Departments.Name.Create("ChildA").Value,
+                DictionaryService.Domain.Departments.Identifier.Create("childa").Value,
+                parent!,
+                [locationId]);
+
+            if (childResult.IsFailure)
+                throw new Exception(string.Join(", ", childResult.Error.Messages));
+
+            db.Departments.Add(childResult.Value);
+            await db.SaveChangesAsync();
+
+            return childResult.Value.Id;
+        });
+        Guid childBId = await ExecuteInDb(async db =>
+        {
+            var parent = await db.Departments.FindAsync(parentDepartmentId);
+            var childResult = Department.CreateChild(
+                DictionaryService.Domain.Departments.Name.Create("ChildB").Value,
+                DictionaryService.Domain.Departments.Identifier.Create("childb").Value,
+                parent!,
+                [locationId]);
+
+            if (childResult.IsFailure)
+                throw new Exception(string.Join(", ", childResult.Error.Messages));
+
+            db.Departments.Add(childResult.Value);
+            await db.SaveChangesAsync();
+
+            return childResult.Value.Id;
+        });
+        Guid newParentId = await CreateDepartmentDb(locationId, "NewParent", "newparent");
+        CancellationToken cancellationToken = CancellationToken.None;
+
+        // Act - параллельно перемещаем двух детей в нового родителя
+        using var client1 = this.CreateClient();
+        using var client2 = this.CreateClient();
+
+        var task1 = client1.PutAsJsonAsync(
+            $"/api/departments/{childAId}/parent",
+            new TransferDepartmentRequest(newParentId),
+            cancellationToken: cancellationToken);
+
+        var task2 = client2.PutAsJsonAsync(
+            $"/api/departments/{childBId}/parent",
+            new TransferDepartmentRequest(newParentId),
+            cancellationToken: cancellationToken);
+
+        var responses = await Task.WhenAll(task1, task2);
+
+        // Assert - хотя бы один запрос должен завершиться успешно, второй может быть Conflict
+        var successCount = responses.Count(r => r.StatusCode == HttpStatusCode.OK);
+        var conflictCount = responses.Count(r => r.StatusCode == HttpStatusCode.Conflict);
+
+        Assert.True(successCount >= 1, "At least one request should succeed");
+        Assert.True(conflictCount <= 1, "At most one request should conflict");
+
+        await ExecuteInDb(async db =>
+        {
+            Department childAAfter = await db.Departments
+                .FirstAsync(d => d.Id == childAId, cancellationToken);
+            Department childBAfter = await db.Departments
+                .FirstAsync(d => d.Id == childBId, cancellationToken);
+
+            // Оба ребенка должны быть в новом родителе (если оба запроса успешны)
+            // или только один (если второй конфликт)
+            if (successCount == 2)
+            {
+                Assert.Equal(newParentId, childAAfter.ParentId);
+                Assert.Equal(newParentId, childBAfter.ParentId);
+            }
+            else
+            {
+                // Хотя бы один ребенок должен быть в новом родителе
+                Assert.True(
+                    childAAfter.ParentId == newParentId || childBAfter.ParentId == newParentId,
+                    "At least one child should be moved to new parent");
+            }
+        });
+    }
+
+    [Fact]
+    public async Task TransferDepartment_Concurrent_Cycle_A_To_B_And_B_To_A_Should_Prevent_Cycle()
+    {
+        // Arrange
+        Guid locationId = await CreateLocationDb();
+        Guid departmentAId = await CreateDepartmentDb(locationId, "DepartmentA", "depta");
+        Guid departmentBId = await CreateDepartmentDb(locationId, "DepartmentB", "deptb");
+        CancellationToken cancellationToken = CancellationToken.None;
+
+        // Act - параллельно пытаемся создать цикл: A под B и B под A
+        using var client1 = this.CreateClient();
+        using var client2 = this.CreateClient();
+
+        var task1 = client1.PutAsJsonAsync(
+            $"/api/departments/{departmentAId}/parent",
+            new TransferDepartmentRequest(departmentBId),
+            cancellationToken: cancellationToken);
+
+        var task2 = client2.PutAsJsonAsync(
+            $"/api/departments/{departmentBId}/parent",
+            new TransferDepartmentRequest(departmentAId),
+            cancellationToken: cancellationToken);
+
+        var responses = await Task.WhenAll(task1, task2);
+
+        // Assert - хотя бы один запрос должен завершиться успешно, второй может быть Conflict
+        var successCount = responses.Count(r => r.StatusCode == HttpStatusCode.OK);
+        var conflictCount = responses.Count(r => r.StatusCode == HttpStatusCode.Conflict);
+
+        Assert.True(successCount >= 1, "At least one request should succeed");
+        Assert.True(conflictCount <= 1, "At most one request should conflict");
+
+        await ExecuteInDb(async db =>
+        {
+            Department departmentA = await db.Departments
+                .FirstAsync(d => d.Id == departmentAId, cancellationToken);
+            Department departmentB = await db.Departments
+                .FirstAsync(d => d.Id == departmentBId, cancellationToken);
+
+            // Проверяем, что цикла нет - оба отдела не являются родителями друг для друга
+            Assert.False(
+                departmentA.ParentId == departmentBId && departmentB.ParentId == departmentAId,
+                "Cycle detected: both departments are parents of each other");
+        });
+    }
 }

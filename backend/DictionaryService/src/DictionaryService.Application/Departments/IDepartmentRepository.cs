@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions;
 using DictionaryService.Contracts.Departments.TransferDepartment;
 using DictionaryService.Domain.DepartmentLocations;
 using DictionaryService.Domain.DepartmentPositions;
@@ -30,6 +30,11 @@ public interface IDepartmentRepository
     Task<UnitResult<Error>> IsDepartmentContains(
         Department department,
         Department newParent,
+        CancellationToken cancellationToken);
+
+    Task<bool> CheckCycleAsync(
+        Guid departmentId,
+        Guid newParentId,
         CancellationToken cancellationToken);
 
     Task<Result<TransferDepartmentResponse, Error>> TransferAsync(

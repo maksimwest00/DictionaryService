@@ -1,6 +1,4 @@
-using System.Data;
 using CSharpFunctionalExtensions;
-using Dapper;
 using DictionaryService.Application.Database;
 using DictionaryService.Application.Validation.ValidationExtensions;
 using DictionaryService.Contracts.Departments.TransferDepartment;
@@ -16,18 +14,15 @@ namespace DictionaryService.Application.Departments.Commands.TransferDepartment;
 public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentResponse, TransferDepartmentCommand>
 {
     private readonly IDepartmentRepository _departmentRepository;
-    private readonly IReadDbConnectionFactory _readDbConnectionFactory;
     private readonly IValidator<TransferDepartmentCommand> _validator;
     private readonly ITransactionManager _transactionManager;
 
     public TransferDepartmentHandler(
         IDepartmentRepository departmentRepository,
-        IReadDbConnectionFactory readDbConnectionFactory,
         IValidator<TransferDepartmentCommand> validator,
         ITransactionManager transactionManager)
     {
         _departmentRepository = departmentRepository;
-        _readDbConnectionFactory = readDbConnectionFactory;
         _validator = validator;
         _transactionManager = transactionManager;
     }
@@ -44,40 +39,9 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
             return validationResult.ToError();
         }
 
-        // двигаемое подразделение существует и не soft-deleted;
-        var departmentResult = await _departmentRepository.GetByIdAsync(
-            command.DepartmentId,
-            cancellationToken);
-
-        if (departmentResult.IsFailure)
-        {
-            return departmentResult.Error;
-        }
-
-        // новый родитель либо null, либо существует и не soft-deleted;
-        if (command.Request.ParentId.HasValue)
-        {
-            if (!await _departmentRepository.ExistsAndActiveAsync(command.Request.ParentId.Value, cancellationToken))
-            {
-                return Error.Conflict(
-                    "department.move.parent_deleted",
-                    ["Parent department is soft-deleted"]);
-            }
-        }
-
-        // если родитель уже такой же, операция завершается как no-op без обновления БД.
-        if (command.Request.ParentId.HasValue &&
-            departmentResult.Value.ParentId == command.Request.ParentId.Value)
-        {
-            return new TransferDepartmentResponse(
-                departmentResult.Value.Id,
-                departmentResult.Value.ParentId,
-                departmentResult.Value.Path.Value,
-                departmentResult.Value.Depth,
-                departmentResult.Value.UpdatedAt);
-        }
-
-        var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+        var transactionScopeResult = await _transactionManager.BeginTransactionAsync(
+            cancellationToken,
+            System.Data.IsolationLevel.Serializable);
 
         if (transactionScopeResult.IsFailure)
         {
@@ -86,46 +50,39 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
 
         using var transactionScope = transactionScopeResult.Value;
 
-        // новый родитель не находится внутри поддерева двигаемого узла;
+        // Блокируем строки в детерминированном порядке (по id ASC) для избежания deadlock
+        var idsToLock = new List<Guid> { command.DepartmentId };
         if (command.Request.ParentId.HasValue)
         {
-            using IDbConnection connection =
-                await _readDbConnectionFactory.OpenConnectionAsync(cancellationToken);
+            idsToLock.Add(command.Request.ParentId.Value);
+        }
 
-            var cond = await connection.ExecuteScalarAsync<int>(
-                """
-                    -- получаем путь двигаемоего департамента
-                    WITH parent AS (
-                        SELECT path
-                        FROM departments
-                        WHERE id = @departmentId
-                    ),
-                    -- получаем список его детей
-                    childrens AS (
-                        SELECT *
-                        FROM departments
-                        WHERE path::ltree <@ (SELECT path FROM parent)
-                          AND path::ltree <> (SELECT path FROM parent)
-                    )
-
-                    -- смотрим есть ли среди детей тот департамент в который мы перемещаем
-                    SELECT 1
-                    FROM childrens
-                    WHERE id = @parentId
-                """,
-                new
-                {
-                    departmentId = command.DepartmentId,
-                    parentId = command.Request.ParentId,
-                } ) == 1;
-
-            if (cond)
+        foreach (var id in idsToLock.OrderBy(x => x))
+        {
+            var result = await _departmentRepository.GetByIdAsync(id, cancellationToken);
+            if (result.IsFailure)
             {
                 transactionScope.Rollback();
+                // Для parentId возвращаем Conflict, для departmentId - NotFound
+                if (id == command.DepartmentId)
+                {
+                    return result.Error;
+                }
                 return Error.Conflict(
-                    "department.move.cycle",
-                    ["Cannot move department into its own subtree"]);
+                    "department.move.parent_deleted",
+                    ["Parent department not found or deleted"]);
             }
+        }
+
+        // Перечитываем данные после блокировки всех строк для получения актуального состояния
+        var departmentResult = await _departmentRepository.GetByIdAsync(
+            command.DepartmentId,
+            cancellationToken);
+
+        if (departmentResult.IsFailure)
+        {
+            transactionScope.Rollback();
+            return departmentResult.Error;
         }
 
         Department? newParent = null;
@@ -138,17 +95,46 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
             if (newParentResult.IsFailure)
             {
                 transactionScope.Rollback();
-                return Error.NotFound(
-                    "department.parent.not_found",
-                    ["Parent department not found"],
-                    command.Request.ParentId.Value);
+                return Error.Conflict(
+                    "department.move.parent_deleted",
+                    ["Parent department not found or deleted"]);
             }
 
             newParent = newParentResult.Value;
         }
 
+        var department = departmentResult.Value;
+
+        // если родитель уже такой же, операция завершается как no-op без обновления БД.
+        if (department.ParentId == newParent?.Id)
+        {
+            return new TransferDepartmentResponse(
+                department.Id,
+                department.ParentId,
+                department.Path.Value,
+                department.Depth,
+                department.UpdatedAt);
+        }
+
+        // новый родитель не находится внутри поддерева двигаемого узла;
+        if (newParent is not null)
+        {
+            var hasCycle = await _departmentRepository.CheckCycleAsync(
+                department.Id,
+                newParent.Id,
+                cancellationToken);
+
+            if (hasCycle)
+            {
+                transactionScope.Rollback();
+                return Error.Conflict(
+                    "department.move.cycle",
+                    ["Cannot move department into its own subtree"]);
+            }
+        }
+
         var transferResult = await _departmentRepository.TransferAsync(
-            departmentResult.Value,
+            department,
             newParent,
             cancellationToken);
 

@@ -66,15 +66,25 @@ public class DepartmentRepository : IDepartmentRepository
         Guid id,
         CancellationToken cancellationToken)
     {
-        Department? position = await _dbContext.Departments
+        await _dbContext.Database.ExecuteSqlAsync(
+            $"""
+                 SELECT *
+                 FROM departments
+                 WHERE id = {id}
+                   AND is_active = true
+                 FOR UPDATE;
+             """,
+            cancellationToken);
+
+        Department? department = await _dbContext.Departments
             .FirstOrDefaultAsync(x => x.Id == id && x.IsActive, cancellationToken);
 
-        if (position is null)
+        if (department is null)
         {
             return Error.NotFound("department.not_found", ["Department not found"], id);
         }
 
-        return position;
+        return department;
     }
 
     public async Task<bool> ExistsAsync(
@@ -150,6 +160,71 @@ public class DepartmentRepository : IDepartmentRepository
                 ["New parent department include in department"],
                 department.Id));
         }
+    }
+
+    public async Task<bool> CheckCycleAsync(
+        Guid departmentId,
+        Guid newParentId,
+        CancellationToken cancellationToken)
+    {
+        var connection = _dbContext.Database.GetDbConnection();
+
+        // Проверка по parent_id для случая, когда новая родительская связь уже установлена другой транзакцией
+        var parentCheck = await connection.ExecuteScalarAsync<int>(
+            """
+                WITH RECURSIVE descendants AS (
+                    SELECT id, parent_id
+                    FROM departments
+                    WHERE id = @departmentId
+                    UNION ALL
+                    SELECT d.id, d.parent_id
+                    FROM departments d
+                    INNER JOIN descendants ds ON d.parent_id = ds.id
+                )
+                SELECT 1
+                FROM descendants
+                WHERE id = @newParentId
+            """,
+            new
+            {
+                departmentId = departmentId,
+                newParentId = newParentId,
+            });
+
+        if (parentCheck == 1)
+        {
+            return true;
+        }
+
+        // Проверка по path для случая, когда path уже обновлен
+        var cond = await connection.ExecuteScalarAsync<int>(
+            """
+                -- получаем путь двигаемого департамента
+                WITH parent AS (
+                    SELECT path
+                    FROM departments
+                    WHERE id = @departmentId
+                ),
+                -- получаем список его детей
+                childrens AS (
+                    SELECT *
+                    FROM departments
+                    WHERE path::ltree <@ (SELECT path FROM parent)
+                      AND path::ltree <> (SELECT path FROM parent)
+                )
+
+                -- смотрим есть ли среди детей тот департамент в который мы перемещаем
+                SELECT 1
+                FROM childrens
+                WHERE id = @parentId
+            """,
+            new
+            {
+                departmentId = departmentId,
+                parentId = newParentId,
+            });
+
+        return cond == 1;
     }
 
     public async Task<UnitResult<Error>> AddPositionAsync(
@@ -233,15 +308,16 @@ public class DepartmentRepository : IDepartmentRepository
                 newParentId = newParent?.Id,
             };
 
+            int rowsAffected;
             if (newParent is not null)
             {
-                await connection.ExecuteAsync(
+                rowsAffected = await connection.ExecuteAsync(
                     """
                     UPDATE departments
                     SET path = @newPath::ltree || subpath(path, depth),
                         parent_id = @newParentId,
                         depth = nlevel(@newPath::ltree)
-                    WHERE path = @oldPath::ltree;
+                    WHERE id = @id AND path = @oldPath::ltree;
 
                     UPDATE departments
                     SET path = @newPath::ltree || subpath(path, depth - 1),
@@ -253,13 +329,13 @@ public class DepartmentRepository : IDepartmentRepository
             }
             else
             {
-                await connection.ExecuteAsync(
+                rowsAffected = await connection.ExecuteAsync(
                     """
                     UPDATE departments
                     SET path = subpath(path, nlevel(path) - 1),
                         parent_id = NULL,
                         depth = 0
-                    WHERE path = @oldPath::ltree;
+                    WHERE id = @id AND path = @oldPath::ltree;
 
                     UPDATE departments
                     SET path = subpath(@oldPath::ltree, nlevel(@oldPath::ltree) - 1) || subpath(path, nlevel(@oldPath::ltree)),
@@ -269,6 +345,27 @@ public class DepartmentRepository : IDepartmentRepository
                     """,
                     parameters);
             }
+
+            if (rowsAffected == 0)
+            {
+                return Result.Failure<TransferDepartmentResponse, Error>(
+                    Error.Conflict(
+                        "department.move.conflict",
+                        ["Department was modified by another transaction"]));
+            }
+        }
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.DeadlockDetected || ex.SqlState == "40001")
+        {
+            _logger.LogWarning(
+                ex,
+                "Transaction conflict detected при перемещении отдела (DepartmentId={DepartmentId}, SqlState={SqlState})",
+                department.Id,
+                ex.SqlState);
+
+            return Result.Failure<TransferDepartmentResponse, Error>(
+                Error.Conflict(
+                    "department.move.conflict",
+                    ["Transaction conflict occurred due to concurrent operations. Please retry."]));
         }
         catch (Exception ex)
         {

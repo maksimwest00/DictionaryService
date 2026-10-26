@@ -1,4 +1,6 @@
-﻿using CSharpFunctionalExtensions;
+﻿using System.Data;
+using CSharpFunctionalExtensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Shared.Core.Database;
@@ -22,11 +24,15 @@ public class TransactionManager : ITransactionManager
         _loggerFactory = loggerFactory;
     }
 
-    public async Task<Result<ITransactionScope, Error>> BeginTransactionAsync(CancellationToken cancellationToken)
+    public async Task<Result<ITransactionScope, Error>> BeginTransactionAsync(
+        CancellationToken cancellationToken = default,
+        IsolationLevel? level = null)
     {
         try
         {
-            var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+            var transaction = await _dbContext.Database.BeginTransactionAsync(
+                level ?? IsolationLevel.ReadCommitted,
+                cancellationToken);
             var logger = _loggerFactory.CreateLogger<TransactionScope>();
             var transactionScope = new TransactionScope(transaction.GetDbTransaction(), logger);
             return transactionScope;
@@ -34,7 +40,7 @@ public class TransactionManager : ITransactionManager
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to begin transaction");
-            return Error.Failure("database",["Failed to begin transaction"]);
+            return Error.Failure("database", ["Failed to begin transaction"]);
         }
     }
 

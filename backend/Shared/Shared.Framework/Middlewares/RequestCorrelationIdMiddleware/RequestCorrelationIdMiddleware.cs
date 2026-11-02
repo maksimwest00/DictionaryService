@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Primitives;
 using Serilog.Context;
 
-namespace Shared.Framework.Middlewares;
+namespace Shared.Framework.Middlewares.RequestCorrelationIdMiddleware;
 
 public class RequestCorrelationIdMiddleware
 {

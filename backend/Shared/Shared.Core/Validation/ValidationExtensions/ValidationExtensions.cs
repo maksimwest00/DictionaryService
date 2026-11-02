@@ -9,8 +9,9 @@ public static class ValidationExtensions
     {
         List<ValidationFailure> validationErrors = validationResult.Errors;
 
-        var errors = validationErrors.Select(validationError => validationError.ErrorMessage);
+        var errors = validationErrors.Select(
+            validationError => validationError.ErrorMessage);
 
-        return Error.Validation(null, errors.ToArray());
+        return Error.Validation(null, [.. errors]);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 
-namespace Shared.Framework.Middlewares;
+namespace Shared.Framework.Middlewares.RequestCorrelationIdMiddleware;
 
 public static class RequestCorrelationIdMiddlewareExtension
 {

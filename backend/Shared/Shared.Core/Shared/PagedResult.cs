@@ -2,7 +2,7 @@
 
 public record PagedResult<T>
 {
-    public List<T> Data { get; set; }
+    public List<T> Data { get; set; } = null!;
 
     public int PageNumber { get; set; }
 

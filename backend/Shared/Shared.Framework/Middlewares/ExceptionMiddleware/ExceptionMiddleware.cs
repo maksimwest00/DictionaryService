@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Shared.Framework.ResponseExtensions;
 using Shared.Kernel;
 
-namespace Shared.Framework.Middlewares;
+namespace Shared.Framework.Middlewares.ExceptionMiddleware;
 
 public class ExceptionMiddleware
 {

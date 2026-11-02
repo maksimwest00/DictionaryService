@@ -13,5 +13,6 @@ public interface IQueryHandler<TResponse, in TQuery>
 
 public interface IQueryHandler<TResponse>
 {
-    Task<Result<TResponse, Error>> HandleAsync(CancellationToken cancellationToken);
+    Task<Result<TResponse, Error>> HandleAsync(
+        CancellationToken cancellationToken);
 }

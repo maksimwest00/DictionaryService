@@ -8,7 +8,7 @@ public static class ResponseExtensions
 {
     public static ActionResult ToResponse(this Error error)
     {
-        var statusCode = GetStatusCodeFromErrorType(error.Type);
+        int statusCode = GetStatusCodeFromErrorType(error.Type);
 
         return new ObjectResult(Envelope.Error(error))
         {

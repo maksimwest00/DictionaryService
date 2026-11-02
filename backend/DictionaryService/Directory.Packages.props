@@ -11,9 +11,9 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
-    <PackageVersion Include="MaksimWest00.SharedKernel" Version="0.1.0" />
-    <PackageVersion Include="MaksimWest00.SharedCore" Version="0.1.0" />
-    <PackageVersion Include="MaksimWest00.SharedFramework" Version="0.1.0" />
+    <PackageVersion Include="MaksimWest00.SharedKernel" Version="0.2.0" />
+    <PackageVersion Include="MaksimWest00.SharedCore" Version="0.3.0" />
+    <PackageVersion Include="MaksimWest00.SharedFramework" Version="0.2.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageVersion Include="Scrutor" Version="7.0.0" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.1.118" />

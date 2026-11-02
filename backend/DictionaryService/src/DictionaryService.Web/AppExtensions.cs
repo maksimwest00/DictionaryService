@@ -1,5 +1,6 @@
 ﻿using Serilog;
-using Shared.Framework.Middlewares;
+using Shared.Framework.Middlewares.ExceptionMiddleware;
+using Shared.Framework.Middlewares.RequestCorrelationIdMiddleware;
 
 namespace DictionaryService.Web;
 

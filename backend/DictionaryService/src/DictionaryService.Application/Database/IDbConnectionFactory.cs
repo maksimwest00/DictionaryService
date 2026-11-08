@@ -4,5 +4,5 @@ namespace DictionaryService.Application.Database;
 
 public interface IReadDbConnectionFactory
 {
-    Task<DbConnection> OpenConnectionAsync(CancellationToken cancellationToken = default);
+    Task<DbConnection> OpenConnectionAsync(CancellationToken cancellationToken);
 }

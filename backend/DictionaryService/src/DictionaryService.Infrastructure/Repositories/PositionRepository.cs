@@ -33,7 +33,7 @@ public class PositionRepository : IPositionRepository
         {
             _logger.LogError(
                 ex,
-                "������ ��� ���������� ��������� � �� (PositionId={PositionId})",
+                "Ошибка при сохранении должности в БД (PositionId={PositionId})",
                 position.Id);
 
             return Result.Failure<Guid, Error>(Error.Conflict(
@@ -46,12 +46,12 @@ public class PositionRepository : IPositionRepository
         Guid id,
         CancellationToken cancellationToken)
     {
-        Position? position = await _dbContext.Positions
+        var position = await _dbContext.Positions
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
         if (position is null)
         {
-            return Result.Failure<Position, Error>(Error.NotFound(null, ["Position not found"], id));
+            return Error.NotFound("position.not.found", ["Position not found"], id);
         }
 
         return position;

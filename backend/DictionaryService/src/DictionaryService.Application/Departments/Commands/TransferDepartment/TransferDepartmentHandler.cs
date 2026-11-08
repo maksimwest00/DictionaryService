@@ -1,10 +1,8 @@
 using CSharpFunctionalExtensions;
-using DictionaryService.Application.Database;
 using DictionaryService.Application.Validation.ValidationExtensions;
 using DictionaryService.Contracts.Departments.TransferDepartment;
 using DictionaryService.Domain.Departments;
 using FluentValidation;
-using FluentValidation.Results;
 using Shared.Core.Abstractions;
 using Shared.Core.Database;
 using Shared.Kernel;
@@ -31,8 +29,7 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
         TransferDepartmentCommand command,
         CancellationToken cancellationToken)
     {
-        // parentId не равен departmentId;
-        ValidationResult? validationResult = await _validator.ValidateAsync(command, cancellationToken);
+        var validationResult = await _validator.ValidateAsync(command, cancellationToken);
 
         if (!validationResult.IsValid)
         {
@@ -50,7 +47,6 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
 
         using var transactionScope = transactionScopeResult.Value;
 
-        // Блокируем строки в детерминированном порядке (по id ASC) для избежания deadlock
         var idsToLock = new List<Guid> { command.DepartmentId };
         if (command.Request.ParentId.HasValue)
         {
@@ -59,23 +55,22 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
 
         foreach (var id in idsToLock.OrderBy(x => x))
         {
-            var result = await _departmentRepository.GetByIdAsync(id, cancellationToken);
+            var result = await _departmentRepository.GetByIdWithLockAsync(id, cancellationToken);
             if (result.IsFailure)
             {
                 transactionScope.Rollback();
-                // Для parentId возвращаем Conflict, для departmentId - NotFound
                 if (id == command.DepartmentId)
                 {
                     return result.Error;
                 }
+
                 return Error.Conflict(
-                    "department.move.parent_deleted",
+                    "department.move.parent.deleted",
                     ["Parent department not found or deleted"]);
             }
         }
 
-        // Перечитываем данные после блокировки всех строк для получения актуального состояния
-        var departmentResult = await _departmentRepository.GetByIdAsync(
+        var departmentResult = await _departmentRepository.GetByIdWithLockAsync(
             command.DepartmentId,
             cancellationToken);
 
@@ -88,7 +83,7 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
         Department? newParent = null;
         if (command.Request.ParentId.HasValue)
         {
-            var newParentResult = await _departmentRepository.GetByIdAsync(
+            var newParentResult = await _departmentRepository.GetByIdWithLockAsync(
                 command.Request.ParentId.Value,
                 cancellationToken);
 
@@ -96,7 +91,7 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
             {
                 transactionScope.Rollback();
                 return Error.Conflict(
-                    "department.move.parent_deleted",
+                    "department.move.parent.deleted",
                     ["Parent department not found or deleted"]);
             }
 
@@ -105,7 +100,6 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
 
         var department = departmentResult.Value;
 
-        // если родитель уже такой же, операция завершается как no-op без обновления БД.
         if (department.ParentId == newParent?.Id)
         {
             return new TransferDepartmentResponse(
@@ -116,10 +110,9 @@ public class TransferDepartmentHandler : ICommandHandler<TransferDepartmentRespo
                 department.UpdatedAt);
         }
 
-        // новый родитель не находится внутри поддерева двигаемого узла;
         if (newParent is not null)
         {
-            var hasCycle = await _departmentRepository.CheckCycleAsync(
+            bool hasCycle = await _departmentRepository.CheckCycleAsync(
                 department.Id,
                 newParent.Id,
                 cancellationToken);

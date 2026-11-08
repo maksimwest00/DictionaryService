@@ -27,7 +27,7 @@ public class AddPositionHandler : ICommandHandler<Guid, AddPositionCommand>
         AddPositionCommand command,
         CancellationToken cancellationToken)
     {
-        var departmentId = command.DeptId;
+        var departmentId = command.DepartmentId;
 
         var departmentResult =
             await _departmentRepository.GetByIdAsync(departmentId, cancellationToken);
@@ -37,7 +37,7 @@ public class AddPositionHandler : ICommandHandler<Guid, AddPositionCommand>
             return departmentResult.Error;
         }
 
-        var positionId = command.PosId;
+        var positionId = command.PositionId;
 
         var positionResult =
             await _positionRepository.GetByIdAsync(positionId, cancellationToken);
@@ -47,11 +47,9 @@ public class AddPositionHandler : ICommandHandler<Guid, AddPositionCommand>
             return positionResult.Error;
         }
 
-        var department = departmentResult.Value;
-
         var departmentPosition = new DepartmentPosition(departmentId, positionId);
 
-        Result<ITransactionScope, Error> transactionScopeResult =
+        var transactionScopeResult =
             await _transactionManager.BeginTransactionAsync(cancellationToken);
 
         if (transactionScopeResult.IsFailure)
@@ -78,7 +76,7 @@ public class AddPositionHandler : ICommandHandler<Guid, AddPositionCommand>
             return saveResult.Error;
         }
 
-        UnitResult<Error> commitedResult = transactionScope.Commit();
+        var commitedResult = transactionScope.Commit();
 
         if (commitedResult.IsFailure)
         {

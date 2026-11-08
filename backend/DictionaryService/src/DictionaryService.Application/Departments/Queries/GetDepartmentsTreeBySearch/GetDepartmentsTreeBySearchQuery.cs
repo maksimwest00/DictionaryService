@@ -1,5 +1,5 @@
-﻿using Shared.Core.Abstractions;
+using Shared.Core.Abstractions;
 
 namespace DictionaryService.Application.Departments.Queries.GetDepartmentsTreeBySearch;
 
-public record GetDepartmentsTreeBySearchQuery(string search) : IQuery;
+public record GetDepartmentsTreeBySearchQuery(string Search) : IQuery;

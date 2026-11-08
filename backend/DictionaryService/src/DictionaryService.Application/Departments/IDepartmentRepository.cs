@@ -15,6 +15,10 @@ public interface IDepartmentRepository
         Guid id,
         CancellationToken cancellationToken);
 
+    Task<Result<Department, Error>> GetByIdWithLockAsync(
+        Guid id,
+        CancellationToken cancellationToken);
+
     Task<bool> ExistsAsync(Guid[] departmentIds, CancellationToken cancellationToken);
 
     Task<bool> ExistsAndActiveAsync(Guid departmentId, CancellationToken cancellationToken);

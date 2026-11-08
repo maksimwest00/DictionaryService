@@ -13,7 +13,7 @@ public class NpgsqlReadDbConnectionFactory : IReadDbConnectionFactory
         _dataSource = dataSource;
     }
 
-    public async Task<DbConnection> OpenConnectionAsync(CancellationToken cancellationToken = default)
+    public async Task<DbConnection> OpenConnectionAsync(CancellationToken cancellationToken)
     {
         return await _dataSource.OpenConnectionAsync(cancellationToken);
     }

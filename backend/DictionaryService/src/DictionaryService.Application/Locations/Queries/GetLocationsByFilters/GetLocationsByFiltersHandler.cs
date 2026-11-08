@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using CSharpFunctionalExtensions;
 using Dapper;
 using DictionaryService.Application.Database;
@@ -64,6 +64,8 @@ public class GetLocationsByFiltersHandler : IQueryHandler<PagedResult<LocationLi
             parameters.Add("@search", $"%{query.Search}%");
         }
 
+        conditions.Add("L.is_active = true");
+
         if (query.MinDepartmentCount.HasValue
             && query.MinDepartmentCount > 0)
         {
@@ -103,7 +105,7 @@ public class GetLocationsByFiltersHandler : IQueryHandler<PagedResult<LocationLi
                                         L.room_number
                                  FROM locations AS L
                                           LEFT JOIN department_locations AS DL ON L.id = DL.location_id
-                                          LEFT JOIN departments AS D ON DL.department_id = D.id
+                                          LEFT JOIN departments AS D ON DL.department_id = D.id AND D.is_active = true
                                  {whereClause}
                                  GROUP BY L.id
                                  {whereClause2}

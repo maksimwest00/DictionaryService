@@ -34,7 +34,7 @@ public class DeleteDepartmentHandler : ICommandHandler<DeleteDepartmentCommand>
 
         var department = departmentResult.Value;
 
-        Result<ITransactionScope, Error> transactionScopeResult =
+        var transactionScopeResult = 
             await _transactionManager.BeginTransactionAsync(cancellationToken);
 
         if (transactionScopeResult.IsFailure)
@@ -46,7 +46,7 @@ public class DeleteDepartmentHandler : ICommandHandler<DeleteDepartmentCommand>
 
         department.Deactivate();
 
-        UnitResult<Error> saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
 
         if (saveResult.IsFailure)
         {
@@ -54,7 +54,7 @@ public class DeleteDepartmentHandler : ICommandHandler<DeleteDepartmentCommand>
             return saveResult.Error;
         }
 
-        UnitResult<Error> commitedResult = transactionScope.Commit();
+        var commitedResult = transactionScope.Commit();
 
         if (commitedResult.IsFailure)
         {

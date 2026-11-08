@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using CSharpFunctionalExtensions;
 using Dapper;
 using DictionaryService.Application.Database;
@@ -8,17 +8,14 @@ using Shared.Kernel;
 
 namespace DictionaryService.Application.Departments.Queries.GetDepartmentAncestors;
 
-public class GetDepartmentAncestorsHandler : IQueryHandler<List<GetDepartmentsTreeResponse>, GetDepartmentAncestorsQuery>
+public class GetDepartmentAncestorsHandler :
+    IQueryHandler<List<GetDepartmentsTreeResponse>, GetDepartmentAncestorsQuery>
 {
     private readonly IReadDbConnectionFactory _readDbConnectionFactory;
-    private readonly IDepartmentRepository _departmentRepository;
 
-    public GetDepartmentAncestorsHandler(
-        IReadDbConnectionFactory readDbConnectionFactory,
-        IDepartmentRepository departmentRepository)
+    public GetDepartmentAncestorsHandler(IReadDbConnectionFactory readDbConnectionFactory)
     {
         _readDbConnectionFactory = readDbConnectionFactory;
-        _departmentRepository = departmentRepository;
     }
 
     public async Task<Result<List<GetDepartmentsTreeResponse>, Error>> HandleAsync(
@@ -28,17 +25,25 @@ public class GetDepartmentAncestorsHandler : IQueryHandler<List<GetDepartmentsTr
         using IDbConnection connection =
             await _readDbConnectionFactory.OpenConnectionAsync(cancellationToken);
 
-        var departmentResult = await _departmentRepository.GetByIdAsync(query.Id, cancellationToken);
+        string? pathResult = await connection.QuerySingleOrDefaultAsync<string>(
+            """
+                    SELECT path
+                    FROM departments
+                    WHERE id = @Id
+                      AND is_active = true;
+                """,
+            param: new { Id = query.Id });
 
-        if (departmentResult.IsFailure)
+        if (pathResult == null)
         {
-            return departmentResult.Error;
+            return Error.NotFound(
+                "record.not.found",
+                ["Department not found"],
+                query.Id);
         }
 
-        string path = departmentResult.Value.Path.Value;
-
         var parameters = new DynamicParameters();
-        parameters.Add("path", path);
+        parameters.Add("path", pathResult);
 
         var dp =
             await connection.QueryAsync<GetDepartmentsTreeResponse>(

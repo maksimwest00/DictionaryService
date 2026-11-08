@@ -24,9 +24,6 @@ public class LocationRepository : ILocationRepository
         Guid[] locationIds,
         CancellationToken cancellationToken)
     {
-        var a = await _dbContext.Locations
-            .AnyAsync(l => locationIds.Contains(l.Id), cancellationToken);
-
         return await _dbContext.Locations
             .AnyAsync(l => locationIds.Contains(l.Id), cancellationToken);
     }

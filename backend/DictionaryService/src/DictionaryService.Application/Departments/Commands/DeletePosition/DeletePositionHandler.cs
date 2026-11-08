@@ -49,7 +49,7 @@ public class DeletePositionHandler : ICommandHandler<Guid, DeletePositionCommand
 
         var departmentPosition = new DepartmentPosition(departmentId, positionId);
 
-        Result<ITransactionScope, Error> transactionScopeResult =
+        var transactionScopeResult =
             await _transactionManager.BeginTransactionAsync(cancellationToken);
 
         if (transactionScopeResult.IsFailure)

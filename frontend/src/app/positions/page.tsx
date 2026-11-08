@@ -6,9 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  return (
-    <main className="flex flex-col gap-2 p-10">
-      <h1 className="text-2xl font-semibold">Позиции</h1>
-    </main>
-  );
+  return <span>Positions</span>;
 }

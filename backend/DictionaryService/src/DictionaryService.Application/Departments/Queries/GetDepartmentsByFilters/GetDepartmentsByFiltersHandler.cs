@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using CSharpFunctionalExtensions;
 using Dapper;
 using DictionaryService.Application.Database;
@@ -43,7 +43,7 @@ public class GetDepartmentsByFiltersHandler : IQueryHandler<PagedResult<Departme
         GetDepartmentsByFiltersQuery query,
         CancellationToken cancellationToken)
     {
-        ValidationResult? validationResult =
+        var validationResult =
             await _validator.ValidateAsync(query, cancellationToken);
 
         if (!validationResult.IsValid)
@@ -63,6 +63,8 @@ public class GetDepartmentsByFiltersHandler : IQueryHandler<PagedResult<Departme
             parameters.Add("@search", $"%{query.Search}%");
         }
 
+        conditions.Add("is_active = true");
+
         parameters.Add("@pageSize", query.PageSize);
         parameters.Add("@offset", (query.Page - 1) * query.PageSize);
 
@@ -72,7 +74,7 @@ public class GetDepartmentsByFiltersHandler : IQueryHandler<PagedResult<Departme
 
         string sortColumn = SortColumns.TryGetValue(query.SortBy ?? string.Empty, out string? col)
             ? col
-            : "created_at"; // ������
+            : "created_at";
 
         string sortDir = SortDirections.TryGetValue(query.SortDir ?? string.Empty, out string? dir)
             ? dir

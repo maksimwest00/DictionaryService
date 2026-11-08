@@ -105,21 +105,21 @@ public class DepartmentController : ControllerBase
         return deleteResult.IsFailure ? deleteResult.Error.ToResponse() : Ok(Envelope.Ok());
     }
 
-    [HttpPost("{deptId:Guid}/positions/{posId:Guid}")]
+    [HttpPost("{departmentId:Guid}/positions/{positionId:Guid}")]
     public async Task<IActionResult> AddPositionAsync(
-        [FromRoute] Guid deptId,
-        [FromRoute] Guid posId,
+        [FromRoute] Guid departmentId,
+        [FromRoute] Guid positionId,
         [FromServices] ILogger<DepartmentController> logger,
         [FromServices] ICommandHandler<Guid, AddPositionCommand> handler,
         CancellationToken cancellationToken)
     {
-        var command = new AddPositionCommand(deptId, posId);
+        var command = new AddPositionCommand(departmentId, positionId);
 
         var addPositionResult = await handler.HandleAsync(command, cancellationToken);
 
         if (addPositionResult.IsSuccess)
         {
-            logger.LogInformation("Должность успешно привязана id: {id}", command.PosId);
+            logger.LogInformation("Должность успешно привязана id: {id}", command.PositionId);
         }
         else
         {

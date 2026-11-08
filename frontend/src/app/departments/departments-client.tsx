@@ -5,8 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { departmentQueries } from "@/entities/department/queries";
 import { DataState } from "@/shared/ui/data-state";
 import { PaginationBar } from "@/shared/ui/pagination-bar";
+import { DepartmentListItemResponse } from "@/entities/department/types";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 2;
 
 export default function DepartmentsClient() {
   const [page, setPage] = useState(1);
@@ -36,25 +37,7 @@ export default function DepartmentsClient() {
         emptyText="Подразделения не найдены."
         onRetry={() => refetch()}
       >
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {departments.map((department) => (
-            <article
-              key={department.id}
-              className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md"
-            >
-              <h2 className="text-lg font-medium">{department.name}</h2>
-
-              <p className="text-sm text-gray-600">{department.path}</p>
-
-              <div className="mt-auto flex items-center justify-between text-xs text-gray-500">
-                <span>
-                  Создано:{" "}
-                  {new Date(department.createdAt).toLocaleDateString("ru-RU")}
-                </span>
-              </div>
-            </article>
-          ))}
-        </div>
+        <Data departments={departments} />
       </DataState>
 
       <PaginationBar
@@ -66,3 +49,33 @@ export default function DepartmentsClient() {
     </main>
   );
 }
+
+const Data = ({
+  departments,
+}: {
+  departments: DepartmentListItemResponse[];
+}) => {
+  return (
+    <>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {departments.map((department) => (
+          <article
+            key={department.id}
+            className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+          >
+            <h2 className="text-lg font-medium">{department.name}</h2>
+
+            <p className="text-sm text-gray-600">{department.path}</p>
+
+            <div className="mt-auto flex items-center justify-between text-xs text-gray-500">
+              <span>
+                Создано:{" "}
+                {new Date(department.createdAt).toLocaleDateString("ru-RU")}
+              </span>
+            </div>
+          </article>
+        ))}
+      </div>
+    </>
+  );
+};

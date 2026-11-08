@@ -6,8 +6,9 @@ import { locationQueries } from "@/entities/location/queries";
 import { DataState } from "@/shared/ui/data-state";
 import { PaginationBar } from "@/shared/ui/pagination-bar";
 import { CreateLocationDialog } from "@/features/create-location";
+import { LocationListItemResponse } from "@/entities/location/types";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 2;
 
 export default function LocationsClient() {
   const [page, setPage] = useState(1);
@@ -40,32 +41,7 @@ export default function LocationsClient() {
         emptyText="Локации не найдены."
         onRetry={() => refetch()}
       >
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {locations.map((location) => (
-            <article
-              key={location.id}
-              className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md"
-            >
-              <h2 className="text-lg font-medium">{location.name}</h2>
-
-              <p className="text-sm text-gray-600">
-                {location.address.city}, {location.address.street}, д.{" "}
-                {location.address.building}
-                {location.address.roomNumber
-                  ? `, пом. ${location.address.roomNumber}`
-                  : ""}
-              </p>
-
-              <div className="mt-auto flex items-center justify-between text-xs text-gray-500">
-                <span>Отделов: {location.departmentCount}</span>
-                <span>
-                  Создано:{" "}
-                  {new Date(location.createdAt).toLocaleDateString("ru-RU")}
-                </span>
-              </div>
-            </article>
-          ))}
-        </div>
+        <Data locations={locations} />
       </DataState>
 
       <PaginationBar
@@ -77,3 +53,36 @@ export default function LocationsClient() {
     </main>
   );
 }
+
+const Data = ({ locations }: { locations: LocationListItemResponse[] }) => {
+  return (
+    <>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {locations.map((location) => (
+          <article
+            key={location.id}
+            className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+          >
+            <h2 className="text-lg font-medium">{location.name}</h2>
+
+            <p className="text-sm text-gray-600">
+              {location.address.city}, {location.address.street}, д.{" "}
+              {location.address.building}
+              {location.address.roomNumber
+                ? `, пом. ${location.address.roomNumber}`
+                : ""}
+            </p>
+
+            <div className="mt-auto flex items-center justify-between text-xs text-gray-500">
+              <span>Отделов: {location.departmentCount}</span>
+              <span>
+                Создано:{" "}
+                {new Date(location.createdAt).toLocaleDateString("ru-RU")}
+              </span>
+            </div>
+          </article>
+        ))}
+      </div>
+    </>
+  );
+};

@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using CSharpFunctionalExtensions;
 using Dapper;
 using DictionaryService.Application.Database;
@@ -25,9 +25,9 @@ public class GetDepartmentsTreeBySearchHandler : IQueryHandler<List<GetDepartmen
             await _readDbConnectionFactory.OpenConnectionAsync(cancellationToken);
 
         var parameters = new DynamicParameters();
-        parameters.Add("search", query.search);
+        parameters.Add("search", query.Search);
 
-        var dp =
+        var departments =
             await connection.QueryAsync<GetDepartmentsTreeResponse>(
                 """
                         SELECT
@@ -47,6 +47,6 @@ public class GetDepartmentsTreeBySearchHandler : IQueryHandler<List<GetDepartmen
                 """,
                 param: parameters);
 
-        return dp.ToList();
+        return departments.ToList();
     }
 }

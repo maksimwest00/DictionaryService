@@ -1,15 +1,12 @@
 import { QueryClient } from "@tanstack/react-query";
-import type { ApiError } from "./types";
+import { ApiError } from "./errors";
 
-// Повторяем только временные сбои (FAILURE / сеть). Бизнес-ошибки
-// (VALIDATION, NOT_FOUND, CONFLICT) повторять бессмысленно — ответ не изменится.
 function shouldRetry(failureCount: number, error: unknown): boolean {
   if (failureCount >= 2) return false;
 
   const type = (error as Partial<ApiError> | null)?.type;
   if (type) return type === "FAILURE";
 
-  // Ошибка без типа — скорее всего сетевая (нет ответа от backend'а)
   return true;
 }
 

@@ -46,9 +46,9 @@ public class DepartmentRepository : IDepartmentRepository
                     department.Id,
                     department.Identifier.Value);
 
-                return Result.Failure<Guid, Error>(Error.Conflict(
-                    null,
-                    ["A department with the same identifier already exists"]));
+                return Error.Conflict(
+                    "department.identifier.exist",
+                    ["A department with the same identifier already exists"]);
             }
 
             _logger.LogError(
@@ -56,13 +56,28 @@ public class DepartmentRepository : IDepartmentRepository
                 "Ошибка при сохранении отдела в БД (DepartmentId={DepartmentId})",
                 department.Id);
 
-            return Result.Failure<Guid, Error>(Error.Conflict(
-                null,
-                ["An error occurred while saving the department to the database"]));
+            return Error.Conflict(
+                "database.error",
+                ["An error occurred while saving the department to the database"]);
         }
     }
 
     public async Task<Result<Department, Error>> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var department = await _dbContext.Departments
+            .FirstOrDefaultAsync(x => x.Id == id && x.IsActive, cancellationToken);
+
+        if (department is null)
+        {
+            return Error.NotFound("department.not.found", ["Department not found"], id);
+        }
+
+        return department;
+    }
+
+    public async Task<Result<Department, Error>> GetByIdWithLockAsync(
         Guid id,
         CancellationToken cancellationToken)
     {
@@ -76,12 +91,12 @@ public class DepartmentRepository : IDepartmentRepository
              """,
             cancellationToken);
 
-        Department? department = await _dbContext.Departments
+        var department = await _dbContext.Departments
             .FirstOrDefaultAsync(x => x.Id == id && x.IsActive, cancellationToken);
 
         if (department is null)
         {
-            return Error.NotFound("department.not_found", ["Department not found"], id);
+            return Error.NotFound("department.not.found", ["Department not found"], id);
         }
 
         return department;
@@ -155,10 +170,10 @@ public class DepartmentRepository : IDepartmentRepository
         }
         else
         {
-            return UnitResult.Failure<Error>(Error.NotFound(
+            return Error.NotFound(
                 null,
                 ["New parent department include in department"],
-                department.Id));
+                department.Id);
         }
     }
 
@@ -169,7 +184,6 @@ public class DepartmentRepository : IDepartmentRepository
     {
         var connection = _dbContext.Database.GetDbConnection();
 
-        // Проверка по parent_id для случая, когда новая родительская связь уже установлена другой транзакцией
         var parentCheck = await connection.ExecuteScalarAsync<int>(
             """
                 WITH RECURSIVE descendants AS (
@@ -196,7 +210,6 @@ public class DepartmentRepository : IDepartmentRepository
             return true;
         }
 
-        // Проверка по path для случая, когда path уже обновлен
         var cond = await connection.ExecuteScalarAsync<int>(
             """
                 -- получаем путь двигаемого департамента
@@ -236,7 +249,7 @@ public class DepartmentRepository : IDepartmentRepository
                     x.DepartmentId == departmentPosition.DepartmentId &&
                     x.PositionId == departmentPosition.PositionId, cancellationToken))
         {
-            return Error.Conflict(null, ["This record exist"]);
+            return Error.Conflict("department.position.exist", ["This record exist"]);
         }
 
         await _dbContext.DepartmentPositions
@@ -283,7 +296,7 @@ public class DepartmentRepository : IDepartmentRepository
 
         if (dPosition is null)
         {
-            return Error.NotFound(null, ["This record is not exist"], null);
+            return Error.NotFound("position.not.found", ["This record is not exist"], null);
         }
 
         _dbContext.DepartmentPositions.Remove(dPosition);

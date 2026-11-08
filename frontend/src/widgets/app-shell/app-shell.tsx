@@ -22,9 +22,7 @@ export default function AppShell({
     <>
       <QueryClientProvider client={queryClient}>
         <SidebarProvider>
-          <Suspense fallback={null}>
-            <SideBar />
-          </Suspense>
+          <SideBar />
           <SidebarInset>
             <Header />
             <div className={cn("flex-1 p-10", contentClassName)}>

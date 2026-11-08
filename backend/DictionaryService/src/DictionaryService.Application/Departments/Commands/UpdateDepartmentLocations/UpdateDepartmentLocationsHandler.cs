@@ -33,7 +33,7 @@ public class UpdateDepartmentLocationsHandler : ICommandHandler<Guid, UpdateDepa
         UpdateDepartmentLocationsCommand command,
         CancellationToken cancellationToken)
     {
-        ValidationResult? validationResult = await _validator.ValidateAsync(command, cancellationToken);
+        var validationResult = await _validator.ValidateAsync(command, cancellationToken);
 
         if (!validationResult.IsValid)
         {
@@ -47,21 +47,36 @@ public class UpdateDepartmentLocationsHandler : ICommandHandler<Guid, UpdateDepa
 
         if (!existDepartmentAndActive)
         {
-            return Result.Failure<Guid, Error>(Error.NotFound(null, ["Department not found"], null));
+            return Error.NotFound(
+                "department.not.found",
+                ["Department not found"],
+                null);
         }
 
-        bool existLocationsAndActive =
-            await _locationRepository.ExistsAndActiveAsync(
-                command.Request.LocationIds,
-                cancellationToken);
+        bool existLocationsAndActive = await _locationRepository.ExistsAndActiveAsync(
+            command.Request.LocationIds,
+            cancellationToken);
 
         if (!existLocationsAndActive)
         {
-            return Result.Failure<Guid, Error>(Error.NotFound(null, ["Locations not found"], null));
+            return Error.NotFound(
+                "locations.not.found",
+                ["Locations not found"],
+                null);
         }
 
-        IEnumerable<DepartmentLocation> departmentLocations = command.Request.LocationIds
+        var departmentLocations = command.Request.LocationIds
             .Select(locationId => new DepartmentLocation(command.DepartmentId, locationId));
+
+        var transactionScopeResult =
+            await _transactionManager.BeginTransactionAsync(cancellationToken);
+
+        if (transactionScopeResult.IsFailure)
+        {
+            return transactionScopeResult.Error;
+        }
+
+        using ITransactionScope transactionScope = transactionScopeResult.Value;
 
         await _departmentRepository.DeleteLocationsAsync(
             command.DepartmentId,
@@ -75,7 +90,15 @@ public class UpdateDepartmentLocationsHandler : ICommandHandler<Guid, UpdateDepa
 
         if (saveResult.IsFailure)
         {
+            transactionScope.Rollback();
             return saveResult.Error;
+        }
+
+        var commitedResult = transactionScope.Commit();
+
+        if (commitedResult.IsFailure)
+        {
+            return commitedResult.Error;
         }
 
         return command.DepartmentId;

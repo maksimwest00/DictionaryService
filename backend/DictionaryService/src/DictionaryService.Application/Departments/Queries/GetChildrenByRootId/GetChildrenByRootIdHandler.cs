@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using CSharpFunctionalExtensions;
 using Dapper;
 using DictionaryService.Application.Database;
@@ -12,14 +12,10 @@ namespace DictionaryService.Application.Departments.Queries.GetChildrenByRootId;
 public class GetChildrenByRootIdHandler : IQueryHandler<List<GetDepartmentsTreeResponse>, GetChildrenByRootIdQuery>
 {
     private readonly IReadDbConnectionFactory _readDbConnectionFactory;
-    private readonly IReadDbContext _readDbContext;
 
-    public GetChildrenByRootIdHandler(
-        IReadDbConnectionFactory readDbConnectionFactory,
-        IReadDbContext readDbContext)
+    public GetChildrenByRootIdHandler(IReadDbConnectionFactory readDbConnectionFactory)
     {
         _readDbConnectionFactory = readDbConnectionFactory;
-        _readDbContext = readDbContext;
     }
 
     public async Task<Result<List<GetDepartmentsTreeResponse>, Error>> HandleAsync(
@@ -32,15 +28,19 @@ public class GetChildrenByRootIdHandler : IQueryHandler<List<GetDepartmentsTreeR
         var parameters = new DynamicParameters();
         parameters.Add("RootId", query.Id);
 
-        bool departmentExist = await _readDbContext.DepartmentsRead.AnyAsync(
-            d => d.Id == query.Id, cancellationToken);
+        var parentExists = await connection.QueryFirstOrDefaultAsync<Guid?>(
+            "SELECT id FROM departments WHERE id = @RootId AND is_active = true",
+            param: parameters);
 
-        if (!departmentExist)
+        if (parentExists == null)
         {
-            return Error.NotFound("record.not.found", ["Department not found"], query.Id);
+            return Error.NotFound(
+                "record.not.found",
+                ["Department not found"],
+                query.Id);
         }
 
-        var dp =
+        var departments =
             await connection.QueryAsync<GetDepartmentsTreeResponse>(
                 """
                         SELECT
@@ -58,6 +58,6 @@ public class GetChildrenByRootIdHandler : IQueryHandler<List<GetDepartmentsTreeR
                     """,
                 param: parameters);
 
-        return dp.ToList();
+        return departments.ToList();
     }
 }

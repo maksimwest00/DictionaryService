@@ -29,6 +29,7 @@ import {
   type CreateLocationFormValues,
 } from "@/entities/location/schemas";
 import { useCreateLocation } from "../model/use-create-location";
+import { EnvelopeError } from "@/shared/api/errors";
 
 const TIMEZONES = [
   "Europe/Moscow",
@@ -48,7 +49,6 @@ const EMPTY_VALUES: CreateLocationFormValues = {
   timezone: "Europe/Moscow",
 };
 
-/** Поле формы с подписью и ошибкой валидации. */
 function Field({
   label,
   htmlFor,
@@ -64,15 +64,11 @@ function Field({
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={htmlFor}>{label}</Label>
       {children}
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && <p className="text-red-500 text-xs">{error}</p>}
     </div>
   );
 }
 
-/**
- * Диалог создания локации.
- * UI не знает про HTTP: собирает валидные данные и вызывает мутацию.
- */
 export function CreateLocationDialog() {
   const [open, setOpen] = useState(false);
 
@@ -89,10 +85,10 @@ export function CreateLocationDialog() {
   const mutation = useCreateLocation({
     onSuccess: () => {
       setOpen(false);
+      reset(EMPTY_VALUES);
     },
   });
 
-  // При любом закрытии форма возвращается к пустому состоянию
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
     if (!next) {

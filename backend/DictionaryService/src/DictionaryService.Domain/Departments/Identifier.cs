@@ -25,12 +25,16 @@ public record Identifier
 
         if (value.Length is > IDENTIFIER_MAX_LENGTH or < IDENTIFIER_MIN_LENGTH)
         {
-            return GeneralErrors.ValueIsInvalid("department identifier", "Identifier must be between 3 and 150 characters");
+            return GeneralErrors.ValueIsInvalid(
+                "department identifier",
+                "Identifier must be between 3 and 150 characters");
         }
 
         if (!Regex.IsMatch(value, @"^[a-zA-Z]*$"))
         {
-            return GeneralErrors.ValueIsInvalid("department identifier", "Identifier must be in Latin characters");
+            return GeneralErrors.ValueIsInvalid(
+                "department identifier",
+                "Identifier must be in Latin characters");
         }
 
         return new Identifier(value);

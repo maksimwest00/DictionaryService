@@ -1,48 +1,83 @@
-﻿using CSharpFunctionalExtensions;
+using System.Data;
+using CSharpFunctionalExtensions;
+using Dapper;
 using DictionaryService.Application.Database;
 using DictionaryService.Contracts.Locations.GetLocationById;
-using Microsoft.EntityFrameworkCore;
 using Shared.Core.Abstractions;
 using Shared.Kernel;
 
 namespace DictionaryService.Application.Locations.Queries.GetLocationById;
 
+public record LocationDto(
+    Guid Id,
+    string Name,
+    string City,
+    string Street,
+    string Building,
+    string RoomNumber,
+    string Timezone,
+    bool IsActive,
+    DateTime CreatedAt,
+    DateTime UpdatedAt);
+
 public class GetLocationByIdHandler : IQueryHandler<GetLocationByIdResponse, GetLocationByIdQuery>
 {
-    private readonly IReadDbContext _readDbContext;
+    private readonly IReadDbConnectionFactory _readDbConnectionFactory;
 
-    public GetLocationByIdHandler(IReadDbContext readDbContext)
+    public GetLocationByIdHandler(IReadDbConnectionFactory readDbConnectionFactory)
     {
-        _readDbContext = readDbContext;
+        _readDbConnectionFactory = readDbConnectionFactory;
     }
 
     public async Task<Result<GetLocationByIdResponse, Error>> HandleAsync(
         GetLocationByIdQuery query,
         CancellationToken cancellationToken)
     {
-        GetLocationByIdResponse? location = await _readDbContext.LocationsRead
-            .Where(x => x.Id == query.Id)
-            .Select(location => new GetLocationByIdResponse
-            {
-                Id = location.Id,
-                Name = location.Name.Value,
-                Address = new AddressDto(
-                    location.Address.City,
-                    location.Address.Street,
-                    location.Address.Building,
-                    location.Address.RoomNumber),
-                Timezone = location.Timezone,
-                IsActive = location.IsActive,
-                CreatedAt = location.CreatedAt,
-                UpdatedAt = location.UpdatedAt,
-            })
-            .FirstOrDefaultAsync(cancellationToken);
+        using IDbConnection connection =
+            await _readDbConnectionFactory.OpenConnectionAsync(cancellationToken);
+
+        var location = await connection.QueryFirstOrDefaultAsync<dynamic>(
+            """
+                    SELECT
+                        id,
+                        name,
+                        city,
+                        street,
+                        building,
+                        room_number,
+                        timezone,
+                        is_active,
+                        created_at,
+                        updated_at
+                    FROM locations
+                    WHERE id = @Id
+                      AND is_active = true
+                """,
+            param: new { Id = query.Id });
 
         if (location is null)
         {
-            return Error.NotFound(null, ["Location not found"], query.Id);
+            return Error.NotFound(
+                "location.not.found",
+                ["Location not found"],
+                query.Id);
         }
 
-        return location;
+        var response = new GetLocationByIdResponse
+        {
+            Id = location.id,
+            Name = location.name,
+            Address = new AddressDto(
+                location.city,
+                location.street,
+                location.building,
+                location.room_number),
+            Timezone = location.timezone,
+            IsActive = location.is_active,
+            CreatedAt = location.created_at,
+            UpdatedAt = location.updated_at,
+        };
+
+        return response;
     }
 }

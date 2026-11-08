@@ -1,5 +1,5 @@
 import { apiClient } from "@/shared/api/axios-instance";
-import { PagedResult } from "@/shared/api/types";
+import { PagedResult } from "@/shared/api/paged-result";
 import { DepartmentListItemResponse } from "./types";
 
 export type GetDepartmentsByFiltersQuery = {

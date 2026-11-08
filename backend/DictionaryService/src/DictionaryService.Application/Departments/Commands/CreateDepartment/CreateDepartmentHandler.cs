@@ -2,7 +2,6 @@
 using DictionaryService.Application.Locations;
 using DictionaryService.Domain.Departments;
 using FluentValidation;
-using FluentValidation.Results;
 using Shared.Core.Abstractions;
 using Shared.Core.Database;
 using Shared.Core.Validation.ValidationExtensions;
@@ -33,16 +32,16 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
         CreateDepartmentCommand command,
         CancellationToken cancellationToken)
     {
-        ValidationResult? validationResult = await _validator.ValidateAsync(command, cancellationToken);
+        var validationResult = await _validator.ValidateAsync(command, cancellationToken);
 
         if (!validationResult.IsValid)
         {
             return validationResult.ToError();
         }
 
-        Result<Name, Error> nameDepartmentResult = Name.Create(command.Request.Name);
+        var nameDepartmentResult = Name.Create(command.Request.Name);
 
-        Result<Identifier, Error> identifierDepartmentResult = Identifier.Create(command.Request.Identifier);
+        var identifierDepartmentResult = Identifier.Create(command.Request.Identifier);
 
         var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
 
@@ -60,12 +59,12 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
         if (!locationsExist)
         {
             transactionScope.Rollback();
-            return Result.Failure<Guid, Error>(Error.NotFound(null, ["Locations not found"], null));
+            return Error.NotFound("locations.not.found", ["Locations not found"], null);
         }
 
         if (command.Request.ParentId.HasValue)
         {
-            Guid parentId = command.Request.ParentId.Value;
+            var parentId = command.Request.ParentId.Value;
 
             var departmentParentResult =
                 await _departmentRepository.GetByIdAsync(parentId, cancellationToken);
@@ -75,7 +74,7 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
                 return departmentParentResult.Error;
             }
 
-            Result<Department, Error> createDepartmentResult = Department.CreateChild(
+            var createDepartmentResult = Department.CreateChild(
                 nameDepartmentResult.Value,
                 identifierDepartmentResult.Value,
                 departmentParentResult.Value,
@@ -87,7 +86,8 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
                 return createDepartmentResult.Error;
             }
 
-            var addDepartmentResult = await _departmentRepository.AddAsync(createDepartmentResult.Value, cancellationToken);
+            var addDepartmentResult =
+                await _departmentRepository.AddAsync(createDepartmentResult.Value, cancellationToken);
 
             if (addDepartmentResult.IsFailure)
             {
@@ -114,7 +114,7 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
         }
         else
         {
-            Result<Department, Error> createDepartmentResult = Department.CreateParent(
+            var createDepartmentResult = Department.CreateParent(
                 nameDepartmentResult.Value,
                 identifierDepartmentResult.Value,
                 command.Request.LocationIds);
@@ -125,7 +125,8 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
                 return createDepartmentResult.Error;
             }
 
-            var addDepartmentResult = await _departmentRepository.AddAsync(createDepartmentResult.Value, cancellationToken);
+            var addDepartmentResult =
+                await _departmentRepository.AddAsync(createDepartmentResult.Value, cancellationToken);
 
             if (addDepartmentResult.IsFailure)
             {

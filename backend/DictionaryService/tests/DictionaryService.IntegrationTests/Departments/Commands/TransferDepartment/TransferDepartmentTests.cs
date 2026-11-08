@@ -305,7 +305,7 @@ public class TransferDepartmentTests : DictionaryBaseTests
         // Assert
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
         Assert.NotNull(envelope);
-        Assert.Equal("department.move.parent_deleted", envelope.Errors.First().Code);
+        Assert.Equal("department.move.parent.deleted", envelope.Errors.First().Code);
     }
 
     [Fact]
@@ -332,7 +332,7 @@ public class TransferDepartmentTests : DictionaryBaseTests
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         Assert.NotNull(envelope);
-        Assert.Equal("department.not_found", envelope.Errors.First().Code);
+        Assert.Equal("department.not.found", envelope.Errors.First().Code);
     }
 
     [Fact]
@@ -359,7 +359,7 @@ public class TransferDepartmentTests : DictionaryBaseTests
         // Assert
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
         Assert.NotNull(envelope);
-        Assert.Equal("department.move.parent_deleted", envelope.Errors.First().Code);
+        Assert.Equal("department.move.parent.deleted", envelope.Errors.First().Code);
     }
 
     [Fact]

@@ -15,6 +15,7 @@ import {
 } from "@/shared/ui/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 
 export default function SideBar() {
   return (
@@ -29,7 +30,14 @@ export default function SideBar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {NAV_ITEMS.map((item) => (
-                <MyLink key={item.href} item={item} />
+                <Suspense
+                  key={item.name}
+                  fallback={
+                    <div className="h-10 w-full animate-pulse bg-muted" />
+                  }
+                >
+                  <MyLink item={item} />
+                </Suspense>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>

@@ -15,11 +15,6 @@ type DataStateProps = {
   children: React.ReactNode;
 };
 
-/**
- * Единый набор состояний для списочных страниц:
- * loading → error → empty → data.
- * Компонент не знает ничего про backend/envelope — только про состояние запроса.
- */
 export function DataState({
   isLoading,
   isError,

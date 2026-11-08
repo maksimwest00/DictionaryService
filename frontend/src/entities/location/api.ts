@@ -1,9 +1,7 @@
 import { apiClient } from "@/shared/api/axios-instance";
 import { LocationListItemResponse } from "./types";
 import { PagedResult } from "@/shared/api/paged-result";
-import axios from "axios";
 import { Envelope } from "@/shared/api/envelope";
-import { EnvelopeError } from "@/shared/api/errors";
 
 export type CreateLocationRequest = {
   name: string;
@@ -28,40 +26,17 @@ export type GetLocationsByFiltersQuery = {
 export const locationsApi = {
   getLocations: (
     request: GetLocationsByFiltersQuery,
-    signal?: AbortSignal,
   ): Promise<PagedResult<LocationListItemResponse>> => {
-    try {
-      return apiClient.get<PagedResult<LocationListItemResponse>>(
-        "/locations",
-        {
-          params: request,
-          signal,
-        },
-      );
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.data) {
-        const envelope = error.response.data as Envelope;
-        if (envelope?.errors.length > 0) {
-          throw new EnvelopeError(envelope.errors);
-        }
-      }
-      throw error;
-    }
+    return apiClient
+      .get<Envelope<PagedResult<LocationListItemResponse>>>("/locations", {
+        params: request,
+      })
+      .then((envelope) => envelope.result!);
   },
 
   createLocation: (
     request: CreateLocationRequest,
   ): Promise<Envelope<string>> => {
-    try {
-      return apiClient.post<Envelope<string>>("/locations", request);
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.data) {
-        const envelope = error.response.data as Envelope;
-        if (envelope?.errors.length > 0) {
-          throw new EnvelopeError(envelope.errors);
-        }
-      }
-      throw error;
-    }
+    return apiClient.post<Envelope<string>>("/locations", request);
   },
 };

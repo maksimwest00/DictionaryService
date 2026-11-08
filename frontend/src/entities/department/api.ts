@@ -1,6 +1,7 @@
 import { apiClient } from "@/shared/api/axios-instance";
 import { PagedResult } from "@/shared/api/paged-result";
 import { DepartmentListItemResponse } from "./types";
+import { Envelope } from "@/shared/api/envelope";
 
 export type GetDepartmentsByFiltersQuery = {
   search?: string;
@@ -13,10 +14,10 @@ export type GetDepartmentsByFiltersQuery = {
 export const departmentsApi = {
   getDepartments: (
     request: GetDepartmentsByFiltersQuery,
-    signal?: AbortSignal,
   ): Promise<PagedResult<DepartmentListItemResponse>> =>
-    apiClient.get<PagedResult<DepartmentListItemResponse>>("/departments", {
-      params: request,
-      signal,
-    }),
+    apiClient
+      .get<Envelope<PagedResult<DepartmentListItemResponse>>>("/departments", {
+        params: request,
+      })
+      .then((envelope) => envelope.result!),
 };

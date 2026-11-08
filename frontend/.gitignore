@@ -43,3 +43,6 @@ next-env.d.ts
 
 # vs code
 .vscode/
+
+# rider
+.idea

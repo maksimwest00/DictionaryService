@@ -3,8 +3,14 @@ import { toast } from "sonner";
 import { locationsApi } from "@/entities/location/api";
 import type { CreateLocationFormValues } from "@/entities/location/schemas";
 import { locationQueries } from "@/entities/location/queries";
+import { handleFormError } from "@/shared/lib/handle-form-error";
+import { LOCATION_ERROR_FIELD_MAP } from "../error-field-map";
+import { UseFormSetError } from "react-hook-form";
 
-export function useCreateLocation(options?: { onSuccess?: () => void }) {
+export function useCreateLocation(options?: {
+  onSuccess?: () => void;
+  setError?: UseFormSetError<CreateLocationFormValues>;
+}) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -18,7 +24,13 @@ export function useCreateLocation(options?: { onSuccess?: () => void }) {
       options?.onSuccess?.();
     },
     onError: (error) => {
-      toast.error(error.message);
+      if (options?.setError) {
+        handleFormError(error, options.setError, LOCATION_ERROR_FIELD_MAP);
+      } else {
+        toast.error(
+          error instanceof Error ? error.message : "Неизвестная ошибка",
+        );
+      }
     },
   });
 }

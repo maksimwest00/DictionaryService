@@ -6,15 +6,16 @@ import { locationQueries } from "@/entities/location/queries";
 import { DataState } from "@/shared/ui/data-state";
 import { PaginationBar } from "@/shared/ui/pagination-bar";
 import { CreateLocationDialog } from "@/features/create-location";
-import { LocationListItemResponse } from "@/entities/location/types";
+import { LocationListItemResponse } from "@/entities/location/schemas";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 2;
 
 export default function LocationsClient() {
   const [page, setPage] = useState(1);
 
   const queryOptions = useMemo(
-    () => locationQueries.list({ page, pageSize: PAGE_SIZE }),
+    () =>
+      locationQueries.list({ page, pageSize: PAGE_SIZE, sortBy: "created_at" }),
     [page],
   );
 

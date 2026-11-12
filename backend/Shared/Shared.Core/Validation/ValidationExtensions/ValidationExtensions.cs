@@ -1,17 +1,18 @@
-﻿using FluentValidation.Results;
+using System.Text.Json;
+using FluentValidation.Results;
 using Shared.Kernel;
 
 namespace Shared.Core.Validation.ValidationExtensions;
 
 public static class ValidationExtensions
 {
-    public static Error ToError(this ValidationResult validationResult)
+    public static Errors ToError(this ValidationResult validationResult)
     {
-        List<ValidationFailure> validationErrors = validationResult.Errors;
+        var validationErrors = validationResult.Errors;
 
         var errors = validationErrors.Select(
-            validationError => validationError.ErrorMessage);
+            validationError => JsonSerializer.Deserialize<Error>(validationError.ErrorMessage)!);
 
-        return Error.Validation(null, [.. errors]);
+        return new Errors(errors.ToList());
     }
 }

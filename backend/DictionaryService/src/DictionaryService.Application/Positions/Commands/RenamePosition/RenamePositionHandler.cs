@@ -7,7 +7,7 @@ using Shared.Core.Database;
 using Shared.Core.Validation.ValidationExtensions;
 using Shared.Kernel;
 
-namespace DictionaryService.Application.Positions.RenamePosition;
+namespace DictionaryService.Application.Positions.Commands.RenamePosition;
 
 public class RenamePositionHandler : ICommandHandler<Guid, RenamePositionCommand>
 {

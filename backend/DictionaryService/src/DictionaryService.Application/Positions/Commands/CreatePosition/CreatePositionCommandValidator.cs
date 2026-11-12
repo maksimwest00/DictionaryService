@@ -2,7 +2,7 @@
 using FluentValidation;
 using Shared.Core.Validation;
 
-namespace DictionaryService.Application.Positions.CreatePosition;
+namespace DictionaryService.Application.Positions.Commands.CreatePosition;
 
 public class CreatePositionCommandValidator : AbstractValidator<CreatePositionCommand>
 {

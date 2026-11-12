@@ -8,7 +8,7 @@ using Shared.Core.Database;
 using Shared.Core.Validation.ValidationExtensions;
 using Shared.Kernel;
 
-namespace DictionaryService.Application.Positions.CreatePosition;
+namespace DictionaryService.Application.Positions.Commands.CreatePosition;
 
 public class CreatePositionHandler : ICommandHandler<Guid, CreatePositionCommand>
 {

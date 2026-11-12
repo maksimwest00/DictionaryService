@@ -1,13 +1,12 @@
-import { UseFormSetError } from "react-hook-form";
+import {FieldValues, UseFormSetError, Path} from "react-hook-form";
 import { toast } from "sonner";
 import { EnvelopeError } from "@/shared/api/errors";
-import { CreateLocationFormValues } from "@/entities/location";
 
 type ErrorFieldMap = Record<string, string>;
 
-export function handleFormError(
+export function handleFormError<T extends FieldValues>(
   error: Error,
-  setError: UseFormSetError<CreateLocationFormValues>,
+  setError: UseFormSetError<T>,
   fieldMap: ErrorFieldMap,
 ) {
   if (!(error instanceof EnvelopeError)) {
@@ -19,7 +18,7 @@ export function handleFormError(
 
   for (const apiError of apiErrors) {
     for (const message of apiError.messages) {
-      const fieldName = fieldMap[message] as keyof CreateLocationFormValues;
+      const fieldName = fieldMap[message] as Path<T>;
       if (fieldName) {
         setError(fieldName, {
           type: "server",

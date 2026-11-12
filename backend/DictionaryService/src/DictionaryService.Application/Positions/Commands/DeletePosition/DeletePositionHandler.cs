@@ -4,7 +4,7 @@ using Shared.Core.Abstractions;
 using Shared.Core.Database;
 using Shared.Kernel;
 
-namespace DictionaryService.Application.Positions.DeletePosition;
+namespace DictionaryService.Application.Positions.Commands.DeletePosition;
 
 public class DeletePositionHandler : ICommandHandler<DeletePositionCommand>
 {

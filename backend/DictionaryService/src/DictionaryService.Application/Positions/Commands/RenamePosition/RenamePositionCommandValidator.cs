@@ -2,7 +2,7 @@
 using FluentValidation;
 using Shared.Core.Validation;
 
-namespace DictionaryService.Application.Positions.RenamePosition;
+namespace DictionaryService.Application.Positions.Commands.RenamePosition;
 
 public class RenamePositionCommandValidator : AbstractValidator<RenamePositionCommand>
 {

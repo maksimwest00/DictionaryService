@@ -1,7 +1,9 @@
-﻿using DictionaryService.Application.Positions.CreatePosition;
-using DictionaryService.Application.Positions.DeletePosition;
-using DictionaryService.Application.Positions.RenamePosition;
+using DictionaryService.Application.Positions.Commands.CreatePosition;
+using DictionaryService.Application.Positions.Commands.DeletePosition;
+using DictionaryService.Application.Positions.Commands.RenamePosition;
+using DictionaryService.Application.Positions.Queries.GetPositions;
 using DictionaryService.Contracts.Positions;
+using DictionaryService.Contracts.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Shared.Core.Abstractions;
@@ -50,7 +52,7 @@ public class PositionController : ControllerBase
 
         if (renameResult.IsSuccess)
         {
-            logger.LogInformation("Должность успешно переименована id: {CreateResultValue}", renameResult.Value);
+            logger.LogInformation("Должность успешно переименована id: {PositionId}", renameResult.Value);
         }
         else
         {
@@ -75,7 +77,7 @@ public class PositionController : ControllerBase
 
         if (deleteResult.IsSuccess)
         {
-            logger.LogInformation("Должность успешно удалена id: {id}", command.Id);
+            logger.LogInformation("Должность успешно удалена id: {PositionId}", command.Id);
         }
         else
         {
@@ -85,5 +87,32 @@ public class PositionController : ControllerBase
         }
 
         return deleteResult.IsFailure ? deleteResult.Error.ToResponse() : Ok(Envelope.Ok());
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetPositionsAsync(
+        [FromQuery] string? cursor,
+        [FromQuery] int pageSize,
+        [FromQuery] Guid? departmentId,
+        [FromServices] ILogger<PositionController> logger,
+        [FromServices] IQueryHandler<CursorResult<PositionListItemResponse>, GetPositionsQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetPositionsQuery(cursor, pageSize, departmentId);
+
+        var result = await handler.HandleAsync(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            logger.LogInformation("Должности успешно получены. Cursor: {Cursor}, PageSize: {PageSize}, DepartmentId: {DepartmentId}", cursor, pageSize, departmentId);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Ошибка получения должностей: {ErrorMessage}",
+                string.Join(',', result.Error.Messages));
+        }
+
+        return result.IsFailure ? result.Error.ToResponse() : Ok(Envelope.Ok(result.Value));
     }
 }

@@ -1,21 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { locationQueries } from "@/entities/location/queries";
 import { DataState } from "@/shared/ui/data-state";
 import { PaginationBar } from "@/shared/ui/pagination-bar";
 import { CreateLocationDialog } from "@/features/create-location";
-import { LocationListItemResponse } from "@/entities/location/types";
+import { LocationListItemResponse } from "@/entities/location/schemas";
 
 const PAGE_SIZE = 2;
 
 export default function LocationsClient() {
   const [page, setPage] = useState(1);
 
-  const { data, isPending, isError, isSuccess, error, refetch } = useQuery(
-    locationQueries.list({ page, pageSize: PAGE_SIZE }),
+  const queryOptions = useMemo(
+    () =>
+      locationQueries.list({ page, pageSize: PAGE_SIZE, sortBy: "created_at" }),
+    [page],
   );
+
+  const { data, isPending, isError, isSuccess, error, refetch } =
+    useQuery(queryOptions);
 
   const locations = data?.data ?? [];
   const totalCount = data?.totalCount ?? 0;

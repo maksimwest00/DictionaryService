@@ -25,11 +25,10 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import {
-  createLocationSchema,
+  createLocationFormSchema,
   type CreateLocationFormValues,
 } from "@/entities/location/schemas";
 import { useCreateLocation } from "../model/use-create-location";
-import { EnvelopeError } from "@/shared/api/errors";
 
 const TIMEZONES = [
   "Europe/Moscow",
@@ -76,9 +75,10 @@ export function CreateLocationDialog() {
     control,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<CreateLocationFormValues>({
-    resolver: zodResolver(createLocationSchema),
+    resolver: zodResolver(createLocationFormSchema),
     defaultValues: EMPTY_VALUES,
   });
 
@@ -87,6 +87,7 @@ export function CreateLocationDialog() {
       setOpen(false);
       reset(EMPTY_VALUES);
     },
+    setError,
   });
 
   const handleOpenChange = (next: boolean) => {
